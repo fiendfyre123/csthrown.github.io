@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CS2 战术站 · 六合一资料库</title>
+<meta name="description" content="CS2战术站，提供道具图鉴、投掷点位、战术百科、战队选手、地图介绍与武器介绍。" />
+<style>
+:root{
+    --bg:#0b0e14; --bg2:#12171f; --bg3:#0d1219; --border:#262e3a; --border2:#2a3342;
+    --gold:#f0b000; --gold-dark:#d4a017; --text:#e6e9f0; --text2:#a7b1c2; --muted:#6a778b;
+    --t-color:#f0a030; --t-bg:#3a2a1a; --t-border:#5a3a20; --ct-color:#4ab0f0; --ct-bg:#1a2a3a; --ct-border:#2a4a6a;
+    --green:#4ade80; --yellow:#fbbf24; --red:#f87171; --radius:16px; --radius-sm:12px; --shadow:0 8px 16px rgba(0,0,0,.6);
+    --shadow-hover:0 16px 28px rgba(240,176,0,.12); --transition:.25s ease; --font:'Segoe UI',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:var(--font);color:var(--text);line-height:1.6;padding:0 20px 60px;min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:#2a313e;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#3a4357}
+.wrapper{max-width:1400px;margin:0 auto}
+
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 12px;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:16px;position:sticky;top:0;background:var(--bg);z-index:50;backdrop-filter:blur(10px)}
+.logo{display:flex;align-items:center;gap:10px;user-select:none}
+.logo-icon{font-size:2rem;filter:drop-shadow(0 0 8px rgba(240,176,0,.6));animation:pulse-glow 3s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{filter:drop-shadow(0 0 8px rgba(240,176,0,.6))}50%{filter:drop-shadow(0 0 18px rgba(240,176,0,.9))}}
+.logo h1{font-size:1.9rem;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,#f5e6b0,#d4a017);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase}
+.logo span{font-size:.8rem;color:var(--muted);-webkit-text-fill-color:var(--muted);letter-spacing:2px;font-weight:400;margin-left:6px}
+.search-box{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:40px;padding:4px 4px 4px 18px;align-items:center;transition:var(--transition);min-width:280px}
+.search-box:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,176,0,.15)}
+.search-box input{background:transparent;border:none;outline:none;color:var(--text);font-size:1rem;width:220px;padding:8px 0;flex:1}
+.search-box input::placeholder{color:#5e6a7e;font-size:.9rem}
+.search-box .clear-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px 6px;display:none;border-radius:50%;transition:var(--transition);line-height:1}
+.search-box .clear-btn.visible{display:flex}
+.search-box .clear-btn:hover{color:var(--gold);background:rgba(255,255,255,.05)}
+.search-box button{background:#2a313e;border:none;border-radius:30px;padding:10px 18px;color:#cbd2e0;font-weight:600;cursor:pointer;font-size:.9rem;transition:var(--transition);white-space:nowrap}
+.search-box button:hover{background:var(--gold);color:var(--bg)}
+.search-mode{display:flex;gap:6px;margin-left:10px}
+.mode-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:20px;font-size:.75rem;cursor:pointer;transition:var(--transition)}
+.mode-btn.active{background:#1e2a3a;border-color:var(--gold);color:var(--gold)}
+
+.main-switch{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:6px;margin-bottom:28px;width:fit-content;flex-wrap:wrap;gap:4px}
+.switch-btn{background:transparent;border:none;color:var(--muted);padding:10px 20px;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:var(--transition)}
+.switch-btn:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.switch-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg);box-shadow:0 4px 12px rgba(240,176,0,.3)}
+.switch-emoji{font-size:1.1rem}
+
+.module{display:none}.module.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.filter-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+.filter-btn{background:var(--bg2);border:1px solid var(--border);color:#b1b9c9;padding:9px 20px;border-radius:30px;font-weight:600;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:var(--transition);user-select:none}
+.filter-btn .emoji{font-size:1.1rem}
+.filter-btn:hover{border-color:var(--gold);color:#fff;background:#222937;transform:translateY(-1px)}
+.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:700;box-shadow:0 4px 12px rgba(240,176,0,.25)}
+.filter-btn .map-count{display:inline-block;background:rgba(0,0,0,.2);color:inherit;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.15);line-height:1.4;min-width:24px;text-align:center}
+.filter-btn.active .map-count{background:rgba(0,0,0,.3);border-color:rgba(0,0,0,.2)}
+.map-count-zero{opacity:.5}
+
+.sub-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;padding:8px 0}
+.sub-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:20px;font-size:.82rem;cursor:pointer;font-weight:600;transition:var(--transition);user-select:none}
+.sub-btn:hover{border-color:#3a4357;color:#cbd2e0}
+.sub-btn.active{background:#1e2a3a;border-color:var(--gold);color:var(--gold);font-weight:700}
+.sub-btn .fav-star{color:var(--gold)}
+
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:8px}
+.item-card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:var(--transition);position:relative;opacity:0;transform:translateY(20px)}
+.item-card.visible{opacity:1;transform:translateY(0)}
+.item-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:var(--shadow-hover)}
+.item-card .card-hint{position:absolute;top:12px;right:12px;background:#1e2632;border:1px solid #2f3a4a;color:var(--muted);font-size:.68rem;padding:2px 8px;border-radius:12px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2}
+.item-card:hover .card-hint{opacity:1}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 10px;border-bottom:1px solid #232b37;gap:10px;flex-wrap:wrap}
+.item-name{font-size:1.15rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.item-emoji{font-size:1.5rem;filter:drop-shadow(0 0 5px rgba(240,176,0,.5));flex-shrink:0}
+.side-badge{padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.side-badge.T{background:var(--t-bg);color:var(--t-color);border:1px solid var(--t-border)}
+.side-badge.CT{background:var(--ct-bg);color:var(--ct-color);border:1px solid var(--ct-border)}
+.side-badge.both{background:#1e2632;color:#8a94a6;border:1px solid #2f3a4a}
+.item-price{background:#1e2632;padding:6px 12px;border-radius:30px;font-size:.85rem;font-weight:700;color:var(--gold);border:1px solid #3a4357;white-space:nowrap}
+.card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:12px}
+.area-tag{display:inline-block;background:#1a2230;color:#9bb5d4;padding:3px 12px;border-radius:20px;font-size:.72rem;font-weight:700;border:1px solid #2a3a50;align-self:flex-start}
+.description{color:var(--text2);font-size:.9rem;line-height:1.7;border-left:3px solid var(--gold);padding:10px 14px;background:#0f131b;border-radius:8px;flex:1}
+.stats{display:flex;justify-content:space-around;background:var(--bg3);border-radius:12px;padding:12px 10px;border:1px solid #1e2632;gap:6px;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:60px}
+.stat-label{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.stat-value{font-weight:700;color:#dfe5f0;font-size:.95rem}
+.meta-row{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--muted);gap:8px;flex-wrap:wrap}
+.difficulty{display:flex;align-items:center;gap:4px;font-weight:700}
+.diff-简单{color:var(--green)}.diff-中等{color:var(--yellow)}.diff-困难{color:var(--red)}
+.throw-type{background:#1e2632;padding:3px 10px;border-radius:12px;font-size:.72rem;color:var(--muted);font-weight:600;border:1px solid #2f3a4a}
+
+.fav-btn{background:transparent;border:none;cursor:pointer;font-size:1.2rem;padding:4px;border-radius:50%;transition:var(--transition);line-height:1;flex-shrink:0;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;user-select:none}
+.fav-btn:hover{background:rgba(255,255,255,.08);transform:scale(1.1)}
+.fav-btn.faved{color:var(--gold);filter:drop-shadow(0 0 4px rgba(240,176,0,.5))}
+.fav-btn:not(.faved){color:#4a5568}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.fav-btn.pop{animation:pop .3s ease}
+
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;background:var(--bg2);border-radius:24px;border:1px dashed #2e3a4a;color:var(--muted);font-size:1.2rem}
+.empty-state .big-icon{font-size:3rem;margin-bottom:20px}
+.empty-state h3{color:#b1b9c9;margin-bottom:8px;font-size:1.2rem}
+.empty-state p{font-size:.95rem}
+
+.footer{margin-top:60px;padding-top:24px;border-top:1px solid #232b37;text-align:center;font-size:.85rem;color:#5b677a;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer span{transition:color .2s}
+.footer #footerStats:hover{color:var(--gold)}
+.export-import{display:flex;gap:8px}
+.export-import button{background:#1a1f2a;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:20px;font-size:.8rem;cursor:pointer;transition:var(--transition)}
+.export-import button:hover{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.back-top{position:fixed;bottom:30px;right:30px;background:#1a1f2a;border:1px solid var(--border);color:var(--muted);width:48px;height:48px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:var(--transition);z-index:100;box-shadow:var(--shadow)}
+.back-top.visible{opacity:1;pointer-events:auto}
+.back-top:hover{background:var(--gold);color:var(--bg);border-color:var(--gold);transform:translateY(-3px)}
+
+.detail-overlay{position:fixed;inset:0;background:rgba(5,8,12,.88);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.detail-overlay.active{display:flex}
+.detail-panel{background:#0f131b;border:1px solid var(--border2);border-radius:20px;max-width:960px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.8);animation:detailUp .3s ease;overflow:hidden}
+@keyframes detailUp{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 26px;border-bottom:1px solid #232b37;background:linear-gradient(180deg,#151b26,#0f131b);flex-wrap:wrap}
+.detail-title{display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap;min-width:0}
+.detail-title .item-emoji{font-size:2rem}
+.detail-title h2{font-size:1.5rem;color:#fff;font-weight:700;word-break:break-word}
+.detail-sub{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.detail-close{background:#1a1f2a;border:1px solid #2f3542;color:#b1b9c9;width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition);min-width:40px}
+.detail-close:hover{background:var(--gold);color:var(--bg);border-color:var(--gold);transform:rotate(90deg)}
+.detail-action-btns{display:flex;gap:8px;flex-shrink:0}
+.detail-action-btns button{background:#1a1f2a;border:1px solid #2f3542;color:#b1b9c9;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.detail-action-btns button:hover{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.detail-body{padding:26px;display:flex;flex-direction:column;gap:22px}
+.info-block{background:var(--bg2);border:1px solid #232b37;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.info-block h3{font-size:.95rem;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:8px}
+.info-block h3 .ico{font-size:1.1rem}
+.info-block p{color:var(--text2);font-size:.9rem;line-height:1.8}
+.info-block ul{margin-left:18px;color:var(--text2);font-size:.9rem;line-height:1.9}
+.info-block li::marker{color:var(--gold)}
+.detail-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.meta-chip{background:var(--bg3);border:1px solid #1e2632;border-radius:var(--radius-sm);padding:14px 16px;display:flex;flex-direction:column;gap:4px;text-align:center}
+.meta-chip .k{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.meta-chip .v{font-size:1rem;color:#dfe5f0;font-weight:700}
+mark.kw{background:var(--gold);color:var(--bg);border-radius:3px;padding:0 2px;font-weight:700}
+
+.search-hint{display:none;background:rgba(240,176,0,.08);border:1px solid rgba(240,176,0,.3);border-radius:12px;padding:12px 18px;margin-bottom:16px;color:var(--gold);font-size:.85rem;font-weight:600;cursor:pointer;transition:var(--transition);align-items:center;gap:8px}
+.search-hint.visible{display:flex}
+.search-hint:hover{background:rgba(240,176,0,.15);border-color:var(--gold)}
+
+.tactic-card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:var(--transition);position:relative;opacity:0;transform:translateY(20px)}
+.tactic-card.visible{opacity:1;transform:translateY(0)}
+.tactic-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:var(--shadow-hover)}
+.tactic-card .card-header{padding:16px 18px 10px;border-bottom:1px solid #232b37}
+.tactic-card .item-name{font-size:1.15rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.tactic-card .card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:12px}
+.tactic-card .tactic-points{background:var(--bg3);border-radius:12px;padding:12px 14px;border:1px solid #1e2632}
+.tactic-card .tactic-points h4{font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.tactic-card .tactic-points ul{margin-left:16px;color:var(--text2);font-size:.85rem;line-height:1.9}
+.tactic-card .tactic-points li::marker{color:var(--gold)}
+.tactic-card .tactic-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tactic-card .tactic-meta .tag{background:#1e2632;padding:3px 10px;border-radius:12px;font-size:.72rem;color:#8a94a6;font-weight:600;border:1px solid #2f3a4a}
+.tactic-card .tactic-meta .tag.map{color:#9bb5d4;border-color:#2a3a50;background:#1a2230}
+.tactic-card .tactic-meta .tag.team{color:var(--t-color);border-color:var(--t-border);background:var(--t-bg)}
+
+.team-card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition);grid-column:1/-1}
+.team-card:hover{border-color:var(--gold);box-shadow:var(--shadow-hover)}
+.team-card .team-header{padding:20px 24px;border-bottom:1px solid #232b37;background:linear-gradient(135deg,#151b26,#0f131b);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.team-card .team-logo{font-size:2.5rem}
+.team-card .team-info{flex:1;min-width:200px}
+.team-card .team-info h2{font-size:1.4rem;color:#fff;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.team-card .team-info .rank-badge{background:var(--gold);color:var(--bg);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px}
+.team-card .team-info .region-tag{background:#1e2632;color:#8a94a6;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:12px;border:1px solid #2f3a4a}
+.team-card .team-style{padding:16px 24px;border-bottom:1px solid #232b37;color:var(--text2);font-size:.9rem;line-height:1.8}
+.team-card .team-style strong{color:var(--gold);font-weight:700}
+.team-card .players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;padding:20px 24px}
+.player-card{background:var(--bg3);border:1px solid #1e2632;border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;gap:8px;transition:var(--transition)}
+.player-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.player-card .player-name{font-weight:700;color:#fff;font-size:1rem}
+.player-card .player-id{color:var(--gold);font-size:.82rem;font-weight:700}
+.player-card .player-role{font-size:.75rem;color:var(--muted);background:#1a1f2a;padding:2px 8px;border-radius:10px;align-self:flex-start;border:1px solid #2a3342}
+.player-card .player-desc{font-size:.8rem;color:var(--text2);line-height:1.6}
+.player-card .player-settings{font-size:.72rem;color:var(--muted);border-top:1px solid #1e2632;padding-top:8px;margin-top:4px}
+.player-card .player-settings span{color:#9bb5d4}
+
+.map-intro-card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition);grid-column:1/-1}
+.map-intro-card:hover{border-color:var(--gold);box-shadow:var(--shadow-hover)}
+.map-intro-card .map-banner{padding:24px 26px;border-bottom:1px solid #232b37;background:linear-gradient(135deg,#151b26,#0f131b);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.map-intro-card .map-banner .map-icon{font-size:3rem}
+.map-intro-card .map-banner .map-title{flex:1;min-width:200px}
+.map-intro-card .map-banner .map-title h2{font-size:1.5rem;color:#fff;font-weight:700}
+.map-intro-card .map-banner .map-title .map-sub{color:var(--muted);font-size:.85rem;margin-top:4px}
+.map-intro-card .map-banner .map-tags{display:flex;gap:8px;flex-wrap:wrap}
+.map-intro-card .map-banner .map-tags .tag{background:#1e2632;padding:4px 12px;border-radius:12px;font-size:.75rem;color:#9bb5d4;border:1px solid #2a3a50;font-weight:600}
+.map-intro-card .map-body{padding:20px 26px;display:flex;flex-direction:column;gap:16px}
+.map-intro-card .map-desc{color:var(--text2);font-size:.92rem;line-height:1.8}
+.map-intro-card .map-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.map-intro-card .map-section{background:var(--bg3);border:1px solid #1e2632;border-radius:var(--radius-sm);padding:14px 16px}
+.map-intro-card .map-section h4{font-size:.82rem;color:var(--gold);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.map-intro-card .map-section ul{margin-left:16px;color:var(--text2);font-size:.85rem;line-height:1.9}
+.map-intro-card .map-section li::marker{color:var(--gold)}
+
+.weapon-card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:var(--transition);position:relative;opacity:0;transform:translateY(20px);cursor:pointer}
+.weapon-card.visible{opacity:1;transform:translateY(0)}
+.weapon-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:var(--shadow-hover)}
+.weapon-card .card-header{padding:16px 18px 10px;border-bottom:1px solid #232b37}
+.weapon-card .item-name{font-size:1.1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.weapon-card .card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:12px}
+.weapon-card .weapon-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:var(--bg3);border-radius:12px;padding:12px;border:1px solid #1e2632}
+.weapon-card .weapon-stat{display:flex;flex-direction:column;gap:2px;text-align:center}
+.weapon-card .weapon-stat .k{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.weapon-card .weapon-stat .v{font-size:.9rem;color:#dfe5f0;font-weight:700}
+.weapon-card .weapon-price{background:#1e2632;padding:4px 10px;border-radius:20px;font-size:.78rem;font-weight:700;color:var(--gold);border:1px solid #3a4357;white-space:nowrap}
+
+@media(max-width:700px){
+    .navbar{flex-direction:column;align-items:stretch;position:relative}
+    .search-box,.search-box input{width:100%}.search-box{min-width:auto}
+    .logo h1{font-size:1.5rem}.items-grid{grid-template-columns:1fr}.main-switch{width:100%}
+    .switch-btn{flex:1;justify-content:center;padding:9px 6px;font-size:.78rem;gap:4px}
+    .switch-emoji{font-size:.95rem}
+    .detail-overlay{padding:0}.detail-panel{border-radius:0;min-height:100vh}.detail-body{padding:18px}.detail-head{padding:18px}
+    .detail-title h2{font-size:1.25rem}.back-top{bottom:20px;right:20px;width:42px;height:42px;font-size:1rem}
+    .filter-btn{padding:7px 14px;font-size:.8rem}.sub-btn{padding:5px 10px;font-size:.72rem}
+    .stats{gap:4px}.stat-value{font-size:.85rem}
+    .search-mode{margin-left:0;margin-top:6px}
+    .team-card .players-grid{grid-template-columns:1fr}
+    .map-intro-card .map-banner{padding:18px}
+    .map-intro-card .map-body{padding:16px}
+}
+/* 游戏按钮 */
+.game-btn{background:transparent;border:2px solid var(--gold);color:var(--gold);padding:8px 18px;border-radius:30px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:var(--transition);white-space:nowrap;letter-spacing:.5px;user-select:none}
+.game-btn:hover{background:var(--gold);color:var(--bg);box-shadow:0 0 20px rgba(240,176,0,.4);transform:translateY(-1px)}
+.game-btn:active{transform:translateY(0)}
+@media(max-width:700px){.game-btn{padding:8px 12px;font-size:.82rem}.game-btn span{display:none}}
+
+/* 游戏全屏遮罩 */
+.game-overlay{position:fixed;inset:0;background:#0d0f13;z-index:2000;display:none;align-items:center;justify-content:center}
+.game-overlay.active{display:flex}
+.game-frame-wrap{position:relative;width:100%;height:100%}
+.game-frame{width:100%;height:100%;border:none;display:block;background:#0d0f13}
+.game-close{position:absolute;top:16px;right:16px;z-index:10;background:rgba(15,17,22,.85);border:2px solid var(--gold);color:var(--gold);width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);backdrop-filter:blur(6px);font-weight:700}
+.game-close:hover{background:var(--gold);color:var(--bg);transform:rotate(90deg)}
+</style>
+</head>
+<body>
+<div class="wrapper">
+    <header class="navbar">
+        <div class="logo" title="CS2 战术站">
+            <div class="logo-icon">💣</div>
+            <h1>CS2<span>战术站</span></h1>
+        </div>
+                <div class="search-box" id="searchBox">
+            <input type="text" id="searchInput" placeholder="搜索道具、点位、战术、战队、地图、武器..." autocomplete="off" />
+            <button id="searchClearBtn" class="clear-btn" title="清空搜索">✕</button>
+            <div class="search-mode" id="searchMode">
+                <button class="mode-btn active" data-mode="and" title="包含所有关键词">AND</button>
+                <button class="mode-btn" data-mode="or" title="包含任意关键词">OR</button>
+            </div>
+            <button id="searchBtn">🔍 搜索</button>
+        </div>
+        <button class="game-btn" id="gameBtn" title="玩小游戏 BLACKOUT">🎮 <span>BLACKOUT</span></button>
+    </header>
+
+    <div class="search-hint" id="searchHint">
+        <span>💡</span>
+        <span id="searchHintText"></span>
+    </div>
+
+    <div class="main-switch" id="mainSwitch">
+        <button class="switch-btn active" data-module="items"><span class="switch-emoji">🎒</span> 道具</button>
+        <button class="switch-btn" data-module="points"><span class="switch-emoji">🗺️</span> 点位</button>
+        <button class="switch-btn" data-module="tactics"><span class="switch-emoji">📖</span> 战术</button>
+        <button class="switch-btn" data-module="teams"><span class="switch-emoji">🏆</span> 战队</button>
+        <button class="switch-btn" data-module="maps"><span class="switch-emoji">🌍</span> 地图</button>
+        <button class="switch-btn" data-module="weapons"><span class="switch-emoji">🔫</span> 武器</button>
+    </div>
+
+    <section class="module active" id="module-items">
+        <div class="filter-tabs" id="itemCategoryTabs">
+            <button class="filter-btn active" data-category="all"><span class="emoji">🎒</span> 全部</button>
+            <button class="filter-btn" data-category="grenade"><span class="emoji">💥</span> 手雷</button>
+            <button class="filter-btn" data-category="smoke"><span class="emoji">💨</span> 烟雾</button>
+            <button class="filter-btn" data-category="flash"><span class="emoji">⚡</span> 闪光</button>
+            <button class="filter-btn" data-category="molotov"><span class="emoji">🔥</span> 燃烧</button>
+            <button class="filter-btn" data-category="decoy"><span class="emoji">🎭</span> 诱饵</button>
+        </div>
+        <div class="items-grid" id="itemsGrid"></div>
+    </section>
+
+    <section class="module" id="module-points">
+        <div class="filter-tabs" id="mapTabs"></div>
+        <div class="sub-tabs" id="areaTabs"></div>
+        <div class="items-grid" id="pointsGrid"></div>
+    </section>
+
+    <section class="module" id="module-tactics">
+        <div class="filter-tabs" id="tacticsTabs">
+            <button class="filter-btn active" data-tactic="all"><span class="emoji">📚</span> 全部</button>
+            <button class="filter-btn" data-tactic="economy"><span class="emoji">💰</span> 经济系统</button>
+            <button class="filter-btn" data-tactic="team"><span class="emoji">⚔️</span> 战队战术</button>
+        </div>
+        <div class="items-grid" id="tacticsGrid"></div>
+    </section>
+
+    <section class="module" id="module-teams">
+        <div class="filter-tabs" id="teamTabs"></div>
+        <div class="items-grid" id="teamsGrid"></div>
+    </section>
+
+    <section class="module" id="module-maps">
+        <div class="items-grid" id="mapsGrid"></div>
+    </section>
+
+    <section class="module" id="module-weapons">
+        <div class="filter-tabs" id="weaponCategoryTabs">
+            <button class="filter-btn active" data-wcat="all"><span class="emoji">🔫</span> 全部</button>
+            <button class="filter-btn" data-wcat="pistol"><span class="emoji">🔫</span> 手枪</button>
+            <button class="filter-btn" data-wcat="smg"><span class="emoji">💢</span> 冲锋枪</button>
+            <button class="filter-btn" data-wcat="rifle"><span class="emoji">🎯</span> 步枪</button>
+            <button class="filter-btn" data-wcat="sniper"><span class="emoji">🎯</span> 狙击枪</button>
+            <button class="filter-btn" data-wcat="shotgun"><span class="emoji">💥</span> 霰弹枪</button>
+            <button class="filter-btn" data-wcat="mg"><span class="emoji">⚙️</span> 机枪</button>
+            <button class="filter-btn" data-wcat="gear"><span class="emoji">🛡️</span> 装备</button>
+        </div>
+        <div class="items-grid" id="weaponsGrid"></div>
+    </section>
+
+    <footer class="footer">
+        <span>© 2025 CS2 战术站 · 六合一资料库</span>
+        <div class="export-import">
+            <button id="exportFavBtn">📤 导出收藏</button>
+            <button id="importFavBtn">📥 导入收藏</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none">
+        </div>
+        <span id="footerStats" title="悬停查看明细">⚡ 加载中...</span>
+    </footer>
+</div>
+
+<button class="back-top" id="backTop" title="回到顶部">↑</button>
+
+<div class="detail-overlay" id="detailOverlay">
+    <div class="detail-panel" id="detailPanel"></div>
+</div>
+<!-- 小游戏全屏遮罩 -->
+<div class="game-overlay" id="gameOverlay">
+    <div class="game-frame-wrap">
+        <button class="game-close" id="gameCloseBtn" title="关闭游戏 (ESC)">✕</button>
+        <iframe class="game-frame" id="gameFrame" title="BLACKOUT 小游戏"></iframe>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ============ 道具数据 ============
+    var itemsData = [
+        { id: 1, name: '高爆手雷', emoji: '💥', category: 'grenade', price: '$300', side: '通用',
+            description: '通用投掷物。造成范围伤害，最高可对无甲敌人造成 57 点伤害，对护甲也有可观穿透。是清理死角、逼迫走位、残局补伤害的核心道具。',
+            stats: { damage: '57', radius: '350', fuse: '1.6s' }, usage: '破点 / 残局 / 补伤害',
+            tips: ['最高伤害在爆炸中心附近', '可以反弹墙面攻击掩体后的敌人', '残局时优先使用'] },
+        { id: 2, name: '烟雾弹', emoji: '💨', category: 'smoke', price: '$300', side: '通用',
+            description: '通用投掷物。释放持续 18 秒的浓烟阻挡视线。CS2 中烟雾为动态体积，可被子弹和手雷短暂推开，能制造单向烟等高级技巧。',
+            stats: { duration: '18s', radius: '144', fuse: '1.6s' }, usage: '封路 / 掩护 / 战术核心',
+            tips: ['CS2 烟雾可被子弹短暂推开', '跳投可投掷到更远的位置', '单向烟是高级技巧'] },
+        { id: 3, name: '闪光弹', emoji: '⚡', category: 'flash', price: '$200', side: '通用',
+            description: '通用投掷物。致盲敌人，背闪可减少影响。完美投掷可让敌人完全白屏。每回合最多可购买两颗，是进攻与反清的关键道具。',
+            stats: { duration: '1.8s', radius: '600', fuse: '1.6s' }, usage: '突破 / 反清 / 连续控制',
+            tips: ['背对闪光可减少致盲时间', '可弹墙闪光出其不意', '每回合限购两颗'] },
+        { id: 4, name: '燃烧瓶', emoji: '🔥', category: 'molotov', price: '$400', side: 'T 专属',
+            description: 'T 阵营专属。落地碎裂后制造火焰区域，持续 7 秒。玻璃瓶碎裂声可提供信息。可有效阻止敌人推进或逼出掩体后的敌人。',
+            stats: { duration: '7s', radius: '150', fuse: '即时' }, usage: '封路 / 清点 / 区域封锁',
+            tips: ['火焰区域持续伤害敌人', '碎裂声可暴露敌人位置', 'T 方价格比 CT 低 $200'] },
+        { id: 5, name: '燃烧弹', emoji: '🔥', category: 'molotov', price: '$600', side: 'CT 专属',
+            description: 'CT 阵营专属。与燃烧瓶效果类似，但火焰范围稍大，且可弹墙反弹，价格更高。是防守拖延与清点的利器。',
+            stats: { duration: '7s', radius: '160', fuse: '即时' }, usage: '防守 / 拖延 / 清点',
+            tips: ['火焰范围比燃烧瓶略大', '可反弹墙面覆盖更多区域', 'CT 防守核心道具'] },
+        { id: 6, name: '诱饵弹', emoji: '🎭', category: 'decoy', price: '$50', side: '通用',
+            description: '通用投掷物。投掷后会模拟当前主武器的枪声，并在敌人小地图上显示为敌人，持续 15 秒。可用于欺骗、侦查与心理战。',
+            stats: { duration: '15s', radius: '—', fuse: '即时' }, usage: '欺骗 / 侦查 / 心理战',
+            tips: ['价格最低的投掷物', '可模拟狙击枪声', '在小地图上显示为敌人'] }
+    ];
+
+    // ============ 点位数据 ============
+    var mapsData = {
+    mirage: { name: '荒漠迷城', emoji: '🏜️', points: [
+        { id: 'm1', name: 'VIP 快烟', side: 'T', type: 'smoke', area: '中路', description: 'T出生点垃圾桶右侧贴墙，准星对准左侧天线顶端，跑一步跳投。这是职业比赛中最标准的VIP烟，速度快且容错率高。', difficulty: '简单', throw: '跑跳投', standPos: 'T出生点垃圾桶右侧贴墙站立。', aimPos: '准星对准左侧天线最顶端尖角处。', tips: ['跑一步后立即跳投，节奏为"跑-跳-投"', '这颗烟是Mirage T方中路控制的基础', '如果被CT反清，可改用右侧安全位投掷'] },
+        { id: 'm2', name: 'Jungle+CT 双烟套餐', side: 'T', type: 'smoke', area: 'A 区', description: 'A1出口右侧箱子后站位，第一颗准星对准jungle上方屋檐缺口跳投封jungle，第二颗抬高准星对准CT出生点上方天线跳投封CT。两颗烟可连续投掷。', difficulty: '中等', throw: '跳投x2', standPos: 'A1出口右侧箱子后方贴墙。', aimPos: '第一颗：jungle上方屋檐缺口；第二颗：CT出生点上方天线顶端。', tips: ['两颗烟需要快速连续投掷，建议练习节奏', '配合A1的队友同步拉出', '如果jungle烟稍微偏了，队友可用闪光补救'] },
+        { id: 'm3', name: '拱门烟（A点进攻）', side: 'T', type: 'smoke', area: 'A 区', description: 'A1出口左侧贴墙，准星对准拱门上方弧形边缘中点，跳投。封住拱门方向CT回防路线，配合jungle烟和CT烟形成A区三烟进攻。', difficulty: '中等', throw: '跳投', standPos: 'A1出口左侧贴墙站立。', aimPos: '准星对准拱门上方弧形边缘的中间位置。', tips: ['这颗烟是FaZe Clan常用的A点进攻道具', '与Jungle烟配合可完全封锁A包点视野', '注意站位必须贴紧左侧墙壁'] },
+        { id: 'm4', name: 'B小烟（CT反清）', side: 'CT', type: 'smoke', area: 'B 区', description: 'B小防守位，准星对准B二楼出口上方墙壁纹理，跳投。封住B二楼出口视野，拖延T方进攻节奏，配合B小闪光使用。', difficulty: '简单', throw: '跳投', standPos: 'B小平台靠近B门一侧贴墙。', aimPos: '准星对准B二楼出口上方墙壁的砖缝标记处。', tips: ['职业比赛中CT常用这颗烟拖延T进攻', '配合超市方向的队友形成交叉火力', '烟散了立刻补闪或火'] },
+        { id: 'm5', name: 'B二楼反清闪', side: 'CT', type: 'flash', area: 'B 区', description: 'B门内侧站位，准星对准B二楼通道天花板，右键轻投反弹。闪光在B二楼通道内爆炸，致盲推进的T，配合队友反清。', difficulty: '中等', throw: '右键反弹', standPos: 'B门内侧贴墙，面向B二楼方向。', aimPos: '准星对准B二楼通道入口上方的天花板，右键轻投。', tips: ['右键投掷力道要轻，让闪光弹在天花板反弹后落下', '投掷后等待1秒再拉出，避免闪到自己', 'Spirit战队的donk常用这种反弹闪'] },
+        { id: 'm6', name: '超市单向烟', side: 'CT', type: 'smoke', area: 'B 区', description: '超市柜台后站位，准星对准超市窗口下方边缘，右键投掷。烟雾弹落在窗口边缘形成单向视野，CT可看到B包点但T看不到超市内。', difficulty: '困难', throw: '右键轻投', standPos: '超市柜台后方，面向窗口。', aimPos: '准星对准窗口下沿，右键轻投让烟雾弹恰好落在窗口边缘。', tips: ['需要精确控制投掷力度，多练习才能掌握', '这是NAVI等顶级队伍的防守技巧', '单向烟效果持续约15秒，需要把握时机'] },
+        { id: 'm7', name: '中路CT反清火', side: 'CT', type: 'molotov', area: '中路', description: 'CT中路近点，准星对准T中路出口地面石板，跑一步站投。燃烧弹覆盖T中路出口，阻止T快速抢中路，配合狙击手架枪。', difficulty: '简单', throw: '跑投', standPos: 'CT中路近点，面向T中路出口。', aimPos: '准星对准T中路出口地面的石板纹理中心，跑一步后站投。', tips: ['开局抢中路时使用，可有效拖延T方', '配合VIP方向的狙击手形成击杀区', '注意听燃烧弹的声音判断是否烧到了人'] },
+        { id: 'm8', name: 'A1闪光套餐', side: 'CT', type: 'flash', area: 'A 区', description: 'A包点忍者位站位，第一颗右键反弹A1上方天花板，第二颗左键高抛跳投。两颗闪光间隔1.5秒，几乎无法躲避。', difficulty: '中等', throw: '右键+跳投', standPos: 'A包点忍者位（三明治后方）。', aimPos: '第一颗：A1上方天花板；第二颗：A包点上方天空。', tips: ['第一颗反弹闪致盲A1口，第二颗覆盖整个A包点', '投掷间隔1.5秒是最佳节奏', '反弹闪需要练习天花板反弹点'] },
+        { id: 'm9', name: 'VIP火（T抢中路）', side: 'T', type: 'molotov', area: '中路', description: 'T中路出口贴墙，准星对准VIP窗口左上角，跳投。燃烧弹落入VIP窗口内，逼退VIP架枪的CT，配合VIP烟控制中路。', difficulty: '简单', throw: '跳投', standPos: 'T中路出口右侧贴墙。', aimPos: '准星对准VIP窗口左上角边缘，跳投。', tips: ['投掷后注意听燃烧弹声音判断是否命中', '配合队友拉中路时使用', '如果听到CT灭火的声音说明VIP有人'] },
+        { id: 'm10', name: 'B区包点全覆盖火', side: 'T', type: 'molotov', area: 'B 区', description: 'B二楼出口右侧，准星对准B包点后方墙壁裂纹，跳投。燃烧弹覆盖B包点默认下包位和沙发位，逼迫CT从掩体后出来。', difficulty: '中等', throw: '跳投', standPos: 'B二楼出口右侧贴墙。', aimPos: '准星对准B包点后方墙壁上的明显裂纹标记，跳投。', tips: ['这颗火覆盖面积大，几乎烧到整个B包点', '配合队友从B二楼和窗口同时拉出', '是G2战队常用的B点进攻道具'] }
+    ]},
+    dust2: { name: '炙热沙城2', emoji: '🏜️', points: [
+        { id: 'd1', name: 'Xbox 快烟', side: 'T', type: 'smoke', area: '中路', description: 'T出生点贴右侧砖柱，准星对准A门右上角，跳投。经典的Xbox烟，封住中门CT狙击视野，是所有中路战术的基础。', difficulty: '简单', throw: '跳投', standPos: 'T出生点右侧砖柱贴墙站立。', aimPos: '准星对准A门上沿的右上角。', tips: ['跑投的节奏是"跑-投"，不需要跳', '这颗烟在CS2中仍然有效，但落点略有变化', '如果被封烟干扰，可以改用跳投版本'] },
+        { id: 'd2', name: 'A大快烟（T进攻）', side: 'T', type: 'smoke', area: 'A 区', description: 'A门外贴右侧墙，准星对准A大门上方蓝色标志左下角，跳投。封住A大CT回防视野，配合A门队友拉出。', difficulty: '简单', throw: '跳投', standPos: 'A门外右侧贴墙站立。', aimPos: '准星对准A大门上方蓝色标志的左下角。', tips: ['这颗烟是Dust2 T方A大进攻的标准道具', '配合A大闪光使用效果更佳', '注意站位要贴紧墙壁，否则烟会偏'] },
+        { id: 'd3', name: 'CT烟（A小夹击）', side: 'T', type: 'smoke', area: 'A 区', description: 'A小出口贴左侧墙，准星对准CT出生点上方建筑边缘，跳投。封住CT出生点到A包点的回防路线，配合A大队友夹击。', difficulty: '简单', throw: '跳投', standPos: 'A小出口左侧贴墙。', aimPos: '准星对准CT出生点上方建筑边缘的尖角处。', tips: ['A小夹击A包点的核心道具', '配合A大烟形成双向封锁', 'Vitality战队经常使用这种夹击战术'] },
+        { id: 'd4', name: 'B门烟（T进攻）', side: 'T', type: 'smoke', area: 'B 区', description: 'B洞出口右侧贴墙，准星对准B门上方拱形边缘中点，跳投。封住B门方向CT视野，配合B洞队友拉出。', difficulty: '中等', throw: '跳投', standPos: 'B洞出口右侧贴墙站立。', aimPos: '准星对准B门上方拱形边缘的正中间。', tips: ['B区进攻的标配道具', '配合B洞闪光可以安全进入B包点', '注意B门外可能有CT前压'] },
+        { id: 'd5', name: '中门CT反清闪', side: 'CT', type: 'flash', area: '中路', description: 'CT中门内侧，准星对准中门上方横梁，右键轻投反弹。闪光弹在中门内侧爆炸，致盲抢中路的T，配合中门狙击手。', difficulty: '简单', throw: '右键反弹', standPos: 'CT中门内侧，面向中门方向。', aimPos: '准星对准中门上方横梁，右键轻投。', tips: ['反弹闪不会暴露CT位置', '配合狙击手架枪可击杀被闪的T', '投掷后等待0.5秒再拉出'] },
+        { id: 'd6', name: 'B洞反清火', side: 'CT', type: 'molotov', area: 'B 区', description: 'B区平台站位，准星对准B洞入口地面木箱，站投。燃烧弹覆盖B洞入口区域，阻止T快速Rush B。', difficulty: '简单', throw: '站投', standPos: 'B区平台靠近B门一侧。', aimPos: '准星对准B洞入口地面的木箱边缘，站投。', tips: ['开局抢B时的常用道具', '配合B门闪光可以反清B洞', 'NAVI战队的s1mple经常使用这颗火'] },
+        { id: 'd7', name: 'A大CT反清火', side: 'CT', type: 'molotov', area: 'A 区', description: 'A平台站位，准星对准A大门外地面石板，跑一步站投。燃烧弹覆盖A大入口，阻止T快速Rush A大。', difficulty: '中等', throw: '跑投', standPos: 'A平台靠近A坑一侧。', aimPos: '准星对准A大门外地面石板纹理，跑一步站投。', tips: ['需要练习跑投的节奏', '配合A大闪光可以反清A门', '是CT防守A大的核心道具'] },
+        { id: 'd8', name: 'A小CT反清闪', side: 'CT', type: 'flash', area: 'A 区', description: 'A包点忍者位站位，准星对准A小出口上方天空，跳投。闪光在A小出口爆炸，致盲推进的T，配合A包点队友反清。', difficulty: '简单', throw: '跳投', standPos: 'A包点忍者位（箱子后方）。', aimPos: '准星对准A小出口正上方天空。', tips: ['注意背身投掷，避免闪到A包点队友', '配合A小烟雾可以安全反清', '投掷后等待1秒再拉出'] },
+        { id: 'd9', name: 'B区包点双火', side: 'T', type: 'molotov', area: 'B 区', description: 'B洞出口，第一颗准星对准B包点右侧箱子后跳投，第二颗对准B门方向跳投。两颗火覆盖B包点所有CT可能站位。', difficulty: '中等', throw: '跳投x2', standPos: 'B洞出口左侧贴墙。', aimPos: '第一颗：B包点右侧箱子后方；第二颗：B门方向地面。', tips: ['两颗火需要快速连续投掷', '配合B门烟和B洞闪形成完整进攻', 'FaZe战队的ropz擅长这种多道具配合'] },
+        { id: 'd10', name: 'A坑反清闪（CT）', side: 'CT', type: 'flash', area: 'A 区', description: 'A坑外站位，准星对准A坑上方边缘，右键反弹。闪光弹反弹到A坑内爆炸，致盲躲在坑里的T。', difficulty: '中等', throw: '右键反弹', standPos: 'A坑外靠近A大门一侧。', aimPos: '准星对准A坑上方边缘，右键轻投让闪光弹反弹进坑。', tips: ['需要练习反弹角度', '配合A坑火可以击杀坑里的T', '投掷时注意不要暴露自己'] },
+        { id: 'd11', name: 'Jame 中路满封烟', side: 'T', type: 'smoke', area: '中路', description: '匪家中路砖缝站位，准星对准面前白墙上污渍，跳投。T 家封中路，满封且不易混开。', difficulty: '简单', throw: '跳投', standPos: '匪家中路砖缝。', aimPos: '准星对准面前白墙上的污渍。', tips: ['满封烟，敌人不易混开', 'T 家即可完成，安全度高'] },
+        { id: 'd12', name: 'Brollan A 大展开烟', side: 'T', type: 'smoke', area: 'A 区', description: 'A 大进攻展开时使用，站位与瞄准点参考视频图示，跳投。用于掩护 A 大进攻展开。', difficulty: '简单', throw: '跳投', standPos: 'A 大站位（详见视频图示）。', aimPos: '准星对准视频图示位置。', tips: ['A 大进攻展开必备', '配合队友同步推进'] },
+        { id: 'd13', name: 'Monesy A 大过点烟', side: 'T', type: 'smoke', area: 'A 区', description: '差不多抵住蓝箱站位，准星拉上去与窗户上端平齐，直接投。保护 A 大过点。', difficulty: '简单', throw: '直接投', standPos: '差不多抵住蓝箱。', aimPos: '准星拉上去与窗户上端平齐。', tips: ['保护 A 大过点非常有效', '容错较高，适合快速投掷'] },
+        { id: 'd14', name: '警家烟-绿龙', side: 'T', type: 'smoke', area: 'A 区', description: '抵住中路去 A 小的铁门中间站位，准星对准中门左上角白点，跳投。封住警家视野。', difficulty: '简单', throw: '跳投', standPos: '抵住中路去 A 小的铁门中间。', aimPos: '准星对准中门左上角白点。', tips: ['封警家视野，配合 A 区进攻', '注意与队友同步投掷时机'] },
+        { id: 'd15', name: 'Fame 沙地展开烟', side: 'T', type: 'smoke', area: '中路', description: '与 B1 门柱子平齐站位，准星对准黑影右端，直接投。沙地展开烟，T/CT 通用。', difficulty: '简单', throw: '直接投', standPos: '与 B1 门柱子平齐。', aimPos: '准星对准黑影右端。', tips: ['T/CT 通用点位', '沙地展开时使用，容错较高'] },
+        { id: 'd16', name: 'Shiro 中门瀑布烟', side: 'T', type: 'smoke', area: '中路', description: '与 B1 门柱子平齐站位，准星对准方形右下角，直接投。中门满封，不易混开。T/CT 通用。', difficulty: '简单', throw: '直接投', standPos: '与 B1 门柱子平齐。', aimPos: '准星对准方形右下角。', tips: ['中门满封，敌人不易混开', 'T/CT 通用点位'] },
+        { id: 'd17', name: 'MOUZ A 区警家烟', side: 'T', type: 'smoke', area: 'A 区', description: '抵住 A 小卷帘门右端站位，准星对准右上角栏杆顶部投掷，直接投。封住 A 区警家视野。', difficulty: '简单', throw: '直接投', standPos: '抵住 A 小卷帘门右端。', aimPos: '准星对准右上角栏杆顶部。', tips: ['A 区警家烟，配合 A 小进攻', '注意投掷后立刻架枪'] },
+        { id: 'd18', name: 'Siuhy A 小过点烟', side: 'T', type: 'smoke', area: 'A 区', description: 'A 小铁门中间站位，准星对准污渍大概位置，直接投。A 小过点烟，高容错。', difficulty: '简单', throw: '直接投', standPos: 'A 小铁门中间。', aimPos: '准星对准污渍大概位置。', tips: ['高容错点位，新手友好', '保护 A 小过点非常有效'] },
+        { id: 'd19', name: 'Fame 沙地展开烟', side: 'CT', type: 'smoke', area: '中路', description: '与 B1 门柱子平齐站位，准星对准黑影右端，直接投。沙地展开烟，CT 方使用。', difficulty: '简单', throw: '直接投', standPos: '与 B1 门柱子平齐。', aimPos: '准星对准黑影右端。', tips: ['CT 方沙地展开时使用', '和 T 方同名点位效果一致'] },
+        { id: 'd20', name: 'Shiro 中门瀑布烟', side: 'CT', type: 'smoke', area: '中路', description: '与 B1 门柱子平齐站位，准星对准方形右下角，直接投。中门满封，不易混开，CT 方使用。', difficulty: '简单', throw: '直接投', standPos: '与 B1 门柱子平齐。', aimPos: '准星对准方形右下角。', tips: ['CT 方中门满封，不易混开', '和 T 方同名点位效果一致'] }
+    ]},
+    inferno: { name: '炼狱小镇', emoji: '🔥', points: [
+        { id: 'i1', name: '香蕉道快烟', side: 'T', type: 'smoke', area: '香蕉道', description: 'T侧香蕉道入口贴右侧墙，准星对准木桶上方树叶缺口，跳投。封住CT在B区架香蕉道的视野，是香蕉道控制的基础道具。', difficulty: '简单', throw: '跳投', standPos: '香蕉道入口右侧贴墙。', aimPos: '准星对准木桶上方树叶的缺口处。', tips: ['这颗烟是所有香蕉道战术的基础', '配合香蕉道闪光可以安全推进', '如果被CT火逼退，可以先灭火再投烟'] },
+        { id: 'i2', name: 'CT烟（A区三烟之一）', side: 'T', type: 'smoke', area: 'A 区', description: 'A二楼出口右侧贴墙，准星对准CT出生点上方建筑边缘，跳投。封住CT从A区回防的路线，配合图书馆烟和A1烟形成A区三烟进攻。', difficulty: '中等', throw: '跳投', standPos: 'A二楼出口右侧贴墙。', aimPos: '准星对准CT出生点上方建筑边缘的尖角。', tips: ['Inferno A区进攻的核心道具', '需要与图书馆烟和A1烟配合使用', '投掷时机要精确，配合队友同步拉出'] },
+        { id: 'i3', name: '图书馆烟', side: 'T', type: 'smoke', area: 'A 区', description: 'A二楼出口左侧贴墙，准星对准图书馆窗口上方屋檐，跳投。封住图书馆窗口架枪的CT视野，是A区三烟之一。', difficulty: '简单', throw: '跳投', standPos: 'A二楼出口左侧贴墙。', aimPos: '准星对准图书馆窗口上方屋檐边缘。', tips: ['配合CT烟和A1烟形成完整A区封锁', '注意图书馆窗口可能有CT狙击手', 'Spirit战队常用这套三烟战术'] },
+        { id: 'i4', name: '香蕉道CT反清火', side: 'CT', type: 'molotov', area: '香蕉道', description: 'B区沙袋后方站位，准星对准香蕉道入口地面木桶前，跑一步站投。燃烧弹覆盖香蕉道入口，阻止T快速推进。', difficulty: '简单', throw: '跑投', standPos: 'B区沙袋后方，面向香蕉道。', aimPos: '准星对准香蕉道入口地面木桶前方，跑一步站投。', tips: ['香蕉道防守的核心道具', '配合队友的香蕉道闪光可以反清', '注意听脚步判断T是否在香蕉道'] },
+        { id: 'i5', name: 'A1火（CT防守）', side: 'CT', type: 'molotov', area: 'A 区', description: 'A区CT站位，准星对准A1出口地面石板，站投。燃烧弹覆盖A1出口，阻止T从A1快速Rush。', difficulty: '简单', throw: '站投', standPos: 'A区靠近CT出生点一侧。', aimPos: '准星对准A1出口地面的石板中心。', tips: ['A区防守的常用道具', '配合A1闪光可以反清A1', '注意不要烧到前压的队友'] },
+        { id: 'i6', name: '二楼反清闪（CT）', side: 'CT', type: 'flash', area: 'A 区', description: 'A区阳台下站位，准星对准二楼出口上方天花板，右键反弹。闪光弹在二楼出口爆炸，致盲在二楼的T。', difficulty: '中等', throw: '右键反弹', standPos: 'A区阳台下方，面向二楼方向。', aimPos: '准星对准二楼出口上方天花板，右键轻投反弹。', tips: ['反弹闪可以出其不意地致盲T', '配合A1火可以反清整个A区', '投掷后立即通知队友拉出'] },
+        { id: 'i7', name: 'B区CT反清闪', side: 'CT', type: 'flash', area: 'B 区', description: 'B区教堂内站位，准星对准教堂窗口上方，右键轻投。闪光弹从教堂窗口飞出，致盲香蕉道推进的T。', difficulty: '中等', throw: '右键反弹', standPos: 'B区教堂内，面向窗口。', aimPos: '准星对准教堂窗口上方边缘，右键轻投。', tips: ['教堂窗口闪不容易被T预判', '配合香蕉道火可以安全反清', '投掷后从教堂拉出补枪'] },
+        { id: 'i8', name: 'A包点全清火（T）', side: 'T', type: 'molotov', area: 'A 区', description: 'A1出口，准星对准A包点右侧箱子后方，跳投。燃烧弹覆盖A包点CT常见站位，逼迫CT从掩体后出来。', difficulty: '中等', throw: '跳投', standPos: 'A1出口左侧贴墙。', aimPos: '准星对准A包点右侧箱子后方的地面，跳投。', tips: ['配合A1闪可以安全清点', '注意燃烧弹可能被CT用烟雾灭火', 'G2战队常用这颗火清A包点'] },
+        { id: 'i9', name: 'B包点双火套餐', side: 'T', type: 'molotov', area: 'B 区', description: 'B区入口，第一颗准星对准B包点左侧柱子后跳投，第二颗对准B包点右侧死点跳投。两颗火覆盖B包点所有可能站位。', difficulty: '困难', throw: '跳投x2', standPos: 'B区入口贴墙。', aimPos: '第一颗：B包点左侧柱子后；第二颗：B包点右侧死点。', tips: ['需要快速连续投掷两颗火', '配合队友的香蕉道闪使用', '两颗火之间间隔约1秒'] }
+    ]},
+    nuke: { name: '核子危机', emoji: '☢️', points: [
+        { id: 'n1', name: '外场一线烟套装', side: 'T', type: 'smoke', area: '外场', description: 'T侧蓝箱处，连续投掷3颗烟雾弹。第一颗封CT狙击位，第二颗封大仓窗口，第三颗封管道口。三颗烟形成外场烟雾墙，掩护T进入B点。', difficulty: '困难', throw: '跳投x3', standPos: 'T侧蓝箱附近。', aimPos: '第一颗：外场高台边缘；第二颗：大仓窗口上方；第三颗：管道口上方。', tips: ['三颗烟需要配合投掷，通常由2-3名队友完成', '这是职业比赛中外场进攻的标准套路', '投掷顺序先封狙击位，再封大仓，最后封管道'] },
+        { id: 'n2', name: '大仓快烟', side: 'T', type: 'smoke', area: '外场', description: 'T侧蓝箱贴墙，准星对准大仓窗口左上角，跑一步跳投。快速封住大仓窗口视野，配合一线烟使用。', difficulty: '简单', throw: '跑跳投', standPos: '蓝箱右侧贴墙。', aimPos: '准星对准大仓窗口左上角的金属框架，跑一步后跳投。', tips: ['这颗烟速度快，适合快速进攻', '配合外场闪可以安全进入外场', '如果大仓有人架枪，先投闪再投烟'] },
+        { id: 'n3', name: '管道封烟（精确版）', side: 'T', type: 'smoke', area: '外场', description: '绿色储水罐左侧矮墙拐角，准星对齐储水罐上方金属通风口左下角，切刀跑两步急停跳投。精确封住管道口视野，CS2职业比赛标准投法。', difficulty: '困难', throw: '急停跳投', standPos: '绿色储水罐左侧矮墙拐角贴墙。', aimPos: '准星对齐储水罐上方金属通风口左下角螺栓。', tips: ['必须切刀跑两步后急停跳投', '这是CS2中容错率很低但效果极好的点位', '建议在训练模式中反复练习'] },
+        { id: 'n4', name: '黄房上火（清A包点）', side: 'T', type: 'molotov', area: 'A 区', description: 'A区入口黄房旁边，准星对准A包点铁箱后地面，跳投。燃烧弹覆盖A包点铁箱后的CT站位，清出包点。', difficulty: '中等', throw: '跳投', standPos: 'A区入口黄房右侧贴墙。', aimPos: '准星对准A包点铁箱后方地面的金属板边缘。', tips: ['清A包点的核心道具', '配合队友的A包点闪使用', '注意铁箱后可能有CT蹲守'] },
+        { id: 'n5', name: '外场CT反清火', side: 'CT', type: 'molotov', area: '外场', description: 'CT外场高台站位，准星对准外场入口地面蓝箱前，站投。燃烧弹覆盖外场入口，阻止T快速进入外场。', difficulty: '简单', throw: '站投', standPos: 'CT外场高台掩体后。', aimPos: '准星对准外场入口地面蓝箱前方，站投。', tips: ['外场防守的常用道具', '配合高台狙击手架枪', '注意听脚步判断T是否在外场入口'] },
+        { id: 'n6', name: 'A包点CT反清闪', side: 'CT', type: 'flash', area: 'A 区', description: 'CT A包点铁箱后站位，准星对准A区入口上方天花板，右键反弹。闪光弹在A区入口爆炸，致盲推进的T。', difficulty: '简单', throw: '右键反弹', standPos: 'A包点铁箱后方。', aimPos: '准星对准A区入口上方天花板，右键轻投。', tips: ['反弹闪不会暴露CT在铁箱后的位置', '配合A包点火可以反清入口', '投掷后等待0.5秒再拉出补枪'] },
+        { id: 'n7', name: 'B包点下管闪（T）', side: 'T', type: 'flash', area: 'B 区', description: 'B区管道出口站位，准星对准B包点上方天花板，右键反弹。闪光弹在B包点爆炸，致盲包点内的CT。', difficulty: '中等', throw: '右键反弹', standPos: 'B区管道出口内。', aimPos: '准星对准B包点上方天花板的横梁，右键轻投反弹。', tips: ['从管道出来后立即投掷', '配合队友的B包点烟使用', '投掷后注意背身避免闪到自己'] },
+        { id: 'n8', name: '外场单向烟（CT）', side: 'CT', type: 'smoke', area: '外场', description: 'CT外场高台边缘，准星对准栏杆下方，右键轻投。烟雾弹落在高台边缘形成单向视野，CT可看到外场但T看不到高台。', difficulty: '困难', throw: '右键轻投', standPos: 'CT外场高台靠近边缘。', aimPos: '准星对准高台栏杆下方，右键轻投让烟雾弹恰好落在边缘。', tips: ['单向烟效果持续约12秒', '需要精确控制投掷力度', '职业比赛中顶级狙击手常用的防守技巧'] }
+    ]},
+    anubis: { name: '阿努比斯', emoji: '🏺', points: [
+        { id: 'a1', name: '中路快烟', side: 'T', type: 'smoke', area: '中路', description: 'T侧中路入口贴左侧墙，准星对准城堡屋顶中间最大突起下方，跳投。封住中路CT狙击视野，是所有中路战术的基础。', difficulty: '简单', throw: '跳投', standPos: 'T侧中路入口左侧贴墙。', aimPos: '准星对准城堡屋顶中间最大突起物的下沿。', tips: ['Anubis中路控制的核心道具', '配合中路闪可以安全推进', '注意CT可能前压中路'] },
+        { id: 'a2', name: '跳台烟（A区进攻）', side: 'T', type: 'smoke', area: 'A 区', description: '水下通道抵住栏杆角落，准星对准砖墙特定纹理点，左键跳投。封住跳台架枪的CT视野，配合A区进攻。', difficulty: '中等', throw: '跳投', standPos: '水下通道抵住右侧栏杆角落。', aimPos: '准星对准砖墙上明显的深色纹理点，在纹理点右侧两个像素处。', tips: ['这颗烟需要精确的瞄准点', '配合A包点烟和A区闪形成完整进攻', '是Vitality战队常用的A区道具'] },
+        { id: 'a3', name: 'B后巷精确烟', side: 'T', type: 'smoke', area: 'B 区', description: 'B门外凹槽卡死点，对准柱子旁第二个齿槽，左键跳投。精确封住B后巷CT视野，配合B区进攻。', difficulty: '中等', throw: '跳投', standPos: 'B门外凹槽内卡死点。', aimPos: '准星对准柱子旁第二个齿槽的尖端。', tips: ['需要卡在凹槽最深处', '配合B区闪可以安全进入B包点', '注意后巷可能有CT狙击手'] },
+        { id: 'a4', name: '中路CT反清火', side: 'CT', type: 'molotov', area: '中路', description: 'CT中路掩体后站位，准星对准T中路出口地面石板，跑一步站投。燃烧弹覆盖T中路出口，阻止T快速控制中路。', difficulty: '简单', throw: '跑投', standPos: 'CT中路掩体后，面向T中路出口。', aimPos: '准星对准T中路出口地面的石板纹理，跑一步站投。', tips: ['开局抢中路时的核心道具', '配合中路闪可以反清中路', '注意听燃烧弹声音判断是否烧到人'] },
+        { id: 'a5', name: 'A区柱子火', side: 'T', type: 'molotov', area: 'A 区', description: 'A区入口，准星对准A包点柱子后方地面，跳投。燃烧弹覆盖柱子后的CT站位，清出包点。', difficulty: '简单', throw: '跳投', standPos: 'A区入口右侧贴墙。', aimPos: '准星对准A包点柱子后方的地面石板，跳投。', tips: ['清A包点的标准道具', '配合A区闪使用效果更好', '注意柱子后可能有CT蹲守'] },
+        { id: 'a6', name: 'A区CT反清闪套餐', side: 'CT', type: 'flash', area: 'A 区', description: 'A包点平台站位，第一颗右键反弹A区入口上方天花板，第二颗左键高抛跳投覆盖A包点。两颗闪间隔1.5秒。', difficulty: '中等', throw: '右键+跳投', standPos: 'A包点平台安全位置。', aimPos: '第一颗：A区入口上方天花板；第二颗：A包点上方天空。', tips: ['双闪套餐几乎无法躲避', '投掷间隔1.5秒是最佳节奏', '配合队友反清时可以全歼进攻方'] },
+        { id: 'a7', name: 'B区CT反清闪', side: 'CT', type: 'flash', area: 'B 区', description: 'B包点平台站位，准星对准B区入口上方天花板，右键反弹。闪光弹在B区入口爆炸，致盲推进的T。', difficulty: '简单', throw: '右键反弹', standPos: 'B包点平台靠近B门一侧。', aimPos: '准星对准B区入口上方天花板，右键轻投。', tips: ['B区防守的常用道具', '配合B区火可以反清B入口', '投掷后通知队友拉出补枪'] },
+        { id: 'a8', name: '中路连接烟（T）', side: 'T', type: 'smoke', area: '中路', description: 'T侧中路贴墙，准星对准连接通道上方建筑边缘，跳投。封住连接方向CT的视野，配合中路控制。', difficulty: '简单', throw: '跳投', standPos: 'T侧中路右侧贴墙。', aimPos: '准星对准连接通道上方建筑边缘的尖角。', tips: ['配合中路烟形成完整封锁', '防止CT从连接方向支援中路', '是FaZe战队常用的中路控制道具'] }
+    ]},
+    vertigo: { name: '殒命大厦', emoji: '🏗️', points: [
+        { id: 'v1', name: '警家瀑布烟', side: 'T', type: 'smoke', area: 'A 区', description: '黄布下沙袋贴墙，瞄准灯泡正上方钢筋，跳投。封住警家方向视野，掩护A点进攻。CS2职业比赛标准投法。', difficulty: '中等', throw: '跳投', standPos: '黄布下方沙袋处贴墙。', aimPos: '准星对准灯泡正上方钢筋的交叉点。', tips: ['Vertigo A点进攻的核心道具', '配合A点包点烟形成双向封锁', '注意警家方向可能有CT狙击手'] },
+        { id: 'v2', name: 'A点进攻烟雾套餐', side: 'T', type: 'smoke', area: 'A 区', description: '斜坡水泥袋靠墙站位，两颗烟分别封警家和包点。第一颗封警家瀑布方向，第二颗封包点柱子方向。', difficulty: '困难', throw: '跳投x2', standPos: '斜坡水泥袋处靠墙。', aimPos: '第一颗：警家瀑布上方；第二颗：包点柱子方向。', tips: ['两颗烟需要快速连续投掷', '通常由两名队友配合完成', '配合A点闪可以安全进入包点'] },
+        { id: 'v3', name: '中路隔断烟', side: 'T', type: 'smoke', area: '中路', description: '黄布水泥袋贴墙，瞄准栏杆底部，左键投掷。隔断中路CT的视野，配合中路进攻。', difficulty: '简单', throw: '站投', standPos: '黄布处水泥袋贴墙。', aimPos: '准星对准中路栏杆底部，左键站投。', tips: ['中路控制的基础道具', '配合中路闪可以安全推进', '注意CT可能在中路前压'] },
+        { id: 'v4', name: '侧道隔断烟', side: 'T', type: 'smoke', area: 'A 区', description: '黄布上方站位，瞄准钢管位置，左键投掷。隔断侧道CT支援A点的路线。', difficulty: '中等', throw: '站投', standPos: '黄布上方平台。', aimPos: '准星对准侧道入口的钢管位置，左键站投。', tips: ['防止CT从侧道支援A区', '配合警家烟形成全面封锁', '是Spirit战队常用的道具'] },
+        { id: 'v5', name: '忍者位狙击位清点套餐', side: 'T', type: 'smoke', area: 'A 区', description: '安全位置站位，烟瞄准吊车平台，火瞄准墙壁交界点，W跳投。烟封忍者位，火清狙位。两颗道具几乎同时投掷。', difficulty: '困难', throw: 'W跳投', standPos: 'A区入口安全位置。', aimPos: '烟：吊车平台；火：墙壁交界点。', tips: ['需要烟和火同时投掷', '清出忍者位和狙位的CT', '是职业比赛中高级清点技巧'] },
+        { id: 'v6', name: '沙袋火（清A点）', side: 'T', type: 'molotov', area: 'A 区', description: '抵住黄布中间，瞄准石块右上角右移，直接投掷。烧沙袋后架枪的CT，清出A点。', difficulty: '简单', throw: '站投', standPos: '黄布中间贴墙。', aimPos: '准星对准石块右上角，右移两个像素后站投。', tips: ['清A点沙袋后的CT', '配合队友的A点闪使用', '燃烧弹声音可以判断是否有人'] },
+        { id: 'v7', name: '中路CT反清火', side: 'CT', type: 'molotov', area: '中路', description: 'CT中路掩体后站位，准星对准T中路出口地面，跑一步站投。燃烧弹覆盖T中路出口，阻止T快速控制中路。', difficulty: '中等', throw: '跑投', standPos: 'CT中路掩体后。', aimPos: '准星对准T中路出口地面，跑一步站投。', tips: ['中路防守的核心道具', '配合中路闪可以反清', '注意听脚步判断T位置'] },
+        { id: 'v8', name: 'B区楼梯CT反清闪', side: 'CT', type: 'flash', area: 'B 区', description: 'B区下层站位，准星对准B区楼梯上方天花板，右键反弹。闪光弹在楼梯口爆炸，致盲从楼梯下来的T。', difficulty: '简单', throw: '右键反弹', standPos: 'B区下层安全位置。', aimPos: '准星对准B区楼梯上方天花板，右键轻投反弹。', tips: ['B区防守的常用道具', '配合B区火可以反清楼梯', '投掷后等待0.5秒拉出补枪'] },
+        { id: 'v9', name: 'A点CT反清闪套餐', side: 'CT', type: 'flash', area: 'A 区', description: 'A包点安全位置，第一颗右键反弹A区入口上方，第二颗左键跳投覆盖包点。双闪套餐可全清A区。', difficulty: '中等', throw: '右键+跳投', standPos: 'A包点安全掩体后。', aimPos: '第一颗：A区入口上方天花板；第二颗：A包点上方天空。', tips: ['A区防守的强力道具', '双闪间隔1.5秒效果最佳', '配合队友反清可团灭进攻方'] }
+    ]},
+    ancient: { name: '远古遗迹', emoji: '🏛️', points: [
+        { id: 'an1', name: '中路快烟', side: 'T', type: 'smoke', area: '中路', description: 'T侧中路入口贴墙，准星对准中路建筑上方拱形边缘，跳投。封住中路CT狙击视野，配合中路控制。', difficulty: '简单', throw: '跳投', standPos: 'T侧中路入口右侧贴墙。', aimPos: '准星对准中路建筑上方拱形边缘的中点。', tips: ['Ancient中路控制的基础', '配合中路闪可以安全推进', '注意CT可能在中路前压'] },
+        { id: 'an2', name: 'A区入口烟', side: 'T', type: 'smoke', area: 'A 区', description: 'A区外侧贴墙，准星对准A区入口上方石柱，跳投。封住CT从A区回防的视野，配合A区进攻。', difficulty: '中等', throw: '跳投', standPos: 'A区外侧入口贴墙。', aimPos: '准星对准A区入口上方石柱的顶端。', tips: ['A区进攻的核心道具', '配合A区闪可以安全进入', '注意A区入口可能有CT前压'] },
+        { id: 'an3', name: 'B区通道快烟', side: 'T', type: 'smoke', area: 'B 区', description: 'B区通道入口贴墙，准星对准通道深处上方石梁，跳投。封住CT从B区架枪的视野。', difficulty: '简单', throw: '跳投', standPos: 'B区通道入口左侧贴墙。', aimPos: '准星对准通道深处上方石梁的边缘。', tips: ['B区进攻的基础道具', '配合B区闪可以安全推进', '注意通道内可能有CT防守'] },
+        { id: 'an4', name: '中路CT反清火', side: 'CT', type: 'molotov', area: '中路', description: 'CT中路掩体后站位，准星对准T中路出口地面，跑一步站投。燃烧弹覆盖T中路出口。', difficulty: '中等', throw: '跑投', standPos: 'CT中路掩体后。', aimPos: '准星对准T中路出口地面石板，跑一步站投。', tips: ['中路防守的核心道具', '配合中路闪可以反清', '开局抢中路时的标准道具'] },
+        { id: 'an5', name: 'A区CT反清闪', side: 'CT', type: 'flash', area: 'A 区', description: 'A区包点平台站位，准星对准A区入口上方天花板，右键反弹。闪光弹在入口爆炸，致盲推进的T。', difficulty: '简单', throw: '右键反弹', standPos: 'A区包点平台安全位置。', aimPos: '准星对准A区入口上方天花板，右键轻投。', tips: ['A区防守的常用道具', '配合A区火可以反清入口', '投掷后通知队友拉出'] },
+        { id: 'an6', name: 'B区包点火（CT防守）', side: 'CT', type: 'molotov', area: 'B 区', description: 'B区包点平台站位，准星对准B包点默认下包位，站投。拖延T下包，配合队友反清。', difficulty: '中等', throw: '站投', standPos: 'B区包点平台安全掩体后。', aimPos: '准星对准B包点默认下包位的地面。', tips: ['残局拖延时间的核心道具', '配合B区闪可以击杀下包的T', '注意燃烧弹持续时间'] },
+        { id: 'an7', name: '连接烟（T中路控制）', side: 'T', type: 'smoke', area: '中路', description: 'T侧连接入口，准星对准连接上方石梁，跳投。封住连接方向CT支援视野，切断CT中路支援。', difficulty: '中等', throw: '跳投', standPos: 'T侧连接入口安全位置。', aimPos: '准星对准连接上方石梁的边缘。', tips: ['配合中路烟形成完整中路控制', '防止CT从连接支援中路', '是NAVI战队常用的中路道具'] },
+        { id: 'an8', name: 'T出生点诱饵弹（假打用）', side: 'T', type: 'decoy', area: '中路', description: 'T出生点，准星对准中路方向，直接投掷。诱饵弹模拟枪声，配合A区或B区假打战术。', difficulty: '简单', throw: '站投', standPos: 'T出生点安全位置。', aimPos: '对准需要假打的方向直接投掷。', tips: ['配合假打战术使用', '可模拟狙击枪声误导CT', '与队友的假打动作同步进行'] }
+    ]}
+};
+
+    var typeEmoji = { smoke: '💨', flash: '⚡', molotov: '🔥', grenade: '💥', decoy: '🎭' };
+    var typeName = { smoke: '烟雾弹', flash: '闪光弹', molotov: '燃烧弹', grenade: '手雷', decoy: '诱饵弹' };
+
+    // ============ 战术数据 ============
+    var tacticsData = [
+        { id: 'eco1', category: 'economy', title: '四种经济局型', icon: '💰',
+          tags: ['基础', '经济'],
+          description: '不同经济状况下，队伍会选择不同的起枪策略。理解四种局型是掌握经济系统的第一步。',
+          points: [
+              'ECO（经济局）：不花钱或极少投入，确保下回合能全起',
+              '半起局：投入部分经济，提高当前战斗力，同时保留全起余裕',
+              '强起局：投入全部经济，尽可能买最好的装备，下回合不一定能全起',
+              '全起局：充足经济，长枪 + 护甲 + 道具'
+          ] },
+        { id: 'eco2', category: 'economy', title: '连败奖励机制', icon: '📉',
+          tags: ['机制', '经济'],
+          description: '连败奖励是经济系统的核心调节器。每输一局，全队额外获得 ¥500，最多累积 4 格（即 4 连败）。',
+          points: [
+              '1 连败：下回合基础奖励 ¥1900',
+              '2 连败：下回合基础奖励 ¥2400',
+              '3 连败：下回合基础奖励 ¥2900',
+              '4 连败：下回合基础奖励 ¥3400',
+              '回合失败基础奖励：¥1400',
+              'CT 拆包：全队 +¥3500，拆包人额外 +¥300',
+              'T 下包爆炸：全队 +¥3000，下包人额外 +¥300',
+              'T 下包被拆：全队 +¥800'
+          ] },
+        { id: 'eco3', category: 'economy', title: '连败控经济策略', icon: '🧠',
+          tags: ['策略', '进阶'],
+          description: '当前版本下，连续输局后的控经济优先级比之前更高，稍有不慎就会把把 ECO 直接送掉整局。',
+          points: [
+              '连败 1-2 局：全队统一半起，半甲 + 手枪 + 闪光。经济最高的 1-2 人起长枪',
+              '连败 3 局：全队半甲 + 基本投掷物，只让经济最高的一个人起狙，其他人拿常规步枪',
+              '连败 4 局及以上：进入最深逆风，关键是把枪保住',
+              '下回合基础奖金与本回合存活队员数量挂钩，存活越多额外奖金越高',
+              '让经济最高的 1-2 名队员往保枪位转移，把枪保住，下回合就能养全队'
+          ] },
+        { id: 'eco4', category: 'economy', title: '经济分配原则', icon: '🤝',
+          tags: ['团队', '沟通'],
+          description: '路人局连败滚雪球的核心原因就是没人管分配。开局花两秒报一下自己的经济，让经济高的队友给没钱的队友发枪。',
+          points: [
+              '开局立即报经济，让队友知道谁有钱谁没钱',
+              '经济高的队友给没钱的队友发枪',
+              '你钱再多放着也不会生利息，让队友多一个战斗力才是关键',
+              '全队统一决策，避免有人 ECO 有人强起'
+          ] },
+        { id: 'team1', category: 'team', title: 'Vitality 标准控图体系', icon: '⚔️',
+          tags: ['荒漠迷城', 'Vitality', '控图'],
+          map: '荒漠迷城', team: 'Vitality',
+          description: 'Vitality 的战术配合被认为是当前 Major 中最标准化的。教练 zonic 把每个地图的配合拆解成可复制的步骤，新人只需练两周就能跟上节奏。',
+          points: [
+              'T 方默认控图分工：中路 2 人，A 小 1 人，B 区 2 人',
+              '中路两人扔完道具后，一人站死点架枪，另一人去摸连接，不会两人挤在一起',
+              'A 小的人扔完跳台闪后卡住位置等中路信号，不直接冲',
+              'B 区的人只扔一颗隔断烟控回防路线，不贸然强冲',
+              '整个流程最多 40 秒就能控下外场，给下包后防守留足时间',
+              'CT 方从不所有人站死在包点，包点只留 2 人，永远留 1 人在外场游走'
+          ] },
+        { id: 'team2', category: 'team', title: 'Legacy vs Falcons 实战', icon: '⚔️',
+          tags: ['炙热沙城2', 'Legacy', 'Falcons'],
+          map: '炙热沙城2', team: 'Legacy / Falcons',
+          description: 'EWC 2026 淘汰赛中，Legacy 在 Dust2 上针对 B 区打出了极具代表性的战术执行。',
+          points: [
+              'Legacy 进攻方策略：反复夹击 B 区，利用中路和 B 洞的同步推进',
+              'Falcons 的应对：m0NESY 起到狙击直架 B 区，连续两回合击杀干拉尝试',
+              'Legacy 不死心，继续针对 B 区，最终在关键局通过中路突破导致 B 区失守',
+              '完成 1v2 残局，拿下关键分',
+              'CT 方细节：中门内侧右键反弹闪是 Dust2 防守的常用道具',
+              '反弹闪不会暴露 CT 位置，配合狙击手可击杀被闪的 T'
+          ] },
+        { id: 'team3', category: 'team', title: 'TYLOO 针对性防守', icon: '⚔️',
+          tags: ['核子危机', 'TYLOO', '防守'],
+          map: '核子危机', team: 'TYLOO',
+          description: 'TYLOO 在 IEM 科隆 Major 中击败 Astralis，赛后指挥 Mercury 透露了针对 Nuke 的准备。',
+          points: [
+              '核心策略：判断对手的进攻侧重点',
+              'Mercury：“Nuke 这张图 CT 开局一般都要有一个防守侧重点，正好对面打在了我们的侧重点上”',
+              '防守调整：让 Jee 先拿狙去铁板观察，再让 JamYoung 补到外场',
+              '解放 Moseyuh 去正门协助 Zero，形成外场双人协防',
+              'BC.GAME 的进攻战术：下半场连续使用“外场封烟下 K1”战术奏效',
+              '还打出了一局“顶级 Super NIP 战术”拿分'
+          ] },
+        { id: 'team4', category: 'team', title: '炼狱小镇经典战术体系', icon: '⚔️',
+          tags: ['炼狱小镇', '经典', '体系'],
+          map: '炼狱小镇', team: '经典体系',
+          description: '炼狱小镇的战术体系围绕香蕉道和 A 区展开，是 CS 历史上最经典的战术地图之一。',
+          points: [
+              'B 区爆烟战术：烟雾弹封锁警家狙击位与棺材位，燃烧弹清理香蕉道防守',
+              '2020 年 ESL 赛事中曾有选手使用“双烟快攻 B 点”战术实现 20 秒占领 B 区',
+              'A 区同步进攻：封连接烟后分兵进攻 A1 通道与二楼，形成交叉火力覆盖包点',
+              '防守方反制：香蕉道反清，瞬爆闪光弹 + 双架位前顶',
+              '马房双架：队友协助占据教堂二楼高点，获取非对称视野优势',
+              '动态防守：采用 3B2A 或 2B3A 的灵活布防，根据道具投掷判断主攻方向'
+          ] },
+        { id: 'team5', category: 'team', title: 'Falcons 枪法碾压', icon: '⚔️',
+          tags: ['阿努比斯', 'Falcons', 'Spirit'],
+          map: '阿努比斯', team: 'Falcons',
+          description: 'IEM 里约 2026 中，Falcons 在 Anubis 上以 13-4 碾压 Spirit。TeSeS 作为自由人在攻守双方均有亮眼表现。',
+          points: [
+              'Falcons 进攻模式：“做完 A 区骚扰后集合爆 B”',
+              '成功把 A 区防守队员全部封在 B 连接烟雾后方',
+              'T 方抱团轻松进入包点',
+              '关键回合：B 外自由人 TeSeS “手撕 sh1ro 大狙”',
+              '直接干扰了中路警察和 A 区队员的防守节奏',
+              '在换位置时被抓 timing 收下人头'
+          ] },
+        { id: 'team6', category: 'team', title: '殒命大厦道具套餐体系', icon: '⚔️',
+          tags: ['殒命大厦', '道具', '体系'],
+          map: '殒命大厦', team: '经典体系',
+          description: '殒命大厦以垂直空间作战为核心，道具套餐是 A 点进攻的关键。',
+          points: [
+              '警家瀑布烟：黄布下沙袋贴墙，瞄准灯泡正上方钢筋跳投',
+              'A 点进攻烟雾套餐（两颗）：斜坡水泥袋靠墙，第一颗隔断警家，第二颗隔断 A 包点',
+              '忍者位狙位清点套餐：烟瞄准吊车平台左键投掷，火瞄准墙壁交界点 W 跳投',
+              '两个道具可以遮挡忍者位并清理狙位 CT，大幅降低 A 点进攻难度',
+              '中路隔断烟：黄布水泥袋贴墙，瞄准栏杆底部左键投掷',
+              '封住中路警家到 A 暗道的门，让回防 CT 只能从后门走，守包难度大大降低'
+          ] }
+    ];
+
+    // ============ 战队与选手数据 ============
+    var teamsData = [
+        {
+            id: 'spirit', name: 'Team Spirit', logo: '🐉', region: 'EU', rank: 1,
+            style: 'Spirit 是目前世界第一的战队，以 <strong>donk 的激进突破</strong>为核心构建战术体系。队伍擅长利用 donk 的个人能力打开局面，同时 sh1ro 在狙击位提供稳定的后场支援。整体风格偏向前期压迫和快速转点，chopper 的指挥让队伍在中期决策上非常果断。',
+            players: [
+                { name: 'Данил Крышковец', id: 'donk', role: '突破手', desc: '2025年HLTV TOP2，CS2时代最具统治力的年轻选手。激进的前压和恐怖的枪法让他成为Spirit的绝对核心。', settings: 'DPI 400 / 灵敏度 3.09' },
+                { name: 'Дмитрий Соколов', id: 'sh1ro', role: '狙击手', desc: '2025年HLTV TOP5。稳健的狙击风格，擅长后场架枪和关键局发挥。Spirit的防守基石。', settings: 'DPI 400 / 灵敏度 2.1' },
+                { name: 'Борис Воробьев', id: 'magixx', role: '步枪手/辅助', desc: '经验丰富的辅助选手，负责道具投掷和残局处理。为donk创造空间的幕后功臣。' },
+                { name: 'Андрей Татаринович', id: 'tN1R', role: '步枪手', desc: '2026年加入Spirit，随队获得电竞世俱杯冠军。稳定的步枪输出和良好的团队配合。' },
+                { name: 'Мирослав Плахотя', id: 'zont1x', role: '自由人', desc: '乌克兰籍选手，负责地图控制和信息收集。灵活的位置轮转让Spirit的防守体系更加多变。' },
+                { name: 'Леонид Вишняков', id: 'chopper', role: '指挥', desc: 'Spirit的场上指挥，以果断的临场决策著称。带领这支年轻队伍登顶世界第一。' }
+            ]
+        },
+        {
+            id: 'falcons', name: 'Team Falcons', logo: '🦅', region: 'EU', rank: 2,
+            style: 'Falcons 拥有全明星阵容，<strong>NiKo 和 m0NESY 的双核体系</strong>让队伍在枪法层面几乎无解。2026年 IEM 科隆 Major 冠军证明了这套阵容的威力。karrigan 的指挥经验搭配年轻选手的爆发力，让 Falcons 在攻防两端都有极强的威胁。',
+            players: [
+                { name: 'Илья Осипов', id: 'm0NESY', role: '狙击手', desc: '2025年HLTV TOP4。世界上最强的AWP选手之一，反应速度和甩狙能力顶级。', settings: 'DPI 400 / 灵敏度 2.3 / eDPI 920' },
+                { name: 'Никола Ковач', id: 'NiKo', role: '步枪手/自由人', desc: '2025年HLTV TOP18。CS历史上最伟大的步枪手之一，经验和技术并存。Falcons的进攻核心。' },
+                { name: 'Максим Лукин', id: 'kyousuke', role: '突破手', desc: '2008年出生的俄罗斯新星，2026年随Falcons获得科隆Major冠军。天赋极高，未来可期。', settings: 'DPI 800 / 灵敏度 1.28' },
+                { name: 'Финн Андерсен', id: 'karrigan', role: '指挥', desc: 'CS历史上最成功的指挥之一。丰富的战术储备和出色的临场调度能力。' },
+                { name: 'Рене Мадсен', id: 'TeSeS', role: '步枪手', desc: '丹麦籍选手，前Heroic核心。稳定的步枪输出和优秀的团队意识。' }
+            ]
+        },
+        {
+            id: 'vitality', name: 'Team Vitality', logo: '🐝', region: 'EU', rank: 3,
+            style: 'Vitality 以 <strong>ZywOo 的个人能力</strong>为绝对核心，配合 ropz 的稳定输出和 apEX 的激进指挥。队伍战术执行度高，道具配合精准，是当前最标准化的战术体系之一。zonic 教练的调教让每个队员都能在体系中发挥最大作用。',
+            players: [
+                { name: 'Mathieu Herbaut', id: 'ZywOo', role: '狙击手/步枪手', desc: '2025年HLTV TOP1。CS2时代最全面的选手，狙击和步枪都达到顶级水平。Vitality的绝对核心。', settings: 'DPI 400 / 灵敏度 2.0 / eDPI 800' },
+                { name: 'Robin Kool', id: 'ropz', role: '自由人', desc: '2025年HLTV TOP3。爱沙尼亚籍选手，最聪明的自由人之一。残局处理和地图控制能力顶级。' },
+                { name: 'Shahar Shushan', id: 'flameZ', role: '突破手', desc: '2025年HLTV TOP7。以色列籍选手，激进的突破风格。为ZywOo创造空间的关键人物。' },
+                { name: 'William Merriman', id: 'mezii', role: '辅助/步枪手', desc: '2025年HLTV TOP12。英国籍选手，负责道具和辅助工作。Vitality体系中不可或缺的一环。' },
+                { name: 'Dan Madesclaire', id: 'apEX', role: '指挥', desc: '法国籍指挥，以激进的战术风格著称。带领Vitality夺得多个Major冠军。' }
+            ]
+        },
+        {
+            id: 'navi', name: 'Natus Vincere', logo: '⚔️', region: 'EU', rank: 4,
+            style: 'NAVI 以 <strong>Aleksib 的体系化指挥</strong>著称，队伍强调纪律性和战术执行。b1t 和 iM 的步枪火力稳定，w0nderful 在狙击位提供后场保障。队伍风格偏向稳健的控图打法，擅长利用道具优势积累回合优势。',
+            players: [
+                { name: 'Valerij Vakhovsjkyj', id: 'b1t', role: '步枪手', desc: '2025年HLTV TOP20。乌克兰籍选手，前NAVI青训。精准的枪法和冷静的比赛心态。' },
+                { name: 'Mihai Ivan', id: 'iM', role: '步枪手', desc: '2025年HLTV TOP19。罗马尼亚籍选手，稳定的输出点。擅长在中后期回合发挥作用。' },
+                { name: 'Aleksi Virolainen', id: 'Aleksib', role: '指挥', desc: '芬兰籍指挥，体系化打法的代表人物。带领NAVI获得2024年哥本哈根Major冠军。' },
+                { name: 'Ihor Zhdanov', id: 'w0nderful', role: '狙击手', desc: '乌克兰籍年轻狙击手，接替s1mple的位置。表现稳定，潜力巨大。' },
+                { name: 'Justinas Lekavičius', id: 'jL', role: '突破手/自由人', desc: '立陶宛籍选手，NAVI的进攻发起者之一。灵活的位置适应能力。' }
+            ]
+        },
+        {
+            id: 'furia', name: 'FURIA Esports', logo: '🐆', region: 'AM', rank: 5,
+            style: 'FURIA 是巴西CS的代表，以 <strong>激进的打法和高强度对抗</strong>著称。YEKINDAR 的突破风格完美契合队伍的侵略性。FalleN 的狙击和指挥经验为这支年轻队伍提供了稳定性。队伍擅长在混乱中寻找机会，节奏极快。',
+            players: [
+                { name: 'Kaike Cerato', id: 'KSCERATO', role: '步枪手', desc: '2025年HLTV TOP9。巴西最稳定的步枪手之一，FURIA的定海神针。' },
+                { name: 'Mareks Gaļinskis', id: 'YEKINDAR', role: '突破手', desc: '2025年HLTV TOP15。拉脱维亚籍选手，CS2中最具侵略性的突破手之一。' },
+                { name: 'Danil Golubenko', id: 'molodoy', role: '步枪手', desc: '2025年HLTV TOP6。年轻选手，2025年表现出色，是FURIA崛起的关键因素。' },
+                { name: 'Gabriel Toledo', id: 'FalleN', role: '狙击手/指挥', desc: '巴西CS的传奇人物，两届Major冠军得主。经验丰富，是队伍的领袖。' },
+                { name: 'Yuri Santos', id: 'yuurih', role: '辅助/步枪手', desc: '巴西籍选手，FURIA的辅助核心。稳定的道具投掷和团队配合。' }
+            ]
+        },
+        {
+            id: 'mouz', name: 'MOUZ', logo: '🐭', region: 'EU', rank: 6,
+            style: 'MOUZ 以 <strong>年轻化和高执行力</strong>著称，是近年崛起最快的欧洲队伍之一。torzsi 的狙击和 xertioN 的步枪火力构成核心。队伍战术体系成熟，道具配合精细，擅长通过团队协作弥补个人能力的差距。',
+            players: [
+                { name: 'Ádám Torzsás', id: 'torzsi', role: '狙击手', desc: '2025年HLTV TOP17。匈牙利籍狙击手，MOUZ的后场核心。' },
+                { name: 'Dorian Berman', id: 'xertioN', role: '步枪手/突破', desc: '2025年HLTV TOP16。以色列籍选手，MOUZ的进攻箭头。' },
+                { name: 'Lotan Giladi', id: 'Spinx', role: '自由人', desc: '2025年HLTV TOP10。以色列籍选手，前Vitality核心。全面的技术和出色的大局观。' },
+                { name: 'Jimi Salo', id: 'Jimpphat', role: '步枪手', desc: '芬兰籍年轻选手，2025年表现出色。MOUZ青训体系的杰出产物。' },
+                { name: 'Kamil Sobolewski', id: 'siuhy', role: '指挥', desc: '波兰籍指挥，前GamerLegion核心。带领MOUZ成为顶级强队的关键人物。' }
+            ]
+        },
+        {
+            id: 'mongolz', name: 'The MongolZ', logo: '🇲🇳', region: 'APAC', rank: 7,
+            style: 'The MongolZ 是亚洲CS的骄傲，以 <strong>910 的狙击和全队激进的枪法</strong>著称。队伍风格非常侵略性，擅长通过快速的团队配合和出色的个人能力压制对手。2024年哥本哈根Major亚军是亚洲CS的历史性突破。',
+            players: [
+                { name: 'Usukhbayar Banzragch', id: '910', role: '狙击手', desc: '蒙古国最优秀的狙击手，The MongolZ的核心。2025年HLTV TOP8。' },
+                { name: 'Garidmagnai Byambasuren', id: 'blitz', role: '步枪手', desc: '蒙古籍选手，The MongolZ的稳定输出点。' },
+                { name: 'Senzorig Batbayar', id: 'Senzu', role: '突破手', desc: '蒙古籍年轻选手，激进的突破风格。' },
+                { name: 'Munkhbold Azbayar', id: 'mzinho', role: '步枪手', desc: '蒙古籍选手，The MongolZ的关键先生。' },
+                { name: 'Tuvshintugs Nyamdorj', id: 'Techno', role: '辅助/指挥', desc: '蒙古籍指挥，The MongolZ的战术核心。' }
+            ]
+        },
+        {
+            id: 'heroic', name: 'HEROIC', logo: '🛡️', region: 'EU', rank: 8,
+            style: 'HEROIC 是丹麦CS的代表，以 <strong>体系化打法和团队纪律</strong>著称。队伍擅长通过精细的道具配合和团队协作获得优势，节奏控制能力出色。虽然经历了多次阵容变动，但始终保持着高水平的竞技状态。',
+            players: [
+                { name: 'Rasmus Nordfoss', id: 'sjuush', role: '步枪手', desc: '丹麦籍选手，HEROIC的稳定输出点。' },
+                { name: 'Nico Tamjidi', id: 'nicoodoz', role: '狙击手', desc: '丹麦籍狙击手，HEROIC的后场核心。' },
+                { name: 'Rasmus Beck', id: 'sirah', role: '步枪手', desc: '丹麦籍选手，HEROIC的突破手。' },
+                { name: 'Damjan Stoilkovski', id: 'kyxsan', role: '指挥', desc: '北马其顿籍指挥，HEROIC的战术大脑。' },
+                { name: 'René Madsen', id: 'TeSeS', role: '步枪手', desc: '丹麦籍选手，后转会Falcons。' }
+            ]
+        },
+        {
+            id: 'liquid', name: 'Team Liquid', logo: '💧', region: 'AM', rank: 9,
+            style: 'Team Liquid 是北美CS的代表，拥有 <strong>NAF 和 YEKINDAR 等顶级选手</strong>。队伍风格偏向个人能力发挥，擅长通过明星选手的爆发打开局面。twistzz 的加入为队伍带来了更多的战术可能性。',
+            players: [
+                { name: 'Keith Markovic', id: 'NAF', role: '步枪手/自由人', desc: '加拿大籍选手，Liquid的核心。全面的技术和出色的大局观。' },
+                { name: 'Russel Van Dulken', id: 'Twistzz', role: '步枪手', desc: '加拿大籍选手，CS历史上最优秀的步枪手之一。发型哥。' },
+                { name: 'Mareks Gaļinskis', id: 'YEKINDAR', role: '突破手', desc: '拉脱维亚籍选手，激进的突破风格。' },
+                { name: 'Casper Møller', id: 'cadiaN', role: '狙击手/指挥', desc: '丹麦籍指挥，前HEROIC核心。Liquid的领袖。' },
+                { name: 'Justin Savage', id: 'jks', role: '步枪手', desc: '澳大利亚籍选手，经验丰富的老将。' }
+            ]
+        },
+        {
+            id: 'tyloo', name: 'TYLOO', logo: '🐯', region: 'APAC', rank: 10,
+            style: 'TYLOO 是中国CS的代表，以 <strong>JamYoung 的狙击和全队的团队配合</strong>著称。2026年 IEM 科隆 Major 中击败 Astralis 是中国CS的历史性突破。队伍风格偏向稳健的控图打法，擅长通过战术执行积累优势。',
+            players: [
+                { name: 'Yang Yi', id: 'JamYoung', role: '狙击手/步枪手', desc: '中国最优秀的选手之一，TYLOO的核心。2026年科隆Major击败Astralis的关键人物。' },
+                { name: 'Wang Zhiwei', id: 'Mercury', role: '指挥', desc: 'TYLOO的场上指挥，以出色的战术布置著称。' },
+                { name: 'Zhuang Yongfu', id: 'Jee', role: '狙击手', desc: '中国籍年轻狙击手，TYLOO的后场核心。' },
+                { name: 'Zhang Moseyuh', id: 'Moseyuh', role: '步枪手', desc: '中国籍选手，TYLOO的稳定输出点。' },
+                { name: 'Qian Kun', id: 'Zero', role: '步枪手/自由人', desc: '中国籍选手，TYLOO的进攻发起者之一。' }
+            ]
+        },
+        {
+            id: 'faze', name: 'FaZe Clan', logo: '🎯', region: 'EU', rank: 11,
+            style: 'FaZe 是CS历史上最著名的国际纵队之一，以 <strong>karrigan 的指挥和 broky 的狙击</strong>著称。队伍风格灵活多变，擅长通过临场调整和明星选手的发挥赢得比赛。2022年安特卫普Major冠军是队伍的巅峰时刻。',
+            players: [
+                { name: 'Helvijs Saukants', id: 'broky', role: '狙击手', desc: '拉脱维亚籍狙击手，FaZe的后场核心。2025年HLTV TOP14。' },
+                { name: 'Håvard Nygaard', id: 'rain', role: '突破手', desc: '挪威籍选手，FaZe的进攻箭头。经验丰富的老将。' },
+                { name: 'David Čerňanský', id: 'frozen', role: '步枪手', desc: '斯洛伐克籍选手，FaZe的核心输出点。' },
+                { name: 'Finn Andersen', id: 'karrigan', role: '指挥', desc: '丹麦籍指挥，CS历史上最成功的指挥之一。' },
+                { name: 'Robin Kool', id: 'ropz', role: '自由人', desc: '爱沙尼亚籍选手，后转会Vitality。' }
+            ]
+        },
+        {
+            id: 'vp', name: 'Virtus.pro', logo: '🐻', region: 'EU', rank: 12,
+            style: 'Virtus.pro 是俄罗斯CS的代表，以 <strong>electroNic 和 FL1T 的枪法</strong>著称。队伍风格偏向稳健的控图打法，擅长通过道具优势和团队配合积累回合优势。Jame 的狙击和指挥是队伍的核心。',
+            players: [
+                { name: 'Dzhami Ali', id: 'Jame', role: '狙击手/指挥', desc: '俄罗斯籍选手，VP的核心。稳健的狙击风格和出色的指挥能力。' },
+                { name: 'Denis Sharipov', id: 'electroNic', role: '步枪手', desc: '俄罗斯籍选手，CS历史上最优秀的步枪手之一。' },
+                { name: 'Timur Tulepov', id: 'FL1T', role: '步枪手', desc: '俄罗斯籍选手，VP的稳定输出点。' },
+                { name: 'Petr Bolyshev', id: 'fame', role: '步枪手', desc: '俄罗斯籍年轻选手，VP的新生力量。' },
+                { name: 'Evgeny Lebedev', id: 'Norbert', role: '辅助/步枪手', desc: '俄罗斯籍选手，VP的辅助核心。' }
+            ]
+        },
+        {
+            id: 'astralis', name: 'Astralis', logo: '⭐', region: 'EU', rank: 13,
+            style: 'Astralis 是 CS 历史上最成功的战队之一，四届 Major 冠军得主。目前的 Astralis 正在重建中，以 <strong>device 的狙击和指挥</strong>为核心。队伍保留了经典的体系化打法，但需要更多时间磨合新阵容。',
+            players: [
+                { name: 'Nicolai Reedtz', id: 'device', role: '狙击手/指挥', desc: '丹麦传奇选手，四届Major冠军。CS历史上最伟大的狙击手之一。' },
+                { name: 'Lukas Rossander', id: 'gla1ve', role: '指挥', desc: '丹麦籍指挥，Astralis王朝的缔造者之一。战术大师。' },
+                { name: 'Andreas Højsleth', id: 'Xyp9x', role: '辅助/残局', desc: '丹麦籍选手，"clutch minister"。CS历史上最伟大的残局选手之一。' },
+                { name: 'Martin Lund', id: 'stavn', role: '步枪手', desc: '丹麦籍选手，Astralis的核心输出点。' },
+                { name: 'Jakob Nygaard', id: 'jabbi', role: '步枪手/突破', desc: '丹麦籍选手，Astralis的进攻箭头。' }
+            ]
+        },
+        {
+            id: 'g2', name: 'G2 Esports', logo: '⚡', region: 'EU', rank: 14,
+            style: 'G2 以 <strong>NiKo 离队后的新体系</strong>为核心，huNter- 和 NertZ 承担更多责任。队伍风格偏向均衡，擅长利用个人能力在中期打开局面。SunPayus 的狙击表现是队伍能否走远的关键。',
+            players: [
+                { name: 'Nemanja Kovač', id: 'huNter-', role: '步枪手/指挥', desc: '波黑籍选手，NiKo的表哥。经验丰富，是G2的精神领袖。' },
+                { name: 'Guy Iluz', id: 'NertZ', role: '步枪手', desc: '以色列籍选手，前ENCE核心。稳定的输出和良好的团队意识。' },
+                { name: 'Álvaro García', id: 'SunPayus', role: '狙击手', desc: '西班牙籍狙击手，前ENCE选手。G2的后场保障。' },
+                { name: 'Ilya Osipov', id: 'm0NESY', role: '狙击手', desc: '俄罗斯籍选手，后转会Falcons。' },
+                { name: 'Nikola Kovač', id: 'NiKo', role: '步枪手', desc: '波黑籍选手，后转会Falcons。CS历史上最伟大的步枪手之一。' }
+            ]
+        }
+    ];
+
+    // ============ 地图介绍数据 ============
+    var mapIntroData = [
+        { id: 'mirage', name: '荒漠迷城', en: 'Mirage', icon: '🏜️',
+          tags: ['经典', '平衡', 'T 略优', '中等节奏'],
+          description: 'Mirage 是 CS 系列最经典、最平衡的地图之一。地图结构清晰，中路控制是整张图的核心——谁能控制中路，谁就能决定进攻方向。T 方略占优势，但 CT 通过合理的道具和站位也能有效防守。是职业赛场和路人局都最常出现的地图。',
+          sections: [
+              { title: '关键区域', items: ['中路（Mid）：连接 A、B 两点的枢纽，VIP 和拱门是控制要点', 'A 区：A1、A2、Palace、Jungle、CT 五条通道，进攻路线复杂', 'B 区：B 二楼、超市、B 小三条路线，道具配合非常关键'] },
+              { title: 'T 方要点', items: ['中路控制是核心：VIP 烟 + 拱门烟打开局面', 'A 区三烟套餐（Jungle + CT + 拱门）是标准进攻', 'B 区需要 B 二楼 + 超市双线夹击', '假打 A 区后快速转 B 是常见战术'] },
+              { title: 'CT 方要点', items: ['VIP 架枪控制中路，配合中门火反清', 'A 区站位移位：Jungle、CT、忍者位交叉火力', 'B 区超市和 B 小双人协防', '留一人在外场游走，随时绕后偷人'] },
+              { title: '代表战队', items: ['Vitality：标准化控图体系', 'FaZe：灵活的个人能力发挥', 'NAVI：体系化防守'] }
+          ] },
+        { id: 'dust2', name: '炙热沙城2', en: 'Dust II', icon: '🏜️',
+          tags: ['经典', '开阔', 'T 略优', '狙击图'],
+          description: 'Dust2 是 CS 历史上最著名、最经典的地图，没有之一。地图视野开阔，A 大、中路、B 洞三条主要进攻路线，狙击手在这张图上有极大的发挥空间。T 方略占优势，但 CT 通过 A 大和中门的架枪也能有效防守。',
+          sections: [
+              { title: '关键区域', items: ['A 大（Long A）：最经典的进攻路线，狙击手的主战场', '中路（Mid）：连接 A 小和 B 洞，中门是狙击对枪点', 'B 洞（Tunnels）：B 区主要进攻路线，狭窄空间适合贴身战'] },
+              { title: 'T 方要点', items: ['Xbox 烟封中门狙击视野是基础', 'A 大快烟 + A 小夹击是经典战术', 'B 洞 Rush 需要 B 门烟 + B 洞闪', '中路控制后可选择 A 小或 B 洞转点'] },
+              { title: 'CT 方要点', items: ['中门狙击手（AWPer）的核心位置', 'A 大架枪配合 A 平台防守', 'B 区 B 门 + B 洞双人协防', 'A 小 CT 反清闪可有效反制 A 小夹击'] },
+              { title: '代表战队', items: ['Legacy：反复夹击 B 区', 'Falcons：m0NESY 狙击直架 B 区', 'Vitality：A 小夹击战术'] }
+          ] },
+        { id: 'inferno', name: '炼狱小镇', en: 'Inferno', icon: '🔥',
+          tags: ['经典', '狭窄', 'CT 略优', '道具图'],
+          description: 'Inferno 是 CS 历史上最经典的战术地图之一。地图狭窄，道具使用至关重要，香蕉道和 A 区的控制是整张图的核心。CT 方略占优势，但 T 方通过精细的道具配合也能有效进攻。',
+          sections: [
+              { title: '关键区域', items: ['香蕉道（Banana）：B 区的必经之路，狭窄且道具密集', 'A 区：A1、A2、图书馆三条路线，需要三烟配合', 'B 区：教堂、棺材、沙袋三个防守要点'] },
+              { title: 'T 方要点', items: ['香蕉道快烟是所有 B 区战术的基础', 'A 区三烟（CT 烟 + 图书馆烟 + A1 烟）是标准进攻', 'B 区双火套餐清点非常有效', '假打香蕉道后快速转 A 是常见战术'] },
+              { title: 'CT 方要点', items: ['香蕉道反清火 + 闪光有效拖延 T 方', 'A 区 A1 火 + 二楼反清闪', 'B 区教堂窗口闪是防守利器', '动态防守：3B2A 或 2B3A 灵活布防'] },
+              { title: '代表战队', items: ['Spirit：A 区三烟战术', 'G2：A 包点全清火', '经典体系：香蕉道爆烟战术'] }
+          ] },
+        { id: 'nuke', name: '核子危机', en: 'Nuke', icon: '☢️',
+          tags: ['立体', 'CT 略优', '道具复杂', '垂直作战'],
+          description: 'Nuke 是 CS 中最具特色的地图之一，以垂直空间作战为核心。外场、A 区、B 区三个主要区域通过管道和楼梯连接，道具配合要求极高。CT 方略占优势，外场控制是整张图的关键。',
+          sections: [
+              { title: '关键区域', items: ['外场（Outside）：连接 A、B 两区，控制权是整张图核心', 'A 区：黄房、铁箱、大仓三个要点，配合管道', 'B 区：下管、正门两条路线，空间狭小'] },
+              { title: 'T 方要点', items: ['外场一线烟（3 颗）是标准进攻套路', '大仓快烟 + 外场闪配合进入外场', '管道封烟需要精确的急停跳投', '黄房上火清 A 包点非常有效'] },
+              { title: 'CT 方要点', items: ['外场高台狙击是核心位置', '外场 CT 反清火阻止 T 方进入', 'A 包点铁箱后反弹闪反清入口', '外场单向烟是高级防守技巧'] },
+              { title: '代表战队', items: ['TYLOO：针对性防守', 'BC.GAME：外场封烟下 K1', '经典体系：外场一线烟套装'] }
+          ] },
+        { id: 'anubis', name: '阿努比斯', en: 'Anubis', icon: '🏺',
+          tags: ['新图', '开阔', 'T 略优', '中路核心'],
+          description: 'Anubis 是 CS2 时代加入的新地图，以古埃及风格为主题。地图结构开阔，中路控制是整张图的核心。T 方略占优势，队伍可以通过中路快速转点。',
+          sections: [
+              { title: '关键区域', items: ['中路（Mid）：连接 A、B 两区，控制权决定进攻方向', 'A 区：跳台、水下、连接三条路线', 'B 区：后巷、B 门两条路线，空间开阔'] },
+              { title: 'T 方要点', items: ['中路快烟控制中路是基础', '跳台烟封跳台架枪视野', 'B 后巷精确烟需要卡凹槽', 'A 区柱子火清柱后 CT'] },
+              { title: 'CT 方要点', items: ['中路反清火 + 闪光有效拖延', 'A 区双闪套餐可全歼进攻方', 'B 区反清闪配合队友反打', '连接烟切断 T 方中路支援'] },
+              { title: '代表战队', items: ['Falcons：A 区骚扰后爆 B', 'Vitality：跳台烟战术', 'FaZe：中路连接烟'] }
+          ] },
+        { id: 'vertigo', name: '殒命大厦', en: 'Vertigo', icon: '🏗️',
+          tags: ['立体', 'CT 略优', '道具核心', '垂直作战'],
+          description: 'Vertigo 以垂直空间作战为核心，地图在建筑工地和楼顶之间展开。道具套餐是 A 点进攻的关键。CT 方略占优势，但 T 方通过精细的道具配合也能有效进攻。',
+          sections: [
+              { title: '关键区域', items: ['A 区：警家、侧道、吊车三个要点，道具要求高', 'B 区：通道、楼梯两条路线，空间狭窄', '中路：连接 A、B 两区，隔断烟非常关键'] },
+              { title: 'T 方要点', items: ['警家瀑布烟是 A 点进攻核心', 'A 点双烟套餐（警家 + 包点）是标准进攻', '忍者位狙位清点套餐是高级技巧', '中路隔断烟封警家到 A 暗道的门'] },
+              { title: 'CT 方要点', items: ['中路反清火有效拖延 T 方', 'B 区楼梯反清闪配合队友反打', 'A 点双闪套餐可全清 A 区', '沙袋火清 A 点架枪 CT'] },
+              { title: '代表战队', items: ['Spirit：侧道隔断烟', '经典体系：道具套餐体系', 'FaZe：A 点进攻烟雾套餐'] }
+          ] },
+        { id: 'ancient', name: '远古遗迹', en: 'Ancient', icon: '🏛️',
+          tags: ['新图', '狭窄', '平衡', '道具图'],
+          description: 'Ancient 是 CS 中的经典战术地图之一，以中美洲遗迹为主题。地图狭窄，道具使用至关重要，中路和连接的控制是整张图的核心。攻防相对平衡，双方都有发挥空间。',
+          sections: [
+              { title: '关键区域', items: ['中路（Mid）：连接 A、B 两区，控制权决定进攻方向', 'A 区：入口、包点两个要点，空间狭窄', 'B 区：通道、包点两个要点，道具密集'] },
+              { title: 'T 方要点', items: ['中路快烟控制中路是基础', 'A 区入口烟封 CT 回防视野', 'B 区通道快烟配合 B 区闪', '连接烟切断 CT 中路支援'] },
+              { title: 'CT 方要点', items: ['中路反清火有效拖延 T 方', 'A 区反清闪配合队友反打', 'B 区包点火拖延 T 方下包', '动态防守：灵活调整布防'] },
+              { title: '代表战队', items: ['NAVI：连接烟战术', '经典体系：中路控制体系', 'FaZe：A 区入口烟'] }
+          ] }
+    ];
+
+    // ============ 武器数据 ============
+    var weaponsData = [
+        { id: 'w1', name: 'Glock-18', category: 'pistol', side: 'T', price: '$200', emoji: '🔫',
+          description: 'T 方默认手枪。射速快，弹匣容量大（20 发），伤害偏低。右键可切换连发模式（三连发），近距离爆发力强。',
+          stats: { damage: '30', fireRate: '400 RPM', mag: '20', reload: '2.2s' },
+          tips: ['T 方默认手枪，开局免费获得', '右键三连发适合近距离', '跑打精度较高'] },
+        { id: 'w2', name: 'USP-S', category: 'pistol', side: 'CT', price: '$200', emoji: '🔫',
+          description: 'CT 方默认手枪。消音手枪，精度高，爆头伤害极高（无甲一枪爆头）。是 CT 方开局最强的手枪之一。',
+          stats: { damage: '35', fireRate: '352 RPM', mag: '12', reload: '2.2s' },
+          tips: ['CT 方默认手枪，开局免费获得', '消音，开枪不易暴露位置', '爆头一枪致死（无甲）'] },
+        { id: 'w3', name: 'P2000', category: 'pistol', side: 'CT', price: '$200', emoji: '🔫',
+          description: 'CT 方可选默认手枪，可替换 USP-S。弹匣容量 13 发，精度较高。',
+          stats: { damage: '35', fireRate: '352 RPM', mag: '13', reload: '2.2s' },
+          tips: ['可替换 USP-S 使用', '弹匣比 USP-S 多 1 发', '精度略低于 USP-S'] },
+        { id: 'w4', name: 'P250', category: 'pistol', side: '通用', price: '$300', emoji: '🔫',
+          description: '廉价手枪，性价比极高。护甲穿透力强，爆头伤害可观。是经济局和半起局的常见选择。',
+          stats: { damage: '38', fireRate: '400 RPM', mag: '13', reload: '2.2s' },
+          tips: ['经济局性价比之王', '护甲穿透力强', '近中距离表现优秀'] },
+        { id: 'w5', name: 'Five-SeveN', category: 'pistol', side: 'CT', price: '$500', emoji: '🔫',
+          description: 'CT 方专属手枪。弹匣容量 20 发，护甲穿透力强，适合反 ECO。',
+          stats: { damage: '32', fireRate: '400 RPM', mag: '20', reload: '2.7s' },
+          tips: ['CT 方反 ECO 首选', '弹匣容量大', '护甲穿透力强'] },
+        { id: 'w6', name: 'Tec-9', category: 'pistol', side: 'T', price: '$500', emoji: '🔫',
+          description: 'T 方专属手枪。射速快，弹匣容量 18 发，适合 Rush 和近距离作战。',
+          stats: { damage: '33', fireRate: '500 RPM', mag: '18', reload: '2.2s' },
+          tips: ['T 方 Rush 首选', '射速快，适合跑打', '近距离爆发力强'] },
+        { id: 'w7', name: 'Desert Eagle', category: 'pistol', side: '通用', price: '$700', emoji: '🔫',
+          description: '沙鹰，CS 最经典的手枪。爆头一枪致死（无论有无护甲），但射速慢、后坐力大。是经济局的翻盘利器。',
+          stats: { damage: '63', fireRate: '267 RPM', mag: '7', reload: '2.2s' },
+          tips: ['爆头一枪致死（无甲/有甲）', '经济局翻盘神器', '射速慢，需要精准瞄准'] },
+        { id: 'w8', name: 'R8 Revolver', category: 'pistol', side: '通用', price: '$600', emoji: '🔫',
+          description: '左轮手枪，射速极慢但伤害极高。左键可快速射击（精度低），右键可蓄力精确射击。',
+          stats: { damage: '86', fireRate: '慢', mag: '8', reload: '3.0s' },
+          tips: ['右键蓄力可精确射击', '左键快速射击精度低', '躯干两枪致死'] },
+        { id: 'w9', name: 'Dual Berettas', category: 'pistol', side: '通用', price: '$300', emoji: '🔫',
+          description: '双持手枪，弹匣容量 30 发，射速快。但精度低、伤害低，适合近距离压制。',
+          stats: { damage: '38', fireRate: '500 RPM', mag: '30', reload: '3.8s' },
+          tips: ['弹匣容量大', '射速快', '精度低，适合近距离'] },
+        { id: 'w10', name: 'MP9', category: 'smg', side: 'CT', price: '$1250', emoji: '💢',
+          description: 'CT 方冲锋枪，射速极快，移动精度高。适合反 ECO 和近距离作战。',
+          stats: { damage: '26', fireRate: '857 RPM', mag: '30', reload: '2.1s' },
+          tips: ['CT 方反 ECO 首选', '射速极快', '移动精度高'] },
+        { id: 'w11', name: 'MAC-10', category: 'smg', side: 'T', price: '$1050', emoji: '💢',
+          description: 'T 方冲锋枪，射速快，价格低廉。适合 T 方 Rush 和近距离作战。',
+          stats: { damage: '29', fireRate: '800 RPM', mag: '30', reload: '2.6s' },
+          tips: ['T 方 Rush 首选', '价格低廉', '近距离爆发力强'] },
+        { id: 'w12', name: 'MP7', category: 'smg', side: '通用', price: '$1500', emoji: '💢',
+          description: '通用冲锋枪，射速快，精度较高。性价比中等。',
+          stats: { damage: '29', fireRate: '750 RPM', mag: '30', reload: '3.1s' },
+          tips: ['射速快', '精度较高', '价格适中'] },
+        { id: 'w13', name: 'MP5-SD', category: 'smg', side: '通用', price: '$1500', emoji: '💢',
+          description: '消音冲锋枪，射速快，精度高。开枪不易暴露位置。',
+          stats: { damage: '27', fireRate: '750 RPM', mag: '30', reload: '2.7s' },
+          tips: ['消音，开枪不易暴露', '精度高', '适合埋伏'] },
+        { id: 'w14', name: 'UMP-45', category: 'smg', side: '通用', price: '$1200', emoji: '💢',
+          description: '廉价冲锋枪，单发伤害较高，但射速慢。适合经济局使用。',
+          stats: { damage: '35', fireRate: '666 RPM', mag: '25', reload: '3.5s' },
+          tips: ['单发伤害高', '价格低廉', '射速慢'] },
+        { id: 'w15', name: 'P90', category: 'smg', side: '通用', price: '$2350', emoji: '💢',
+          description: '弹匣容量 50 发，射速快，移动精度高。适合 Rush 和近距离压制。',
+          stats: { damage: '26', fireRate: '857 RPM', mag: '50', reload: '3.4s' },
+          tips: ['弹匣容量大', '移动精度高', '适合 Rush'] },
+        { id: 'w16', name: 'PP-Bizon', category: 'smg', side: '通用', price: '$1400', emoji: '💢',
+          description: '弹匣容量 64 发，射速快。但伤害低、护甲穿透力弱。',
+          stats: { damage: '27', fireRate: '750 RPM', mag: '64', reload: '2.4s' },
+          tips: ['弹匣容量极大', '护甲穿透力弱', '适合近距离压制'] },
+        { id: 'w17', name: 'AK-47', category: 'rifle', side: 'T', price: '$2700', emoji: '🎯',
+          description: 'CS 最经典的步枪，T 方专属。爆头一枪致死（无论有无护甲），是 T 方的主力步枪。',
+          stats: { damage: '36', fireRate: '600 RPM', mag: '30', reload: '2.5s' },
+          tips: ['爆头一枪致死', 'T 方主力步枪', '弹道需要练习压枪'] },
+        { id: 'w18', name: 'M4A4', category: 'rifle', side: 'CT', price: '$3100', emoji: '🎯',
+          description: 'CT 方主力步枪，弹匣容量 30 发，射速快。爆头伤害略低于 AK-47，需要两枪爆头。',
+          stats: { damage: '33', fireRate: '666 RPM', mag: '30', reload: '3.1s' },
+          tips: ['CT 方主力步枪', '弹匣容量大', '射速快'] },
+        { id: 'w19', name: 'M4A1-S', category: 'rifle', side: 'CT', price: '$2900', emoji: '🎯',
+          description: 'CT 方消音步枪，弹匣容量 20 发，精度高，后坐力小。开枪不易暴露位置。',
+          stats: { damage: '38', fireRate: '600 RPM', mag: '20', reload: '3.1s' },
+          tips: ['消音，开枪不易暴露', '精度高，后坐力小', '弹匣容量较小'] },
+        { id: 'w20', name: 'Galil AR', category: 'rifle', side: 'T', price: '$1800', emoji: '🎯',
+          description: 'T 方廉价步枪，射速快，价格低廉。适合经济局使用。',
+          stats: { damage: '30', fireRate: '666 RPM', mag: '35', reload: '3.0s' },
+          tips: ['T 方经济局首选', '价格低廉', '弹匣容量大'] },
+        { id: 'w21', name: 'FAMAS', category: 'rifle', side: 'CT', price: '$2050', emoji: '🎯',
+          description: 'CT 方廉价步枪，射速快，价格适中。适合经济局使用。',
+          stats: { damage: '30', fireRate: '666 RPM', mag: '25', reload: '3.3s' },
+          tips: ['CT 方经济局首选', '价格适中', '射速快'] },
+        { id: 'w22', name: 'SG 553', category: 'rifle', side: 'T', price: '$3000', emoji: '🎯',
+          description: 'T 方步枪，可开镜瞄准。开镜后精度极高，适合中远距离作战。',
+          stats: { damage: '30', fireRate: '545 RPM', mag: '30', reload: '2.8s' },
+          tips: ['可开镜瞄准', '开镜后精度极高', '价格较高'] },
+        { id: 'w23', name: 'AUG', category: 'rifle', side: 'CT', price: '$3300', emoji: '🎯',
+          description: 'CT 方步枪，可开镜瞄准。开镜后精度极高，适合中远距离作战。',
+          stats: { damage: '28', fireRate: '666 RPM', mag: '30', reload: '3.8s' },
+          tips: ['可开镜瞄准', '开镜后精度极高', '价格较高'] },
+        { id: 'w24', name: 'AWP', category: 'sniper', side: '通用', price: '$4750', emoji: '🎯',
+          description: 'CS 最经典的狙击枪，躯干一枪致死（无论有无护甲）。价格昂贵，但威力极大。是狙击手的主力武器。',
+          stats: { damage: '115', fireRate: '41 RPM', mag: '10', reload: '3.7s' },
+          tips: ['躯干一枪致死', '价格昂贵', '移动精度极低，需要站定射击'] },
+        { id: 'w25', name: 'SSG 08', category: 'sniper', side: '通用', price: '$1700', emoji: '🎯',
+          description: 'Scout 狙击枪，价格低廉。爆头一枪致死，是经济局的常见选择。',
+          stats: { damage: '88', fireRate: '48 RPM', mag: '10', reload: '3.7s' },
+          tips: ['经济局狙击首选', '爆头一枪致死', '价格低廉'] },
+        { id: 'w26', name: 'SCAR-20', category: 'sniper', side: 'CT', price: '$5000', emoji: '🎯',
+          description: 'CT 方自动狙击枪，射速快，但伤害略低于 AWP。',
+          stats: { damage: '80', fireRate: '快速', mag: '20', reload: '3.7s' },
+          tips: ['自动狙击枪', '射速快', '价格昂贵'] },
+        { id: 'w27', name: 'G3SG1', category: 'sniper', side: 'T', price: '$5000', emoji: '🎯',
+          description: 'T 方自动狙击枪，射速快，但伤害略低于 AWP。',
+          stats: { damage: '80', fireRate: '快速', mag: '20', reload: '4.7s' },
+          tips: ['自动狙击枪', '射速快', '价格昂贵'] },
+        { id: 'w28', name: 'Nova', category: 'shotgun', side: '通用', price: '$1050', emoji: '💥',
+          description: '廉价霰弹枪，近距离威力大。适合经济局和近距离埋伏。',
+          stats: { damage: '高', fireRate: '68 RPM', mag: '8', reload: '0.5s/发' },
+          tips: ['近距离威力大', '价格低廉', '适合埋伏'] },
+        { id: 'w29', name: 'XM1014', category: 'shotgun', side: '通用', price: '$2000', emoji: '💥',
+          description: '自动霰弹枪，射速快，弹匣容量 7 发。适合近距离压制。',
+          stats: { damage: '高', fireRate: '171 RPM', mag: '7', reload: '0.5s/发' },
+          tips: ['自动霰弹枪', '射速快', '适合近距离压制'] },
+        { id: 'w30', name: 'MAG-7', category: 'shotgun', side: 'CT', price: '$1300', emoji: '💥',
+          description: 'CT 方霰弹枪，弹匣容量 5 发，近距离威力大。',
+          stats: { damage: '高', fireRate: '80 RPM', mag: '5', reload: '2.8s' },
+          tips: ['CT 方近距离利器', '弹匣容量较小', '适合埋伏'] },
+        { id: 'w31', name: 'Sawed-Off', category: 'shotgun', side: 'T', price: '$1100', emoji: '💥',
+          description: 'T 方霰弹枪，近距离威力大，但精度低。',
+          stats: { damage: '高', fireRate: '80 RPM', mag: '7', reload: '0.5s/发' },
+          tips: ['T 方近距离利器', '精度低', '适合 Rush'] },
+        { id: 'w32', name: 'M249', category: 'mg', side: '通用', price: '$5200', emoji: '⚙️',
+          description: '弹匣容量 100 发的机枪，射速快，但价格昂贵、移动速度慢。',
+          stats: { damage: '32', fireRate: '750 RPM', mag: '100', reload: '5.7s' },
+          tips: ['弹匣容量极大', '价格昂贵', '移动速度慢'] },
+        { id: 'w33', name: 'Negev', category: 'mg', side: '通用', price: '$1700', emoji: '⚙️',
+          description: '弹匣容量 150 发的机枪，射速极快。开火后会逐渐提高精度。',
+          stats: { damage: '35', fireRate: '800 RPM', mag: '150', reload: '5.7s' },
+          tips: ['弹匣容量极大', '射速极快', '开火后精度逐渐提高'] },
+        { id: 'w34', name: 'Kevlar Vest', category: 'gear', side: '通用', price: '$650', emoji: '🛡️',
+          description: '防弹衣，减少受到的伤害。是每回合必买的基础装备。',
+          stats: { protection: '减少伤害', durability: '100', price: '$650' },
+          tips: ['每回合必买', '减少受到的伤害', '与头盔一起购买更佳'] },
+        { id: 'w35', name: 'Kevlar + Helmet', category: 'gear', side: '通用', price: '$1000', emoji: '🛡️',
+          description: '防弹衣 + 头盔，减少受到的伤害并防止爆头一枪致死。',
+          stats: { protection: '减少伤害 + 防爆头', durability: '100', price: '$1000' },
+          tips: ['防爆头一枪致死', '对抗 AK-47 必备', '每回合优先购买'] },
+        { id: 'w36', name: 'Defuse Kit', category: 'gear', side: 'CT', price: '$400', emoji: '🧰',
+          description: 'CT 方专属装备，拆包时间从 10 秒缩短到 5 秒。是 CT 方防守的核心装备。',
+          stats: { effect: '拆包时间减半', price: '$400' },
+          tips: ['拆包时间从 10 秒缩短到 5 秒', 'CT 方防守核心装备', '每回合建议至少 2 人购买'] },
+        { id: 'w37', name: 'Zeus x27', category: 'gear', side: '通用', price: '$200', emoji: '⚡',
+          description: '电击枪，近距离一枪致死。每回合只能使用一次。',
+          stats: { damage: '致死', range: '近距离', price: '$200' },
+          tips: ['近距离一枪致死', '每回合只能使用一次', '适合埋伏和残局'] }
+    ];
+
+    // ============ 状态 ============
+    var currentModule = 'items';
+    var currentCategory = 'all';
+    var currentMap = 'mirage';
+    var currentArea = 'all';
+    var currentSearch = '';
+    var searchMode = 'and';
+    var favorites = loadFavorites();
+    var currentTactic = 'all';
+    var currentTeamFilter = 'all';
+    var currentWeaponCat = 'all';
+    var isInitialLoad = true;
+
+    // ============ DOM 引用 ============
+    function $(id) { return document.getElementById(id); }
+    var mainSwitch = $('mainSwitch');
+    var moduleItems = $('module-items');
+    var modulePoints = $('module-points');
+    var moduleTactics = $('module-tactics');
+    var moduleTeams = $('module-teams');
+    var moduleMaps = $('module-maps');
+    var moduleWeapons = $('module-weapons');
+    var itemCategoryTabs = $('itemCategoryTabs');
+    var itemsGrid = $('itemsGrid');
+    var mapTabs = $('mapTabs');
+    var areaTabs = $('areaTabs');
+    var pointsGrid = $('pointsGrid');
+    var tacticsTabs = $('tacticsTabs');
+    var tacticsGrid = $('tacticsGrid');
+    var teamTabs = $('teamTabs');
+    var teamsGrid = $('teamsGrid');
+    var mapsGrid = $('mapsGrid');
+    var weaponCategoryTabs = $('weaponCategoryTabs');
+    var weaponsGrid = $('weaponsGrid');
+    var searchInput = $('searchInput');
+    var searchBtn = $('searchBtn');
+    var searchClearBtn = $('searchClearBtn');
+    var searchModeEl = $('searchMode');
+    var searchHint = $('searchHint');
+    var searchHintText = $('searchHintText');
+    var detailOverlay = $('detailOverlay');
+    var detailPanel = $('detailPanel');
+    var backTop = $('backTop');
+    var footerStats = $('footerStats');
+    var exportFavBtn = $('exportFavBtn');
+    var importFavBtn = $('importFavBtn');
+    var importFileInput = $('importFileInput');
+
+    // ============ 收藏 ============
+    function loadFavorites() {
+        try {
+            var saved = localStorage.getItem('cs2_fav_points_v2');
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) { return []; }
+    }
+    function saveFavorites() {
+        try { localStorage.setItem('cs2_fav_points_v2', JSON.stringify(favorites)); } catch (e) {}
+    }
+    function isFaved(id) { return favorites.indexOf(id) > -1; }
+    function toggleFav(id) {
+        var idx = favorites.indexOf(id);
+        if (idx > -1) { favorites.splice(idx, 1); } else { favorites.push(id); }
+        saveFavorites();
+        updateFooterStats();
+        return isFaved(id);
+    }
+
+    // ============ 工具函数 ============
+    function matchKeywords(haystacks, query, mode) {
+        mode = mode || searchMode || 'and';
+        var q = String(query || '').replace(/\s+/g, '').toLowerCase();
+        if (q === '') return true;
+        var words = String(query || '').trim().split(/\s+/).filter(function(w) { return w !== ''; });
+        if (words.length === 0) return true;
+        var hay = '';
+        for (var j = 0; j < haystacks.length; j++) {
+            var h = haystacks[j];
+            if (h) hay += String(h).replace(/\s+/g, '').toLowerCase();
+        }
+        if (mode === 'or') {
+            return words.some(function(word) { return hay.indexOf(word) > -1; });
+        } else {
+            return words.every(function(word) { return hay.indexOf(word) > -1; });
+        }
+    }
+    function highlight(text, query) {
+        var t = String(text || '');
+        var q = String(query || '').trim();
+        if (q === '') return t;
+        var words = q.split(/\s+/).map(function(w) { return w.replace(/\s+/g, ''); }).filter(function(w) { return w !== ''; });
+        if (words.length === 0) return t;
+        words.sort(function(a, b) { return b.length - a.length; });
+        var escaped = words.map(function(w) { return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+        var re = new RegExp('(' + escaped.join('|') + ')', 'gi');
+        return t.replace(re, '<mark class="kw">$1</mark>');
+    }
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ============ 模块切换 ============
+    mainSwitch.addEventListener('click', function(e) {
+        var btn = e.target.closest('.switch-btn');
+        if (!btn) return;
+        currentModule = btn.dataset.module;
+        document.querySelectorAll('.switch-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.module === currentModule);
+        });
+        moduleItems.classList.toggle('active', currentModule === 'items');
+        modulePoints.classList.toggle('active', currentModule === 'points');
+        moduleTactics.classList.toggle('active', currentModule === 'tactics');
+        moduleTeams.classList.toggle('active', currentModule === 'teams');
+        moduleMaps.classList.toggle('active', currentModule === 'maps');
+        moduleWeapons.classList.toggle('active', currentModule === 'weapons');
+        hideSearchHint();
+        if (currentModule === 'items') renderItems();
+        else if (currentModule === 'points') renderPoints();
+        else if (currentModule === 'tactics') renderTactics();
+        else if (currentModule === 'teams') renderTeams();
+        else if (currentModule === 'maps') renderMaps();
+        else if (currentModule === 'weapons') renderWeapons();
+        updateBackTopVisibility();
+    });
+
+    // ============ 道具渲染 ============
+    function renderItems() {
+        var list = itemsData.filter(function(it) {
+            var cm = currentCategory === 'all' || it.category === currentCategory;
+            var sm = matchKeywords([it.name, it.description, it.usage, it.side], currentSearch, searchMode);
+            return cm && sm;
+        });
+        if (list.length === 0) {
+            itemsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🔍</div><h3>没有找到匹配的道具</h3><p>尝试更换关键词或切换分类</p></div>';
+        } else {
+            var html = '';
+            list.forEach(function(it) {
+                var statsHTML = '';
+                var lm = { damage: '伤害', radius: '半径', fuse: '引信', duration: '持续' };
+                for (var k in it.stats) {
+                    if (it.stats.hasOwnProperty(k)) {
+                        statsHTML += '<div class="stat-item"><span class="stat-label">' + (lm[k] || k) + '</span><span class="stat-value">' + it.stats[k] + '</span></div>';
+                    }
+                }
+                html += '<div class="item-card" data-item-id="' + it.id + '">' +
+                    '<span class="card-hint">点击查看详情</span>' +
+                    '<div class="card-header">' +
+                    '<div class="item-name"><span class="item-emoji">' + it.emoji + '</span>' + highlight(it.name, currentSearch) + '</div>' +
+                    '<div class="item-price">' + it.price + '</div>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                    '<div class="description">' + highlight(it.description, currentSearch) + '</div>' +
+                    '<div class="stats">' + statsHTML + '</div>' +
+                    '<div class="meta-row"><span class="difficulty" style="color:#9bb5d4;">⚔️ ' + it.usage + '</span></div>' +
+                    '</div></div>';
+            });
+            itemsGrid.innerHTML = html;
+        }
+        animateCards(itemsGrid);
+        updateCategoryCounts();
+    }
+
+    // ============ 地图标签 ============
+    function renderMapTabs() {
+        var html = '';
+        var mapOrder = ['mirage', 'dust2', 'inferno', 'nuke', 'anubis', 'vertigo', 'ancient'];
+        mapOrder.forEach(function(k) {
+            if (mapsData.hasOwnProperty(k)) {
+                var m = mapsData[k];
+                var active = k === currentMap ? ' active' : '';
+                var count = getFilteredPointsForMap(k);
+                var zero = count === 0 ? ' map-count-zero' : '';
+                html += '<button class="filter-btn' + active + '" data-map="' + k + '"><span class="emoji">' + m.emoji + '</span> ' + m.name + ' <span class="map-count' + zero + '">' + count + '</span></button>';
+            }
+        });
+        mapTabs.innerHTML = html;
+    }
+    function getFilteredPointsForMap(mapKey) {
+        var m = mapsData[mapKey];
+        if (!m) return 0;
+        return m.points.filter(function(p) {
+            return matchKeywords([p.name, p.description, p.area, typeName[p.type], p.throw, p.standPos, p.aimPos], currentSearch, searchMode);
+        }).length;
+    }
+
+    // ============ 区域标签 ============
+    function renderAreaTabs() {
+        var map = mapsData[currentMap];
+        if (!map) return;
+        var areas = ['all'];
+        map.points.forEach(function(p) { if (areas.indexOf(p.area) === -1) areas.push(p.area); });
+        var html = '';
+        html += '<button class="sub-btn ' + (currentArea === 'all' ? 'active' : '') + '" data-area="all">全部区域</button>';
+        html += '<button class="sub-btn ' + (currentArea === 'fav' ? 'active' : '') + '" data-area="fav"><span class="fav-star">⭐</span> 收藏 (' + favorites.length + ')</button>';
+        html += '<button class="sub-btn ' + (currentArea === 'side-T' ? 'active' : '') + '" data-area="side-T">🟠 T 方</button>';
+        html += '<button class="sub-btn ' + (currentArea === 'side-CT' ? 'active' : '') + '" data-area="side-CT">🔵 CT 方</button>';
+        areas.forEach(function(a) {
+            if (a === 'all') return;
+            html += '<button class="sub-btn ' + (currentArea === a ? 'active' : '') + '" data-area="' + a + '">' + a + '</button>';
+        });
+        areaTabs.innerHTML = html;
+    }
+
+    function getFilteredPoints(map) {
+        if (!map) return [];
+        return map.points.filter(function(p) {
+            var am;
+            if (currentArea === 'all') { am = true; }
+            else if (currentArea === 'side-T') { am = p.side === 'T'; }
+            else if (currentArea === 'side-CT') { am = p.side === 'CT'; }
+            else if (currentArea === 'fav') { am = isFaved(p.id); }
+            else { am = p.area === currentArea; }
+            var sm = matchKeywords([p.name, p.description, p.area, typeName[p.type], p.throw, p.standPos, p.aimPos], currentSearch, searchMode);
+            return am && sm;
+        });
+    }
+
+    // ============ 点位渲染 ============
+    function renderPoints() {
+        var map = mapsData[currentMap];
+        if (!map) return;
+        var list = getFilteredPoints(map);
+        if (list.length === 0) {
+            var emptyMsg = currentArea === 'fav' ? '暂无收藏点位，点击卡片上的 ⭐ 进行收藏' : '没有找到匹配的点位';
+            pointsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🔍</div><h3>' + emptyMsg + '</h3><p>尝试更换关键词或切换区域</p></div>';
+        } else {
+            var html = '';
+            list.forEach(function(p) {
+                var sideLabel = p.side === 'T' ? 'T 方' : 'CT 方';
+                var typeLabel = typeName[p.type] || p.type;
+                var emoji = typeEmoji[p.type] || '🎯';
+                var favClass = isFaved(p.id) ? ' faved' : '';
+                var favSymbol = isFaved(p.id) ? '⭐' : '☆';
+                html += '<div class="item-card point-card" data-point-id="' + p.id + '">' +
+                    '<span class="card-hint">点击查看详情</span>' +
+                    '<div class="card-header">' +
+                    '<div class="item-name"><span class="item-emoji">' + emoji + '</span>' + highlight(p.name, currentSearch) + '</div>' +
+                    '<button class="fav-btn' + favClass + '" data-fav-id="' + p.id + '" title="收藏">' + favSymbol + '</button>' +
+                    '<span class="side-badge ' + p.side + '">' + sideLabel + '</span>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                    '<span class="area-tag">📍 ' + p.area + ' · ' + typeLabel + '</span>' +
+                    '<div class="description">' + highlight(p.description, currentSearch) + '</div>' +
+                    '<div class="meta-row">' +
+                    '<span class="difficulty diff-' + p.difficulty + '">● 难度：' + p.difficulty + '</span>' +
+                    '<span class="throw-type">' + p.throw + '</span>' +
+                    '</div></div></div>';
+            });
+            pointsGrid.innerHTML = html;
+        }
+        animateCards(pointsGrid);
+        pointsGrid.querySelectorAll('.fav-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var id = btn.getAttribute('data-fav-id');
+                var isNowFaved = toggleFav(id);
+                btn.classList.toggle('faved', isNowFaved);
+                btn.textContent = isNowFaved ? '⭐' : '☆';
+                btn.title = isNowFaved ? '取消收藏' : '收藏';
+                btn.classList.add('pop');
+                setTimeout(function() { btn.classList.remove('pop'); }, 300);
+                renderAreaTabs();
+                if (currentArea === 'fav') {
+                    renderPoints();
+                    renderMapTabs();
+                }
+            });
+        });
+    }
+
+    // ============ 战术渲染 ============
+    function renderTactics() {
+        if (!tacticsGrid) return;
+        var list = tacticsData.filter(function(t) {
+            var cm = currentTactic === 'all' || t.category === currentTactic;
+            var sm = matchKeywords([t.title, t.description, (t.points || []).join(' '), t.map, t.team, (t.tags || []).join(' ')], currentSearch, searchMode);
+            return cm && sm;
+        });
+        if (list.length === 0) {
+            tacticsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🔍</div><h3>没有找到匹配的战术</h3><p>尝试更换关键词或切换分类</p></div>';
+            return;
+        }
+        var html = '';
+        list.forEach(function(t) {
+            var tagsHTML = (t.tags || []).map(function(tag) {
+                return '<span class="tag">' + escapeHtml(tag) + '</span>';
+            }).join('');
+            if (t.map) tagsHTML += '<span class="tag map">📍 ' + escapeHtml(t.map) + '</span>';
+            if (t.team) tagsHTML += '<span class="tag team">' + escapeHtml(t.team) + '</span>';
+            var pointsHTML = '';
+            if (t.points && t.points.length) {
+                pointsHTML = '<div class="tactic-points"><h4>核心要点</h4><ul>';
+                t.points.forEach(function(pt) { pointsHTML += '<li>' + escapeHtml(pt) + '</li>'; });
+                pointsHTML += '</ul></div>';
+            }
+            html += '<div class="tactic-card">' +
+                '<div class="card-header">' +
+                '<div class="item-name"><span class="item-emoji">' + (t.icon || '📖') + '</span>' + highlight(t.title, currentSearch) + '</div>' +
+                '</div>' +
+                '<div class="card-body">' +
+                '<div class="tactic-meta">' + tagsHTML + '</div>' +
+                '<div class="description">' + highlight(t.description, currentSearch) + '</div>' +
+                pointsHTML +
+                '</div></div>';
+        });
+        tacticsGrid.innerHTML = html;
+        animateCards(tacticsGrid);
+    }
+
+    if (tacticsTabs) {
+        tacticsTabs.addEventListener('click', function(e) {
+            var btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            currentTactic = btn.dataset.tactic;
+            tacticsTabs.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.tactic === currentTactic);
+            });
+            renderTactics();
+            hideSearchHint();
+        });
+    }
+
+    // ============ 战队渲染 ============
+    function renderTeams() {
+        if (!teamTabs || !teamsGrid) return;
+        var tabsHtml = '<button class="filter-btn ' + (currentTeamFilter === 'all' ? 'active' : '') + '" data-team="all"><span class="emoji">🏆</span> 全部战队</button>';
+        teamsData.forEach(function(t) {
+            tabsHtml += '<button class="filter-btn ' + (currentTeamFilter === t.id ? 'active' : '') + '" data-team="' + t.id + '"><span class="emoji">' + t.logo + '</span> ' + t.name + '</button>';
+        });
+        teamTabs.innerHTML = tabsHtml;
+
+        var list = teamsData.filter(function(t) {
+            if (currentTeamFilter !== 'all' && t.id !== currentTeamFilter) return false;
+            return matchKeywords([t.name, t.style, (t.players || []).map(function(p) { return p.id + ' ' + p.name + ' ' + p.role + ' ' + p.desc; }).join(' ')], currentSearch, searchMode);
+        });
+
+        if (list.length === 0) {
+            teamsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🏆</div><h3>没有找到匹配的战队</h3><p>尝试更换关键词或切换战队</p></div>';
+            return;
+        }
+
+        var html = '';
+        list.forEach(function(team) {
+            var playersHtml = '';
+            team.players.forEach(function(p) {
+                var settingsHtml = p.settings ? '<div class="player-settings">设置：<span>' + escapeHtml(p.settings) + '</span></div>' : '';
+                playersHtml += '<div class="player-card">' +
+                    '<div class="player-name">' + escapeHtml(p.id) + '</div>' +
+                    '<div class="player-id">' + escapeHtml(p.name) + '</div>' +
+                    '<span class="player-role">' + escapeHtml(p.role) + '</span>' +
+                    '<div class="player-desc">' + escapeHtml(p.desc) + '</div>' +
+                    settingsHtml +
+                    '</div>';
+            });
+            html += '<div class="team-card">' +
+                '<div class="team-header">' +
+                '<span class="team-logo">' + team.logo + '</span>' +
+                '<div class="team-info">' +
+                '<h2>' + escapeHtml(team.name) + ' <span class="rank-badge">世界第 ' + team.rank + '</span> <span class="region-tag">' + escapeHtml(team.region) + '</span></h2>' +
+                '</div>' +
+                '</div>' +
+                '<div class="team-style">' + team.style + '</div>' +
+                '<div class="players-grid">' + playersHtml + '</div>' +
+                '</div>';
+        });
+        teamsGrid.innerHTML = html;
+    }
+
+    if (teamTabs) {
+        teamTabs.addEventListener('click', function(e) {
+            var btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            currentTeamFilter = btn.dataset.team;
+            renderTeams();
+        });
+    }
+
+    // ============ 地图介绍渲染 ============
+    function renderMaps() {
+        if (!mapsGrid) return;
+        var list = mapIntroData.filter(function(m) {
+            return matchKeywords([m.name, m.en, m.description, (m.tags || []).join(' '), (m.sections || []).map(function(s) { return s.title + ' ' + (s.items || []).join(' '); }).join(' ')], currentSearch, searchMode);
+        });
+        if (list.length === 0) {
+            mapsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🔍</div><h3>没有找到匹配的地图</h3><p>尝试更换关键词</p></div>';
+            return;
+        }
+        var html = '';
+        list.forEach(function(m) {
+            var tagsHTML = (m.tags || []).map(function(tag) {
+                return '<span class="tag">' + escapeHtml(tag) + '</span>';
+            }).join('');
+            var sectionsHTML = '';
+            (m.sections || []).forEach(function(s) {
+                var itemsHTML = (s.items || []).map(function(item) {
+                    return '<li>' + escapeHtml(item) + '</li>';
+                }).join('');
+                sectionsHTML += '<div class="map-section"><h4>' + escapeHtml(s.title) + '</h4><ul>' + itemsHTML + '</ul></div>';
+            });
+            html += '<div class="map-intro-card">' +
+                '<div class="map-banner">' +
+                '<span class="map-icon">' + m.icon + '</span>' +
+                '<div class="map-title">' +
+                '<h2>' + escapeHtml(m.name) + '</h2>' +
+                '<div class="map-sub">' + escapeHtml(m.en) + '</div>' +
+                '</div>' +
+                '<div class="map-tags">' + tagsHTML + '</div>' +
+                '</div>' +
+                '<div class="map-body">' +
+                '<div class="map-desc">' + highlight(m.description, currentSearch) + '</div>' +
+                '<div class="map-grid">' + sectionsHTML + '</div>' +
+                '</div></div>';
+        });
+        mapsGrid.innerHTML = html;
+    }
+
+    // ============ 武器渲染（修复） ============
+    function renderWeapons() {
+        if (!weaponsGrid) return;
+        var list = weaponsData.filter(function(w) {
+            var cm = currentWeaponCat === 'all' || w.category === currentWeaponCat;
+            var sm = matchKeywords([w.name, w.description, w.side, (w.tips || []).join(' ')], currentSearch, searchMode);
+            return cm && sm;
+        });
+        if (list.length === 0) {
+            weaponsGrid.innerHTML = '<div class="empty-state"><div class="big-icon">🔫</div><h3>没有找到匹配的武器</h3><p>尝试更换关键词或切换分类</p></div>';
+            return;
+        }
+        var html = '';
+        list.forEach(function(w) {
+            var statsHTML = '';
+            var lm = { damage: '伤害', fireRate: '射速', mag: '弹匣', reload: '换弹', protection: '防护', durability: '耐久', effect: '效果', range: '射程', price: '价格' };
+            for (var k in w.stats) {
+                if (w.stats.hasOwnProperty(k)) {
+                    statsHTML += '<div class="weapon-stat"><span class="k">' + (lm[k] || k) + '</span><span class="v">' + w.stats[k] + '</span></div>';
+                }
+            }
+            var sideClass = w.side === 'T' ? 'T' : (w.side === 'CT' ? 'CT' : 'both');
+            html += '<div class="weapon-card" data-weapon-id="' + w.id + '">' +
+                '<span class="card-hint">点击查看详情</span>' +
+                '<div class="card-header">' +
+                '<div class="item-name"><span class="item-emoji">' + w.emoji + '</span>' + highlight(w.name, currentSearch) + '</div>' +
+                '<span class="side-badge ' + sideClass + '">' + w.side + '</span>' +
+                '<span class="weapon-price">' + w.price + '</span>' +
+                '</div>' +
+                '<div class="card-body">' +
+                '<div class="description">' + highlight(w.description, currentSearch) + '</div>' +
+                '<div class="weapon-stats">' + statsHTML + '</div>' +
+                '</div></div>';
+        });
+        weaponsGrid.innerHTML = html;
+        animateCards(weaponsGrid);
+    }
+
+    if (weaponCategoryTabs) {
+        weaponCategoryTabs.addEventListener('click', function(e) {
+            var btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            currentWeaponCat = btn.dataset.wcat;
+            weaponCategoryTabs.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.wcat === currentWeaponCat);
+            });
+            renderWeapons();
+            hideSearchHint();
+        });
+    }
+
+    // ============ 卡片动画 ============
+    function animateCards(container) {
+        var cards = container.querySelectorAll('.item-card, .tactic-card, .weapon-card');
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            cards.forEach(function(card) { observer.observe(card); });
+        } else {
+            cards.forEach(function(card) { card.classList.add('visible'); });
+        }
+    }
+
+    // ============ 详情面板 ============
+    function findPoint(id) {
+        for (var mk in mapsData) {
+            if (!mapsData.hasOwnProperty(mk)) continue;
+            var pts = mapsData[mk].points;
+            for (var i = 0; i < pts.length; i++) {
+                if (pts[i].id === id) return pts[i];
+            }
+        }
+        return null;
+    }
+    function findItem(id) {
+        for (var i = 0; i < itemsData.length; i++) {
+            if (itemsData[i].id === Number(id)) return itemsData[i];
+        }
+        return null;
+    }
+    function findWeapon(id) {
+        for (var i = 0; i < weaponsData.length; i++) {
+            if (weaponsData[i].id === id) return weaponsData[i];
+        }
+        return null;
+    }
+
+    function openPointDetail(id) {
+        var p = findPoint(id);
+        if (!p) return;
+        var overlay = detailOverlay;
+        var panel = detailPanel;
+        if (!overlay || !panel) return;
+        var typeLabel = typeName[p.type] || p.type;
+        var emoji = typeEmoji[p.type] || '🎯';
+        var sideLabel = p.side === 'T' ? 'T 方' : 'CT 方';
+        var favClass = isFaved(p.id) ? ' faved' : '';
+        var favSymbol = isFaved(p.id) ? '⭐' : '☆';
+        var tipsHTML = '';
+        if (p.tips && p.tips.length) {
+            tipsHTML = '<div class="info-block"><h3><span class="ico">💡</span>小贴士</h3><ul>';
+            p.tips.forEach(function(t) { tipsHTML += '<li>' + escapeHtml(t) + '</li>'; });
+            tipsHTML += '</ul></div>';
+        }
+        panel.innerHTML =
+            '<div class="detail-head">' +
+            '<div class="detail-title">' +
+            '<span class="item-emoji">' + emoji + '</span>' +
+            '<div><h2>' + escapeHtml(p.name) + '</h2>' +
+            '<div class="detail-sub">' +
+            '<span class="side-badge ' + p.side + '">' + sideLabel + '</span>' +
+            '<span class="area-tag">📍 ' + escapeHtml(p.area) + ' · ' + typeLabel + '</span>' +
+            '<span class="difficulty diff-' + p.difficulty + '">● 难度：' + p.difficulty + '</span>' +
+            '<span class="throw-type">' + escapeHtml(p.throw) + '</span>' +
+            '</div></div></div>' +
+            '<div class="detail-action-btns">' +
+            '<button id="detailFavBtn" class="fav-btn' + favClass + '" title="收藏">' + favSymbol + '</button>' +
+            '<button id="detailCopyLinkBtn" title="复制链接">🔗</button>' +
+            '<button id="detailCopyCmdBtn" title="复制投掷指令">📋</button>' +
+            '<button class="detail-close" id="detailCloseBtn">✕</button>' +
+            '</div></div>' +
+            '<div class="detail-body">' +
+            '<div class="detail-meta-grid">' +
+            '<div class="meta-chip"><span class="k">阵营</span><span class="v">' + sideLabel + '</span></div>' +
+            '<div class="meta-chip"><span class="k">道具</span><span class="v">' + typeLabel + '</span></div>' +
+            '<div class="meta-chip"><span class="k">难度</span><span class="v">' + p.difficulty + '</span></div>' +
+            '<div class="meta-chip"><span class="k">投掷方式</span><span class="v">' + escapeHtml(p.throw) + '</span></div>' +
+            '</div>' +
+            '<div class="info-block"><h3><span class="ico">📖</span>点位说明</h3><p>' + escapeHtml(p.description) + '</p></div>' +
+            (p.standPos ? '<div class="info-block"><h3><span class="ico">🧍</span>站位</h3><p>' + escapeHtml(p.standPos) + '</p></div>' : '') +
+            (p.aimPos ? '<div class="info-block"><h3><span class="ico">🎯</span>瞄准点</h3><p>' + escapeHtml(p.aimPos) + '</p></div>' : '') +
+            tipsHTML +
+            '</div>';
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        history.replaceState(null, '', '#point-' + p.id);
+        var cb = $('detailCloseBtn');
+        if (cb) cb.addEventListener('click', closeDetail);
+        var fb = $('detailFavBtn');
+        if (fb) {
+            fb.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isNowFaved = toggleFav(p.id);
+                fb.classList.toggle('faved', isNowFaved);
+                fb.textContent = isNowFaved ? '⭐' : '☆';
+                fb.title = isNowFaved ? '取消收藏' : '收藏';
+                fb.classList.add('pop');
+                setTimeout(function() { fb.classList.remove('pop'); }, 300);
+                renderAreaTabs();
+                renderPoints();
+                renderMapTabs();
+            });
+        }
+        var copyLinkBtn = $('detailCopyLinkBtn');
+        if (copyLinkBtn) copyLinkBtn.addEventListener('click', function() { copyLink(p.id); });
+        var copyCmdBtn = $('detailCopyCmdBtn');
+        if (copyCmdBtn) copyCmdBtn.addEventListener('click', function() { copyPointInstruction(p); });
+    }
+
+    function openItemDetail(id) {
+        var it = findItem(id);
+        if (!it) return;
+        var overlay = detailOverlay;
+        var panel = detailPanel;
+        if (!overlay || !panel) return;
+        var statsHTML = '';
+        var lm = { damage: '伤害', radius: '半径', fuse: '引信', duration: '持续' };
+        for (var k in it.stats) {
+            if (it.stats.hasOwnProperty(k)) {
+                statsHTML += '<div class="meta-chip"><span class="k">' + (lm[k] || k) + '</span><span class="v">' + it.stats[k] + '</span></div>';
+            }
+        }
+        var tipsHTML = '';
+        if (it.tips && it.tips.length) {
+            tipsHTML = '<div class="info-block"><h3><span class="ico">💡</span>使用技巧</h3><ul>';
+            it.tips.forEach(function(t) { tipsHTML += '<li>' + escapeHtml(t) + '</li>'; });
+            tipsHTML += '</ul></div>';
+        }
+        panel.innerHTML =
+            '<div class="detail-head">' +
+            '<div class="detail-title">' +
+            '<span class="item-emoji">' + it.emoji + '</span>' +
+            '<div><h2>' + escapeHtml(it.name) + '</h2>' +
+            '<div class="detail-sub">' +
+            '<span class="side-badge ' + (it.side === 'T 专属' ? 'T' : (it.side === 'CT 专属' ? 'CT' : 'both')) + '">' + escapeHtml(it.side) + '</span>' +
+            '<span class="item-price" style="font-size:1rem;">' + it.price + '</span>' +
+            '</div></div></div>' +
+            '<button class="detail-close" id="detailCloseBtn">✕</button>' +
+            '</div>' +
+            '<div class="detail-body">' +
+            '<div class="detail-meta-grid">' + statsHTML + '</div>' +
+            '<div class="info-block"><h3><span class="ico">📖</span>道具说明</h3><p>' + escapeHtml(it.description) + '</p></div>' +
+            '<div class="info-block"><h3><span class="ico">⚔️</span>使用场景</h3><p>' + escapeHtml(it.usage) + '</p></div>' +
+            tipsHTML +
+            '</div>';
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        history.replaceState(null, '', '#item-' + it.id);
+        var cb = $('detailCloseBtn');
+        if (cb) cb.addEventListener('click', closeDetail);
+    }
+
+    // ============ 武器详情（修复） ============
+    function openWeaponDetail(id) {
+        var w = findWeapon(id);
+        if (!w) return;
+        var overlay = detailOverlay;
+        var panel = detailPanel;
+        if (!overlay || !panel) return;
+        var statsHTML = '';
+        var lm = { damage: '伤害', fireRate: '射速', mag: '弹匣', reload: '换弹', protection: '防护', durability: '耐久', effect: '效果', range: '射程', price: '价格' };
+        for (var k in w.stats) {
+            if (w.stats.hasOwnProperty(k)) {
+                statsHTML += '<div class="meta-chip"><span class="k">' + (lm[k] || k) + '</span><span class="v">' + w.stats[k] + '</span></div>';
+            }
+        }
+        var tipsHTML = '';
+        if (w.tips && w.tips.length) {
+            tipsHTML = '<div class="info-block"><h3><span class="ico">💡</span>使用技巧</h3><ul>';
+            w.tips.forEach(function(t) { tipsHTML += '<li>' + escapeHtml(t) + '</li>'; });
+            tipsHTML += '</ul></div>';
+        }
+        var sideClass = w.side === 'T' ? 'T' : (w.side === 'CT' ? 'CT' : 'both');
+        var catMap = { pistol: '手枪', smg: '冲锋枪', rifle: '步枪', sniper: '狙击枪', shotgun: '霰弹枪', mg: '机枪', gear: '装备' };
+        panel.innerHTML =
+            '<div class="detail-head">' +
+            '<div class="detail-title">' +
+            '<span class="item-emoji">' + w.emoji + '</span>' +
+            '<div><h2>' + escapeHtml(w.name) + '</h2>' +
+            '<div class="detail-sub">' +
+            '<span class="side-badge ' + sideClass + '">' + escapeHtml(w.side) + '</span>' +
+            '<span class="area-tag">' + (catMap[w.category] || w.category) + '</span>' +
+            '<span class="item-price" style="font-size:1rem;">' + w.price + '</span>' +
+            '</div></div></div>' +
+            '<button class="detail-close" id="detailCloseBtn">✕</button>' +
+            '</div>' +
+            '<div class="detail-body">' +
+            '<div class="detail-meta-grid">' + statsHTML + '</div>' +
+            '<div class="info-block"><h3><span class="ico">📖</span>武器说明</h3><p>' + escapeHtml(w.description) + '</p></div>' +
+            tipsHTML +
+            '</div>';
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        history.replaceState(null, '', '#weapon-' + w.id);
+        var cb = $('detailCloseBtn');
+        if (cb) cb.addEventListener('click', closeDetail);
+    }
+
+    function closeDetail() {
+        if (detailOverlay) detailOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
+    // ============ 复制功能 ============
+    function copyLink(id) {
+        var url = window.location.href.split('#')[0] + '#point-' + id;
+        navigator.clipboard.writeText(url).then(function() {
+            alert('链接已复制到剪贴板');
+        }).catch(function() {
+            prompt('复制失败，请手动复制：', url);
+        });
+    }
+    function copyPointInstruction(p) {
+        var text = '【' + p.name + '】\n' +
+            '阵营：' + (p.side === 'T' ? 'T 方' : 'CT 方') + '\n' +
+            '道具：' + (typeName[p.type] || p.type) + '\n' +
+            '难度：' + p.difficulty + '\n' +
+            '投掷：' + p.throw + '\n' +
+            '站位：' + (p.standPos || '无') + '\n' +
+            '瞄准点：' + (p.aimPos || '无') + '\n' +
+            '说明：' + p.description;
+        navigator.clipboard.writeText(text).then(function() {
+            alert('投掷指令已复制到剪贴板');
+        }).catch(function() {
+            prompt('复制失败，请手动复制：', text);
+        });
+    }
+
+    // ============ 事件绑定 ============
+    itemsGrid.addEventListener('click', function(e) {
+        var card = e.target.closest('.item-card');
+        if (!card) return;
+        var id = card.getAttribute('data-item-id');
+        if (id) openItemDetail(id);
+    });
+    pointsGrid.addEventListener('click', function(e) {
+        var favBtn = e.target.closest('.fav-btn');
+        if (favBtn) return;
+        var card = e.target.closest('.point-card');
+        if (!card) return;
+        openPointDetail(card.getAttribute('data-point-id'));
+    });
+    // 武器卡片点击（新增）
+    if (weaponsGrid) {
+        weaponsGrid.addEventListener('click', function(e) {
+            var card = e.target.closest('.weapon-card');
+            if (!card) return;
+            openWeaponDetail(card.getAttribute('data-weapon-id'));
+        });
+    }
+    detailOverlay.addEventListener('click', function(e) {
+        if (e.target === this) closeDetail();
+    });
+       document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            // 优先关闭游戏（游戏打开时）
+            if (gameOverlay && gameOverlay.classList.contains('active')) {
+                closeGame();
+            } else {
+                closeDetail();
+            }
+        }
+    });
+    mapTabs.addEventListener('click', function(e) {
+        var btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        currentMap = btn.dataset.map;
+        currentArea = 'all';
+        renderMapTabs();
+        renderAreaTabs();
+        renderPoints();
+        hideSearchHint();
+        updateBackTopVisibility();
+    });
+    areaTabs.addEventListener('click', function(e) {
+        var btn = e.target.closest('.sub-btn');
+        if (!btn) return;
+        currentArea = btn.dataset.area;
+        renderAreaTabs();
+        renderPoints();
+    });
+    itemCategoryTabs.addEventListener('click', function(e) {
+        var btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        currentCategory = btn.dataset.category;
+        itemCategoryTabs.querySelectorAll('.filter-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.category === currentCategory);
+        });
+        renderItems();
+        hideSearchHint();
+    });
+    searchModeEl.addEventListener('click', function(e) {
+        var btn = e.target.closest('.mode-btn');
+        if (!btn) return;
+        searchMode = btn.dataset.mode;
+        searchModeEl.querySelectorAll('.mode-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.mode === searchMode);
+        });
+        refreshAll();
+    });
+
+    var debounceTimer;
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+            currentSearch = e.target.value;
+            refreshAll();
+        }, 300);
+    });
+    searchBtn.addEventListener('click', function() {
+        currentSearch = searchInput.value;
+        refreshAll();
+    });
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            currentSearch = searchInput.value;
+            refreshAll();
+        }
+    });
+    searchClearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        currentSearch = '';
+        refreshAll();
+        searchInput.focus();
+    });
+
+    function updateClearBtnVisibility() {
+        if (searchInput.value.length > 0) {
+            searchClearBtn.classList.add('visible');
+        } else {
+            searchClearBtn.classList.remove('visible');
+        }
+    }
+
+    function refreshAll() {
+        updateClearBtnVisibility();
+        updateSearchHint();
+        if (currentModule === 'items') renderItems();
+        else if (currentModule === 'points') { renderMapTabs(); renderAreaTabs(); renderPoints(); }
+        else if (currentModule === 'tactics') renderTactics();
+        else if (currentModule === 'teams') renderTeams();
+        else if (currentModule === 'maps') renderMaps();
+        else if (currentModule === 'weapons') renderWeapons();
+    }
+
+    function updateSearchHint() {
+        if (currentSearch.trim() === '') {
+            hideSearchHint();
+            return;
+        }
+        var modules = ['items', 'points', 'tactics', 'teams', 'maps', 'weapons'];
+        var nameMap = { items: '道具图鉴', points: '投掷点位', tactics: '战术百科', teams: '战队选手', maps: '地图介绍', weapons: '武器介绍' };
+        var bestModule = null, bestCount = 0;
+        modules.forEach(function(m) {
+            if (m === currentModule) return;
+            var c = getOtherModuleMatchCount(m, currentSearch);
+            if (c > bestCount) { bestCount = c; bestModule = m; }
+        });
+        if (bestModule && bestCount > 0) {
+            searchHintText.textContent = '在' + nameMap[bestModule] + '模块中找到 ' + bestCount + ' 个匹配结果，点击切换查看';
+            searchHint.classList.add('visible');
+            searchHint.setAttribute('data-target', bestModule);
+        } else {
+            hideSearchHint();
+        }
+    }
+
+    function getOtherModuleMatchCount(module, query) {
+        var count = 0;
+        if (module === 'items') {
+            itemsData.forEach(function(it) {
+                if (matchKeywords([it.name, it.description, it.usage, it.side], query, searchMode)) count++;
+            });
+        } else if (module === 'points') {
+            for (var k in mapsData) {
+                if (!mapsData.hasOwnProperty(k)) continue;
+                mapsData[k].points.forEach(function(p) {
+                    if (matchKeywords([p.name, p.description, p.area, typeName[p.type], p.throw, p.standPos, p.aimPos], query, searchMode)) count++;
+                });
+            }
+        } else if (module === 'tactics') {
+            tacticsData.forEach(function(t) {
+                if (matchKeywords([t.title, t.description, (t.points || []).join(' '), t.map, t.team, (t.tags || []).join(' ')], query, searchMode)) count++;
+            });
+        } else if (module === 'teams') {
+            teamsData.forEach(function(t) {
+                if (matchKeywords([t.name, t.style, (t.players || []).map(function(p) { return p.id + ' ' + p.name + ' ' + p.role + ' ' + p.desc; }).join(' ')], query, searchMode)) count++;
+            });
+        } else if (module === 'maps') {
+            mapIntroData.forEach(function(m) {
+                if (matchKeywords([m.name, m.en, m.description, (m.tags || []).join(' '), (m.sections || []).map(function(s) { return s.title + ' ' + (s.items || []).join(' '); }).join(' ')], query, searchMode)) count++;
+            });
+        } else if (module === 'weapons') {
+            weaponsData.forEach(function(w) {
+                if (matchKeywords([w.name, w.description, w.side, (w.tips || []).join(' ')], query, searchMode)) count++;
+            });
+        }
+        return count;
+    }
+
+    function hideSearchHint() {
+        searchHint.classList.remove('visible');
+    }
+
+    searchHint.addEventListener('click', function() {
+        var target = searchHint.getAttribute('data-target');
+        if (!target) return;
+        currentModule = target;
+        document.querySelectorAll('.switch-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.module === currentModule);
+        });
+        moduleItems.classList.toggle('active', currentModule === 'items');
+        modulePoints.classList.toggle('active', currentModule === 'points');
+        moduleTactics.classList.toggle('active', currentModule === 'tactics');
+        moduleTeams.classList.toggle('active', currentModule === 'teams');
+        moduleMaps.classList.toggle('active', currentModule === 'maps');
+        moduleWeapons.classList.toggle('active', currentModule === 'weapons');
+        hideSearchHint();
+        if (currentModule === 'items') {
+            currentCategory = 'all';
+            itemCategoryTabs.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.category === 'all');
+            });
+            renderItems();
+        } else if (currentModule === 'points') { renderMapTabs(); renderAreaTabs(); renderPoints(); }
+        else if (currentModule === 'tactics') renderTactics();
+        else if (currentModule === 'teams') renderTeams();
+        else if (currentModule === 'maps') renderMaps();
+        else if (currentModule === 'weapons') renderWeapons();
+        updateBackTopVisibility();
+    });
+
+    // ============ 收藏导出/导入 ============
+    exportFavBtn.addEventListener('click', function() {
+        var data = JSON.stringify(favorites, null, 2);
+        var blob = new Blob([data], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'cs2-favorites.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    importFavBtn.addEventListener('click', function() {
+        importFileInput.click();
+    });
+    importFileInput.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var imported = JSON.parse(ev.target.result);
+                if (Array.isArray(imported)) {
+                    favorites = imported.filter(function(id) { return typeof id === 'string'; });
+                    saveFavorites();
+                    renderAreaTabs();
+                    renderPoints();
+                    renderMapTabs();
+                    updateFooterStats();
+                    alert('收藏导入成功！');
+                } else {
+                    alert('文件格式不正确');
+                }
+            } catch (err) {
+                alert('导入失败：文件不是有效的 JSON');
+            }
+        };
+        reader.readAsText(file);
+        importFileInput.value = '';
+    });
+
+    // ============ 回到顶部 ============
+    function updateBackTopVisibility() {
+        if (window.scrollY > 300) {
+            backTop.classList.add('visible');
+        } else {
+            backTop.classList.remove('visible');
+        }
+    }
+    window.addEventListener('scroll', updateBackTopVisibility, { passive: true });
+    backTop.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ============ 页脚统计 ============
+    function updateFooterStats() {
+        var mapCount = 0, total = 0;
+        for (var k in mapsData) {
+            if (mapsData.hasOwnProperty(k)) {
+                mapCount++;
+                total += mapsData[k].points.length;
+            }
+        }
+        if (footerStats) {
+            footerStats.textContent = '⚡ ' + mapCount + ' 图 · ' + total + ' 点位 · ' + tacticsData.length + ' 战术 · ' + teamsData.length + ' 战队 · ' + mapIntroData.length + ' 地图 · ' + weaponsData.length + ' 武器';
+        }
+    }
+
+    // ============ 分类计数 ============
+    function updateCategoryCounts() {
+        var counts = {};
+        var filteredItems = itemsData.filter(function(it) {
+            return matchKeywords([it.name, it.description, it.usage, it.side], currentSearch, searchMode);
+        });
+        counts.all = filteredItems.length;
+        ['grenade', 'smoke', 'flash', 'molotov', 'decoy'].forEach(function(cat) {
+            counts[cat] = filteredItems.filter(function(it) { return it.category === cat; }).length;
+        });
+        document.querySelectorAll('#itemCategoryTabs .filter-btn').forEach(function(btn) {
+            var cat = btn.dataset.category;
+            var countEl = btn.querySelector('.map-count');
+            if (countEl) {
+                countEl.textContent = counts[cat] !== undefined ? counts[cat] : 0;
+            } else {
+                btn.insertAdjacentHTML('beforeend', '<span class="map-count">' + (counts[cat] !== undefined ? counts[cat] : 0) + '</span>');
+            }
+        });
+    }
+    // ============ 小游戏开关 ============
+    var gameBtn = $('gameBtn');
+    var gameOverlay = $('gameOverlay');
+    var gameFrame = $('gameFrame');
+    var gameCloseBtn = $('gameCloseBtn');
+
+    function openGame() {
+    if (!gameOverlay || !gameFrame) return;
+    // ★ 每次打开都重新加载，避免 about:blank 残留导致黑屏
+    gameFrame.src = 'blackout.html';
+    gameOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    // iframe 内聚焦，让键盘操作直接生效
+    setTimeout(function() { try { gameFrame.focus(); } catch (e) {} }, 100);
+}
+
+function closeGame() {
+    if (!gameOverlay) return;
+    gameOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    // 清空 src，终止游戏循环，释放资源
+    if (gameFrame) gameFrame.src = 'about:blank';
+}
+
+    if (gameBtn) gameBtn.addEventListener('click', openGame);
+    if (gameCloseBtn) gameCloseBtn.addEventListener('click', closeGame);
+    if (gameOverlay) {
+        gameOverlay.addEventListener('click', function(e) {
+            if (e.target === gameOverlay) closeGame();
+        });
+    }
+
+    // ============ 初始化 ============
+    function init() {
+        document.querySelectorAll('#itemCategoryTabs .filter-btn').forEach(function(btn) {
+            if (!btn.querySelector('.map-count')) {
+                btn.insertAdjacentHTML('beforeend', '<span class="map-count">0</span>');
+            }
+        });
+        renderItems();
+        renderMapTabs();
+        renderAreaTabs();
+        renderPoints();
+        renderTactics();
+        renderTeams();
+        renderMaps();
+        renderWeapons();
+        updateFooterStats();
+        updateCategoryCounts();
+        updateClearBtnVisibility();
+        updateBackTopVisibility();
+        var hash = location.hash;
+        if (hash.startsWith('#point-')) {
+            var id = hash.replace('#point-', '');
+            if (findPoint(id)) {
+                setTimeout(function() { openPointDetail(id); }, 100);
+            }
+        } else if (hash.startsWith('#item-')) {
+            var itemId = hash.replace('#item-', '');
+            if (findItem(itemId)) {
+                setTimeout(function() { openItemDetail(itemId); }, 100);
+            }
+        } else if (hash.startsWith('#weapon-')) {
+            var wid = hash.replace('#weapon-', '');
+            if (findWeapon(wid)) {
+                setTimeout(function() { openWeaponDetail(wid); }, 100);
+            }
+        }
+        isInitialLoad = false;
+    }
+
+    init();
+
+    window.addEventListener('hashchange', function() {
+        if (isInitialLoad) return;
+        var hash = location.hash;
+        if (hash.startsWith('#point-')) {
+            var id = hash.replace('#point-', '');
+            if (findPoint(id) && !detailOverlay.classList.contains('active')) {
+                openPointDetail(id);
+            }
+        } else if (hash.startsWith('#item-')) {
+            var itemId = hash.replace('#item-', '');
+            if (findItem(itemId) && !detailOverlay.classList.contains('active')) {
+                openItemDetail(itemId);
+            }
+        } else if (hash.startsWith('#weapon-')) {
+            var wid = hash.replace('#weapon-', '');
+            if (findWeapon(wid) && !detailOverlay.classList.contains('active')) {
+                openWeaponDetail(wid);
+            }
+        } else {
+            if (detailOverlay.classList.contains('active')) closeDetail();
+        }
+    });
+
+})();
+</script>
+</body>
+</html>

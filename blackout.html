@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>BLACKOUT 战术行动</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { width: 100%; height: 100%; overflow: hidden; background: #0d0f13; position: fixed; top: 0; left: 0; }
+  body { width: 100%; height: 100%; overflow: hidden; background: #0d0f13; touch-action: none; position: fixed; top: 0; left: 0; font-family: 'Noto Sans SC', sans-serif; color: #c8ccd4; cursor: none; user-select: none; -webkit-user-select: none; }
+  #game { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+  .hidden { display: none !important; }
+  #vignette, #damage-flash, #pickup-flash { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+  #damage-flash { z-index: 5; background: radial-gradient(ellipse at center, transparent 45%, rgba(180,30,30,0.55) 100%); opacity: 0; transition: opacity 0.35s ease-out; }
+  #damage-flash.show { opacity: 1; transition: none; }
+  #pickup-flash { z-index: 6; background: radial-gradient(ellipse at center, rgba(255,184,0,0.3) 0%, transparent 60%); opacity: 0; transition: opacity 0.5s ease-out; }
+  #pickup-flash.show { opacity: 1; transition: none; }
+  #vignette { z-index: 4; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.7) 100%); }
+  #hud { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; }
+  .hud-top { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 16px; gap: 8px; }
+  .hud-top > div { background: rgba(15,17,22,0.88); border-left: 3px solid #d4a017; padding: 5px 14px 6px; min-width: 90px; backdrop-filter: blur(6px); }
+  .hud-top .right { border-left: none; border-right: 3px solid #c41e3a; text-align: right; }
+  .hud-top .center { border-left: none; border-bottom: 2px solid #4a6a8a; text-align: center; }
+  .hud-top .center .value { color: #6a8aaa; }
+  .hud-top .mat { border-left: none; border-bottom: 2px solid #d4a017; text-align: center; }
+  .hud-top .mat .value { color: #d4a017; }
+  .label { font-size: 9px; letter-spacing: 0.2em; color: #6b7280; font-weight: 700; }
+  .value { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: #e4b041; margin-top: 1px; line-height: 1; }
+  .value.danger { color: #ff5252; }
+  .value.info { color: #6a8aaa; }
+  .hud-bl { position: absolute; bottom: 18px; left: 16px; width: 340px; }
+  .level-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .lvl-text { font-weight: 900; font-size: 13px; color: #ffb800; letter-spacing: 0.1em; }
+  .lvl-text span { font-family: 'JetBrains Mono'; font-size: 16px; }
+  .xp-text { font-family: 'JetBrains Mono'; font-size: 10px; color: #8a7a40; }
+  .xp-bar { height: 5px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,184,0,0.3); margin-bottom: 6px; overflow: hidden; }
+  .xp-fill { height: 100%; background: linear-gradient(90deg, #ff8800, #ffb800, #ffd84a); width: 0%; transition: width 0.2s ease; }
+  .stamina-block { background: rgba(15,17,22,0.88); border-left: 3px solid #4a90e2; padding: 6px 12px; margin-bottom: 6px; backdrop-filter: blur(6px); }
+  .stamina-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .stamina-text { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 11px; color: #4a90e2; }
+  .stamina-bar { height: 8px; background: rgba(0,0,0,0.7); border: 1px solid rgba(74,144,226,0.4); overflow: hidden; position: relative; }
+  .stamina-fill { height: 100%; background: linear-gradient(90deg, #1a4a7a, #4a90e2, #6ab0ff); width: 100%; transition: width 0.15s ease; box-shadow: inset 0 0 6px rgba(106,176,255,0.5); }
+  .armor-block { background: rgba(15,17,22,0.88); border-left: 3px solid #a8b8c8; padding: 6px 12px; margin-bottom: 6px; backdrop-filter: blur(6px); }
+  .armor-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .armor-text { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 11px; color: #a8b8c8; }
+  .armor-bar { height: 8px; background: rgba(0,0,0,0.7); border: 1px solid rgba(168,184,200,0.4); overflow: hidden; position: relative; }
+  .armor-fill { height: 100%; background: linear-gradient(90deg, #5a7a9a, #a8b8c8, #d8e0e8); width: 0%; transition: width 0.2s ease; box-shadow: inset 0 0 6px rgba(216,224,232,0.5); }
+  .hp-block { background: rgba(15,17,22,0.88); border-left: 3px solid #c41e3a; padding: 8px 12px; backdrop-filter: blur(6px); }
+  .hp-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .hp-text { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: #ff5252; }
+  .hp-bar { height: 12px; background: rgba(0,0,0,0.7); border: 1px solid rgba(196,30,58,0.4); overflow: hidden; position: relative; }
+  .hp-fill { height: 100%; background: linear-gradient(90deg, #6b0e1e, #c41e3a, #e23636); width: 100%; transition: width 0.2s ease; }
+  .hp-tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.4); }
+  .skills-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; max-width: 340px; }
+  .skill-chip { background: rgba(15,17,22,0.88); border: 1px solid #4a6a8a; padding: 2px 7px; font-size: 10px; color: #6a8aaa; letter-spacing: 0.05em; font-family: 'JetBrains Mono'; position: relative; overflow: hidden; min-width: 70px; text-align: center; transition: opacity 0.2s, border-color 0.2s; }
+  .skill-chip.epic { border-color: #8a4aaa; color: #b347d9; }
+  .skill-chip.legendary { border-color: #ffb800; color: #ffb800; }
+  .skill-chip.rare { border-color: #4a90e2; color: #4a90e2; }
+  .skill-chip.cooling { opacity: 0.4; filter: grayscale(0.6); }
+  .skill-chip .cd-bar { position: absolute; bottom: 0; left: 0; height: 2px; background: currentColor; }
+  .skill-chip .cd-timer { position: absolute; top: 1px; right: 3px; font-size: 8px; opacity: 0.8; }
+  .hud-br { position: absolute; bottom: 18px; right: 16px; }
+  .weapon-block { background: rgba(15,17,22,0.88); border-right: 3px solid #d4a017; padding: 10px 16px; text-align: right; min-width: 280px; position: relative; backdrop-filter: blur(6px); }
+  .weapon-name { font-weight: 900; font-size: 17px; color: #e4b041; letter-spacing: 0.05em; }
+  .weapon-upgrades { font-size: 11px; color: #6b7280; margin-top: 2px; font-family: 'JetBrains Mono'; }
+  .weapon-stats-block { margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a3342; font-family: 'JetBrains Mono'; font-size: 11px; line-height: 1.6; }
+  .weapon-stat-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .weapon-stat-row .stat-name { color: #6b7280; }
+  .weapon-stat-row .stat-val { color: #c8ccd4; }
+  .weapon-stat-row .stat-val .stat-base { color: #4a5568; }
+  .weapon-stat-row .stat-val .stat-arrow { color: #4a5568; margin: 0 3px; }
+  .weapon-stat-row .stat-val .stat-final { color: #ffb800; font-weight: 700; }
+  .weapon-stat-row .stat-val .stat-buffed { color: #4ad45a; font-weight: 700; }
+  .weapon-stat-row .stat-val .stat-nerfed { color: #ff5252; font-weight: 700; }
+  .ammo { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 26px; margin-top: 4px; color: #f0d060; line-height: 1; }
+  .ammo-sep { color: #4a4030; margin: 0 4px; font-weight: 400; }
+  .ammo-low { color: #ff5252; }
+  .ammo-infinite { color: #b347d9; font-size: 22px; }
+  .ammo-melee { color: #cccccc; font-size: 18px; }
+  .charge-bar { height: 4px; background: rgba(0,0,0,0.7); border: 1px solid rgba(0,255,204,0.4); margin-top: 4px; overflow: hidden; }
+  .charge-fill { height: 100%; background: linear-gradient(90deg, #00ffcc, #00ff88); width: 0%; }
+  .reload-hint { position: absolute; top: -20px; right: 4px; font-size: 10px; letter-spacing: 0.2em; color: #ff7a18; font-weight: 700; opacity: 0; transition: opacity 0.15s; }
+  .reload-hint.show { opacity: 1; animation: blink 0.5s infinite alternate; }
+  @keyframes blink { to { opacity: 0.3; } }
+  .weapon-switch-hint { position: absolute; top: -20px; left: 4px; font-size: 10px; letter-spacing: 0.05em; color: #6a8aaa; font-weight: 700; }
+  .weapon-slots-hud { display: flex; gap: 5px; margin-top: 10px; justify-content: flex-end; flex-wrap: wrap; max-width: 280px; }
+  .wslot { width: 44px; height: 44px; border: 1px solid #3a4357; background: rgba(0,0,0,0.5); font-family: 'JetBrains Mono'; font-size: 11px; display: flex; align-items: center; justify-content: center; color: #6b7280; position: relative; }
+  .wslot .key-hint { position: absolute; bottom: 2px; left: 4px; font-size: 9px; color: #4a5568; font-weight: 700; }
+  .wslot.active { border-color: #d4a017; color: #d4a017; box-shadow: 0 0 8px rgba(212,160,23,0.5); }
+  .wslot.active .key-hint { color: #d4a017; }
+  .wslot.knife { border-color: #6a6a6a; color: #aaa; }
+  .wslot.knife.active { border-color: #ffffff; color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.6); }
+  .wslot .tier { position: absolute; top: -4px; right: -4px; background: #d4a017; color: #0d0f13; font-size: 8px; font-weight: 900; padding: 0 3px; border-radius: 2px; }
+  .wslot.empty { opacity: 0.35; }
+  #killfeed { position: absolute; top: 80px; right: 16px; z-index: 11; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+  .kill-item { background: rgba(15,17,22,0.88); border-right: 2px solid #d4a017; padding: 3px 10px; font-family: 'JetBrains Mono'; font-size: 11px; color: #e4b041; animation: killSlide 0.3s ease-out; }
+  @keyframes killSlide { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .kill-item.fade { animation: killFade 0.5s ease-out forwards; }
+  @keyframes killFade { to { opacity: 0; transform: translateX(40px); } }
+  #crate-hint { position: absolute; top: 80px; left: 16px; z-index: 11; pointer-events: none; display: flex; flex-direction: column; gap: 3px; }
+  #pause-btn { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 12; pointer-events: auto; display: none; }
+  #pause-btn.active { display: block; }
+  #pause-btn button { background: rgba(15,17,22,0.88); border: 1px solid #4a6a8a; color: #6a8aaa; width: 36px; height: 36px; font-size: 14px; cursor: pointer; font-family: 'Noto Sans SC'; }
+  #pause-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 25; background: rgba(8,10,14,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: default; }
+  .pause-content { text-align: center; }
+  .pause-title { font-size: 48px; font-weight: 900; color: #d4a017; letter-spacing: 0.1em; margin-bottom: 20px; }
+  .pause-btn-row { display: flex; gap: 12px; justify-content: center; }
+  #levelup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 30; background: rgba(8,10,14,0.82); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: default; padding: 20px; }
+  .lv-header { text-align: center; margin-bottom: 24px; }
+  .lv-tag { font-size: 12px; letter-spacing: 0.4em; color: #ff7a18; font-weight: 700; }
+  .lv-title { font-size: 42px; font-weight: 900; color: #ffb800; letter-spacing: 0.05em; text-shadow: 0 0 20px rgba(255,184,0,0.4); line-height: 1.1; margin-top: 4px; }
+  .lv-sub { font-family: 'JetBrains Mono'; font-size: 12px; color: #6b7280; margin-top: 6px; }
+  .upgrade-cards { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+  .upgrade-card { width: 200px; height: 290px; background: linear-gradient(180deg, #1c1f26 0%, #15171c 100%); border: 1px solid #2a2e38; border-top: 3px solid #4a4a4a; padding: 18px 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s ease; position: relative; overflow: hidden; }
+  .upgrade-card:hover { transform: translateY(-6px); border-color: #ffb800; box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(255,184,0,0.15); }
+  .upgrade-card.common { border-top-color: #8a92a6; }
+  .upgrade-card.rare { border-top-color: #4a90e2; }
+  .upgrade-card.epic { border-top-color: #b347d9; }
+  .upgrade-card.legendary { border-top-color: #ffb800; }
+  .uc-rarity { font-size: 10px; letter-spacing: 0.3em; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; }
+  .upgrade-card.common .uc-rarity { color: #8a92a6; }
+  .upgrade-card.rare .uc-rarity { color: #4a90e2; }
+  .upgrade-card.epic .uc-rarity { color: #b347d9; }
+  .upgrade-card.legendary .uc-rarity { color: #ffb800; }
+  .uc-icon { width: 64px; height: 64px; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono'; font-size: 20px; font-weight: 700; margin-bottom: 12px; transform: rotate(45deg); }
+  .uc-icon > span { transform: rotate(-45deg); }
+  .upgrade-card.common .uc-icon { color: #8a92a6; }
+  .upgrade-card.rare .uc-icon { color: #4a90e2; }
+  .upgrade-card.epic .uc-icon { color: #b347d9; }
+  .upgrade-card.legendary .uc-icon { color: #ffb800; }
+  .uc-name { font-size: 15px; font-weight: 900; color: #e8eaed; letter-spacing: 0.05em; margin-bottom: 8px; line-height: 1.2; }
+  .uc-desc { font-size: 12px; color: #9aa0a8; line-height: 1.4; flex-grow: 1; }
+  .uc-desc .neg { color: #ff5252; }
+  .uc-desc .pos { color: #4ad45a; }
+  .uc-stack { font-family: 'JetBrains Mono'; font-size: 10px; color: #6b7280; margin-top: 8px; letter-spacing: 0.1em; }
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; background: radial-gradient(ellipse at 25% 30%, rgba(212,160,23,0.08) 0%, transparent 50%), radial-gradient(ellipse at 75% 70%, rgba(196,30,58,0.06) 0%, transparent 50%), radial-gradient(ellipse at center, rgba(15,17,22,0.92) 0%, rgba(8,10,14,0.98) 70%); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: default; padding: 20px; }
+  .menu-content { text-align: center; padding: 30px; max-width: 600px; }
+  .title-bar { width: 50px; height: 3px; background: #d4a017; margin: 0 auto 18px; }
+  .game-title { font-size: 76px; font-weight: 900; line-height: 0.9; letter-spacing: 0.04em; color: #e8eaed; }
+  .game-title span { color: #d4a017; text-shadow: 0 0 24px rgba(212,160,23,0.5); display: block; }
+  .game-sub { font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.3em; color: #6b7280; margin-top: 12px; }
+  .controls-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 24px auto; max-width: 480px; }
+  .ctrl { display: flex; align-items: center; gap: 10px; padding: 7px 12px; background: rgba(212,160,23,0.04); border-left: 2px solid rgba(212,160,23,0.3); }
+  .ctrl kbd { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 10px; background: rgba(212,160,23,0.08); border: 1px solid rgba(212,160,23,0.3); padding: 3px 9px; color: #d4a017; letter-spacing: 0.1em; min-width: 64px; text-align: center; }
+  .ctrl span { font-size: 12px; color: #9aa0a8; }
+  .cta-btn { font-family: 'Noto Sans SC'; font-weight: 900; font-size: 16px; letter-spacing: 0.18em; background: transparent; color: #d4a017; border: 2px solid #d4a017; padding: 14px 44px; cursor: pointer; position: relative; overflow: hidden; transition: color 0.3s, box-shadow 0.3s; margin-top: 4px; }
+  .cta-btn::before { content: ''; position: absolute; inset: 0; background: #d4a017; transform: translateX(-101%); transition: transform 0.3s ease; z-index: 0; }
+  .cta-btn > span { position: relative; z-index: 1; }
+  .cta-btn:hover { color: #0d0f13; box-shadow: 0 0 30px rgba(212,160,23,0.4); }
+  .cta-btn:hover::before { transform: translateX(0); }
+  .cta-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .hint { margin-top: 18px; font-size: 12px; color: #4b5563; }
+  .over-title { font-size: 64px; font-weight: 900; color: #c41e3a; letter-spacing: 0.05em; text-shadow: 0 0 24px rgba(196,30,58,0.5); margin-bottom: 4px; }
+  .over-sub { font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.3em; color: #6b7280; margin-bottom: 26px; }
+  .stats { display: flex; flex-direction: column; gap: 5px; margin: 18px 0 24px; align-items: center; }
+  .stat { display: flex; justify-content: space-between; align-items: center; width: 340px; padding: 10px 18px; background: rgba(196,30,58,0.04); border-left: 2px solid rgba(196,30,58,0.3); }
+  .stat-label { font-size: 11px; letter-spacing: 0.18em; color: #6b7280; font-weight: 700; }
+  .stat-value { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 20px; color: #e23636; }
+  .char-select { margin: 14px 0; }
+  .char-label { font-size: 11px; letter-spacing: 0.18em; color: #888; margin-bottom: 8px; font-weight: 700; }
+  .char-list { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .char-card { width: 90px; padding: 10px 6px; background: rgba(13,12,16,0.8); border: 2px solid #333; border-radius: 6px; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .char-card:hover { border-color: #e4b041; transform: translateY(-2px); }
+  .char-card.selected { border-color: #ffd700; background: rgba(255,215,0,0.08); box-shadow: 0 0 12px rgba(255,215,0,0.3); }
+  .char-icon { font-size: 22px; font-weight: 900; margin-bottom: 2px; }
+  .char-name { font-size: 12px; font-weight: 700; color: #ddd; }
+  .char-desc { font-size: 10px; color: #777; margin-top: 3px; line-height: 1.3; }
+  .meta-section { margin: 14px 0; border-top: 1px solid #222; padding-top: 14px; }
+  .meta-points { font-size: 13px; color: #ffd700; margin-bottom: 8px; font-weight: 700; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 340px; margin: 0 auto; }
+  .meta-card { padding: 8px; background: rgba(13,12,16,0.8); border: 1px solid #333; border-radius: 5px; cursor: pointer; font-size: 11px; }
+  .meta-card:hover:not(.locked):not(.owned) { border-color: #ffd700; }
+  .meta-card.owned { border-color: #4ad45a; opacity: 0.6; }
+  .meta-card.locked { opacity: 0.4; }
+  .meta-name { font-weight: 700; color: #ddd; }
+  .meta-cost { color: #ffd700; font-size: 10px; }
+  .meta-desc { color: #777; font-size: 10px; margin-top: 2px; }
+  #mobile-ui { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15; pointer-events: none; display: none; }
+  #mobile-ui.active { display: block; }
+  .joystick-base { position: absolute; width: 120px; height: 120px; border: 2px solid rgba(212,160,23,0.35); border-radius: 50%; background: rgba(15,17,22,0.25); pointer-events: none; }
+  .joystick-stick { position: absolute; width: 50px; height: 50px; border: 2px solid rgba(212,160,23,0.8); background: rgba(212,160,23,0.3); border-radius: 50%; pointer-events: none; }
+  .joystick-base.right { border-color: rgba(196,30,58,0.35); }
+  .joystick-stick.right { border-color: rgba(196,30,58,0.8); background: rgba(196,30,58,0.3); }
+  #reload-mobile { position: absolute; bottom: 160px; right: 16px; width: 56px; height: 56px; background: rgba(15,17,22,0.85); border: 2px solid #d4a017; color: #d4a017; font-weight: 900; font-size: 11px; border-radius: 50%; pointer-events: auto; cursor: pointer; font-family: 'Noto Sans SC'; }
+  #switch-mobile { position: absolute; bottom: 160px; left: 16px; width: 56px; height: 56px; background: rgba(15,17,22,0.85); border: 2px solid #4a6a8a; color: #6a8aaa; font-weight: 900; font-size: 11px; border-radius: 50%; pointer-events: auto; cursor: pointer; font-family: 'Noto Sans SC'; }
+  #knife-mobile { position: absolute; bottom: 220px; left: 16px; width: 56px; height: 56px; background: rgba(15,17,22,0.85); border: 2px solid #aaaaaa; color: #cccccc; font-weight: 900; font-size: 11px; border-radius: 50%; pointer-events: auto; cursor: pointer; font-family: 'Noto Sans SC'; }
+  #dash-mobile { position: absolute; bottom: 100px; left: 80px; width: 50px; height: 50px; background: rgba(15,17,22,0.85); border: 2px solid #4a90e2; color: #4a90e2; font-weight: 900; font-size: 10px; border-radius: 50%; pointer-events: auto; cursor: pointer; font-family: 'Noto Sans SC'; }
+  #shop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 35; background: radial-gradient(ellipse at center, rgba(15,17,22,0.96) 0%, rgba(8,10,14,0.99) 70%); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; cursor: default; gap: 16px; overflow-y: auto; }
+  .shop-header { text-align: center; }
+  .shop-wave { font-size: 12px; letter-spacing: 0.4em; color: #ff7a18; font-weight: 700; }
+  .shop-title { font-size: 36px; font-weight: 900; color: #d4a017; letter-spacing: 0.05em; text-shadow: 0 0 20px rgba(212,160,23,0.4); }
+  .shop-materials { font-family: 'JetBrains Mono'; font-size: 16px; color: #4ad45a; margin-top: 4px; }
+  .shop-grid { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+  .shop-item { width: 180px; height: 250px; background: linear-gradient(180deg, #1c1f26 0%, #15171c 100%); border: 1px solid #2a2e38; border-top: 3px solid #4a4a4a; padding: 14px 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s ease; position: relative; }
+  .shop-item:hover { transform: translateY(-4px); border-color: #ffb800; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+  .shop-item.disabled { opacity: 0.35; cursor: not-allowed; }
+  .shop-item.disabled:hover { transform: none; border-color: #2a2e38; }
+  .shop-item.locked { border-color: #ffb800; box-shadow: 0 0 16px rgba(255,184,0,0.3); }
+  .shop-item.weapon { border-top-color: #d4a017; }
+  .shop-item.skill { border-top-color: #b347d9; }
+  .shop-item.common { border-top-color: #8a92a6; }
+  .shop-item.rare { border-top-color: #4a90e2; }
+  .shop-item.epic { border-top-color: #b347d9; }
+  .shop-item.legendary { border-top-color: #ffb800; }
+  .shop-item-name { font-size: 14px; font-weight: 900; color: #e8eaed; margin-bottom: 6px; line-height: 1.2; }
+  .shop-item-icon { width: 44px; height: 44px; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono'; font-size: 12px; font-weight: 700; margin-bottom: 8px; transform: rotate(45deg); }
+  .shop-item-icon > span { transform: rotate(-45deg); }
+  .shop-item.weapon .shop-item-icon { color: #d4a017; }
+  .shop-item.skill .shop-item-icon { color: #b347d9; }
+  .shop-item.common .shop-item-icon { color: #8a92a6; }
+  .shop-item.rare .shop-item-icon { color: #4a90e2; }
+  .shop-item.epic .shop-item-icon { color: #b347d9; }
+  .shop-item.legendary .shop-item-icon { color: #ffb800; }
+  .shop-item-desc { font-size: 11px; color: #9aa0a8; line-height: 1.4; flex-grow: 1; }
+  .shop-item-desc .pos { color: #4ad45a; }
+  .shop-item-desc .neg { color: #ff5252; }
+  .shop-item-price { font-family: 'JetBrains Mono'; font-size: 16px; font-weight: 700; color: #4ad45a; margin-top: 4px; }
+  .shop-item-price.expensive { color: #ff5252; }
+  .shop-lock { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.5); border: 1px solid #3a4357; color: #6b7280; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .shop-lock:hover { border-color: #ffb800; color: #ffb800; }
+  .shop-item.locked .shop-lock { border-color: #ffb800; color: #ffb800; background: rgba(255,184,0,0.15); }
+  .shop-actions { display: flex; gap: 12px; margin-top: 8px; }
+  .shop-inventory { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+  .inv-slot { width: 90px; height: 60px; background: rgba(15,17,22,0.88); border: 1px solid #2a3342; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'JetBrains Mono'; font-size: 10px; color: #6b7280; position: relative; }
+  .inv-slot.filled { border-color: #d4a017; color: #d4a017; }
+  .inv-slot.knife { border-color: #6a6a6a; color: #aaa; }
+  .inv-slot .inv-name { font-size: 9px; font-weight: 700; }
+  .inv-slot .inv-tier { font-size: 9px; color: #ffb800; }
+  .inv-slot .inv-key { position: absolute; bottom: 2px; left: 4px; font-size: 8px; color: #4a5568; }
+  .inv-slot .inv-sell { position: absolute; top: 2px; right: 2px; background: rgba(196,30,58,0.3); border: 1px solid #c41e3a; color: #ff5252; width: 16px; height: 16px; border-radius: 50%; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .inv-slot .inv-sell:hover { background: #c41e3a; color: #fff; }
+  @media (max-width: 900px) {
+    .hud-bl { width: 220px; }
+    .weapon-block { min-width: 200px; padding: 8px 12px; }
+    .weapon-slots-hud { max-width: 200px; gap: 3px; }
+    .wslot { width: 34px; height: 34px; font-size: 9px; }
+    .wslot .key-hint { font-size: 7px; }
+    .game-title { font-size: 52px; }
+    .controls-grid { grid-template-columns: 1fr 1fr; gap: 4px; }
+    .ctrl { padding: 5px 8px; }
+    .ctrl kbd { min-width: 48px; font-size: 9px; padding: 2px 6px; }
+    .ctrl span { font-size: 10px; }
+    .upgrade-card { width: 150px; height: 230px; padding: 12px 10px; }
+    .uc-icon { width: 44px; height: 44px; font-size: 14px; }
+    .uc-name { font-size: 12px; }
+    .uc-desc { font-size: 10px; }
+    .shop-item { width: 140px; height: 210px; padding: 10px 8px; }
+    .shop-item-icon { width: 36px; height: 36px; font-size: 10px; }
+    .shop-item-name { font-size: 12px; }
+    .shop-item-desc { font-size: 10px; }
+    .shop-item-price { font-size: 13px; }
+    .inv-slot { width: 70px; height: 50px; }
+    .stat { width: 240px; }
+  }
+  @media (max-height: 500px) {
+    .menu-content { padding: 10px; }
+    .game-title { font-size: 40px; }
+    .game-sub { font-size: 9px; margin-top: 4px; }
+    .controls-grid { margin: 10px auto; }
+    .cta-btn { padding: 10px 30px; font-size: 14px; }
+    .hint { margin-top: 8px; font-size: 10px; }
+    .lv-title { font-size: 28px; }
+    .lv-header { margin-bottom: 12px; }
+    .upgrade-card { height: 180px; }
+    .uc-icon { width: 32px; height: 32px; font-size: 12px; margin-bottom: 6px; }
+    .uc-name { font-size: 11px; margin-bottom: 4px; }
+    .uc-desc { font-size: 9px; }
+    .uc-stack { font-size: 8px; margin-top: 4px; }
+    .shop-title { font-size: 24px; }
+    .shop-item { height: 170px; }
+    .shop-grid { gap: 8px; }
+    .pause-title { font-size: 32px; margin-bottom: 12px; }
+    .over-title { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="vignette"></div>
+  <div id="damage-flash"></div>
+  <div id="pickup-flash"></div>
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div><div class="label">得分</div><div class="value" id="score">0</div></div>
+      <div class="mat"><div class="label">材料</div><div class="value" id="materials">0</div></div>
+      <div class="center"><div class="label">波次</div><div class="value info" id="wave">1</div></div>
+      <div class="right"><div class="label">敌人</div><div class="value danger" id="enemies">0</div></div>
+    </div>
+    <div id="pause-btn"><button id="pause-toggle">‖</button></div>
+    <div id="killfeed"></div><div id="crate-hint"></div>
+    <div class="hud-bl">
+      <div class="level-row"><span class="lvl-text">等级 <span id="lvl">1</span></span><span class="xp-text" id="xp-text">0 / 50</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+      <div class="stamina-block">
+        <div class="stamina-label"><span class="label">体力</span><span class="stamina-text" id="stamina-text">100/100</span></div>
+        <div class="stamina-bar"><div class="stamina-fill" id="stamina-fill"></div></div>
+      </div>
+      <div class="armor-block" id="armor-block" style="display:none;">
+        <div class="armor-label"><span class="label">护甲</span><span class="armor-text" id="armor-text">0/0</span></div>
+        <div class="armor-bar"><div class="armor-fill" id="armor-fill"></div></div>
+      </div>
+      <div class="hp-block">
+        <div class="hp-label"><span class="label">生命</span><span class="hp-text" id="hp-text">100/100</span></div>
+        <div class="hp-bar"><div class="hp-fill" id="hp-fill"></div><div class="hp-tick" style="left:25%"></div><div class="hp-tick" style="left:50%"></div><div class="hp-tick" style="left:75%"></div></div>
+      </div>
+      <div class="skills-row" id="skills-row"></div>
+    </div>
+    <div class="hud-br">
+      <div class="weapon-block">
+        <div class="reload-hint" id="reload-hint">装弹中</div>
+        <div class="weapon-switch-hint">滚轮 / 1-6 切枪 · Q 切刀</div>
+        <div class="weapon-name" id="weapon-name">GLOCK-18</div>
+        <div class="weapon-upgrades" id="weapon-upgrades">等级 1 / 5</div>
+        <div class="weapon-stats-block" id="weapon-stats-block"></div>
+        <div class="weapon-slots-hud" id="weapon-slots-hud"></div>
+        <div class="ammo" id="ammo-display"><span id="ammo-mag">12</span><span class="ammo-sep">/</span><span id="ammo-mag-max">12</span></div>
+        <div class="charge-bar" id="charge-bar" style="display:none;"><div class="charge-fill" id="charge-fill"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="mobile-ui">
+    <div class="joystick-base" id="move-base" style="left:30px;bottom:30px;display:none;"></div>
+    <div class="joystick-stick" id="move-stick" style="left:65px;bottom:65px;display:none;"></div>
+    <div class="joystick-base right" id="aim-base" style="right:30px;bottom:30px;display:none;"></div>
+    <div class="joystick-stick right" id="aim-stick" style="right:65px;bottom:65px;display:none;"></div>
+    <button id="reload-mobile">装弹</button>
+    <button id="switch-mobile">换枪</button>
+    <button id="knife-mobile">小刀</button>
+    <button id="dash-mobile">冲刺</button>
+  </div>
+  <div id="pause-overlay" class="hidden">
+    <div class="pause-content">
+      <div class="pause-title">暂停</div>
+      <div class="pause-btn-row"><button class="cta-btn" id="resume-btn"><span>继续</span></button></div>
+    </div>
+  </div>
+  <div id="levelup" class="hidden">
+    <div class="lv-header">
+      <div class="lv-tag" id="lv-tag">升级</div>
+      <div class="lv-title" id="lv-title">等级 2</div>
+      <div class="lv-sub" id="lv-sub">选择一项强化部署</div>
+    </div>
+    <div class="upgrade-cards" id="upgrade-cards"></div>
+  </div>
+  <div id="skill-replace" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:30;background:rgba(8,10,14,0.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;flex-direction:column;cursor:default;padding:20px;">
+    <div class="lv-header">
+      <div class="lv-tag" style="color:#ff5252;">技能槽已满</div>
+      <div class="lv-title" style="color:#b347d9;">选择替换</div>
+      <div class="lv-sub">点击要替换掉的技能</div>
+    </div>
+    <div class="upgrade-cards" id="replace-cards"></div>
+  </div>
+  <div id="shop" class="hidden">
+    <div class="shop-header">
+      <div class="shop-wave">第 <span id="shop-wave">1</span> 波结算</div>
+      <div class="shop-title">补给站</div>
+      <div class="shop-materials">材料 <span id="shop-materials">0</span></div>
+    </div>
+    <div class="shop-grid" id="shop-grid"></div>
+    <div class="shop-actions">
+      <button id="shop-reroll" class="cta-btn"><span>刷新 $<span id="reroll-cost">5</span></span></button>
+      <button id="shop-next" class="cta-btn"><span>下一波</span></button>
+    </div>
+    <div class="shop-inventory" id="shop-inventory"></div>
+  </div>
+  <div id="menu" class="overlay">
+    <div class="menu-content">
+      <div class="title-bar"></div>
+      <h1 class="game-title">战术<span>行動</span></h1>
+      <p class="game-sub">BLACKOUT · v10.2</p>
+      <div class="controls-grid">
+        <div class="ctrl"><kbd>W A S D</kbd><span>战术移动</span></div>
+        <div class="ctrl"><kbd>鼠标</kbd><span>瞄准方向</span></div>
+        <div class="ctrl"><kbd>左键</kbd><span>开火</span></div>
+        <div class="ctrl"><kbd>R</kbd><span>装弹</span></div>
+        <div class="ctrl"><kbd>1-6</kbd><span>切换武器</span></div>
+        <div class="ctrl"><kbd>滚轮</kbd><span>循环切枪</span></div>
+        <div class="ctrl"><kbd>Q</kbd><span>切小刀</span></div>
+        <div class="ctrl"><kbd>SHIFT</kbd><span>冲刺</span></div>
+        <div class="ctrl"><kbd>ESC</kbd><span>暂停</span></div>
+        <div class="ctrl"><kbd>SPACE</kbd><span>开始游戏</span></div>
+      </div>
+      <div class="char-select">
+        <div class="char-label">选择角色</div>
+        <div class="char-list" id="char-list"></div>
+      </div>
+      <div class="meta-section">
+        <div class="meta-points">基因点：<span id="meta-gene-display">0</span></div>
+        <div class="meta-grid" id="meta-grid"></div>
+      </div>
+      <button id="start-btn" class="cta-btn"><span>出击</span></button>
+      <div class="hint">18 武器 · 19 技能 · 32 道具 · 护甲系统 · 商店购买 · 合并升级</div>
+    </div>
+  </div>
+  <div id="gameover" class="overlay hidden">
+    <div class="menu-content">
+      <h1 class="over-title">阵亡</h1>
+      <p class="over-sub">KIA · 任务失败</p>
+      <div class="stats">
+        <div class="stat"><span class="stat-label">最终得分</span><span class="stat-value" id="final-score">0</span></div>
+        <div class="stat"><span class="stat-label">抵达波次</span><span class="stat-value" id="final-wave">1</span></div>
+        <div class="stat"><span class="stat-label">角色等级</span><span class="stat-value" id="final-lvl">1</span></div>
+        <div class="stat"><span class="stat-label">总击杀</span><span class="stat-value" id="final-kills">0</span></div>
+        <div class="stat"><span class="stat-label">获得基因点</span><span class="stat-value" id="gene-earned" style="color:#ffd700">0</span></div>
+        <div class="stat"><span class="stat-label">基因点余额</span><span class="stat-value" id="gene-points-total" style="color:#ffd700">0</span></div>
+      </div>
+      <button id="restart-btn" class="cta-btn"><span>重新出击</span></button>
+    </div>
+  </div>
+
+<script>
+// ===================== 全局变量（提前声明，避免 TDZ） =====================
+var game = null;
+const $ = {}; // ★ HUD DOM 引用缓存
+
+// ===================== 元进度系统 =====================
+const Meta = {
+  data: { genePoints: 0, unlocked: {}, totalKills: 0, bestWave: 0, runs: 0 },
+  load() {
+    try {
+      const s = localStorage.getItem('blackout_meta');
+      if (s) { const d = JSON.parse(s); Object.assign(this.data, d); }
+    } catch(e) {}
+  },
+  save() {
+    try { localStorage.setItem('blackout_meta', JSON.stringify(this.data)); } catch(e) {}
+  },
+  addPoints(n) { this.data.genePoints += n; this.save(); },
+  unlock(key) {
+    const cost = META_UNLOCKS[key].cost;
+    if (this.data.genePoints >= cost && !this.data.unlocked[key]) {
+      this.data.genePoints -= cost;
+      this.data.unlocked[key] = true;
+      this.save();
+      return true;
+    }
+    return false;
+  }
+};
+Meta.load();
+
+const META_UNLOCKS = {
+  dmg5:    { name: '基因强化 I', desc: '永久 +5% 伤害', cost: 50,  apply: p => { p.damageMult *= 1.05; } },
+  hp20:    { name: '基因强化 II', desc: '永久 +20 最大生命', cost: 80, apply: p => { p.maxHp += 20; p.hp += 20; } },
+  slot:    { name: '武器扩容', desc: '永久 +1 武器槽', cost: 150, apply: p => { p.maxWeaponSlots += 1; } },
+  startwp: { name: '战备物资', desc: '开局随机获得一把 Tier1 武器', cost: 100, apply: p => { const pool = ['mp9','deagle','nova']; const k = pool[Math.floor(Math.random()*pool.length)]; p.addWeapon(k); } },
+  skill5:  { name: '神经连接', desc: '永久 +1 技能槽', cost: 120, apply: p => { p.skillSlots += 1; } },
+  crit10:  { name: '战斗直觉', desc: '永久 +10% 暴击率', cost: 100, apply: p => { p.critChance += 0.1; } }
+};
+
+const CHARACTERS = {
+  assault: { name: '突击手', icon: '突', desc: '弹匣容量 +50%', color: '#ff7755', apply: p => { p.magMult *= 1.5; p.ammo = p.effectiveMag; } },
+  sniper:  { name: '狙击手', icon: '狙', desc: '暴击率 +20%，移速 -10%', color: '#55aaff', apply: p => { p.critChance += 0.2; p.speedMult *= 0.9; } },
+  engineer:{ name: '工程兵', icon: '工', desc: '爆炸伤害 +40%', color: '#ffaa33', apply: p => { p.explosionMult = (p.explosionMult||1) * 1.4; } },
+  medic:   { name: '医疗兵', icon: '医', desc: '击杀回血 +10，每秒回 1 HP', color: '#55ff88', apply: p => { p.lifesteal += 10; p.regen += 1; } }
+};
+let selectedCharacter = 'assault';
+
+const rand = (a, b) => Math.random() * (b - a) + a;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const TAU = Math.PI * 2;
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// ===================== 优化 #2：背景缓存 =====================
+const bgCanvas = document.createElement('canvas');
+const bgCtx = bgCanvas.getContext('2d');
+function buildBackgroundCache() {
+  bgCanvas.width = canvas.width;
+  bgCanvas.height = canvas.height;
+  const size = 50;
+  bgCtx.fillStyle = '#0d0c10';
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+  bgCtx.strokeStyle = 'rgba(74,70,50,0.06)';
+  bgCtx.lineWidth = 1;
+  for (let x = 0; x < bgCanvas.width; x += size) { bgCtx.beginPath(); bgCtx.moveTo(x, 0); bgCtx.lineTo(x, bgCanvas.height); bgCtx.stroke(); }
+  for (let y = 0; y < bgCanvas.height; y += size) { bgCtx.beginPath(); bgCtx.moveTo(0, y); bgCtx.lineTo(bgCanvas.width, y); bgCtx.stroke(); }
+  bgCtx.strokeStyle = 'rgba(74,70,50,0.12)';
+  for (let x = 0; x < bgCanvas.width; x += size * 4) { bgCtx.beginPath(); bgCtx.moveTo(x, 0); bgCtx.lineTo(x, bgCanvas.height); bgCtx.stroke(); }
+  for (let y = 0; y < bgCanvas.height; y += size * 4) { bgCtx.beginPath(); bgCtx.moveTo(0, y); bgCtx.lineTo(bgCanvas.width, y); bgCtx.stroke(); }
+}
+
+// ===================== 优化 #3：空间分区 =====================
+const SPATIAL_CELL = 100;
+function getCellKeys(x, y) {
+  return Math.floor(x / SPATIAL_CELL) + '_' + Math.floor(y / SPATIAL_CELL);
+}
+function buildEnemyGrid() {
+  game.enemyGrid = new Map();
+  for (const e of game.enemies) {
+    if (e.dead) continue;
+    const key = getCellKeys(e.x, e.y);
+    if (!game.enemyGrid.has(key)) game.enemyGrid.set(key, []);
+    game.enemyGrid.get(key).push(e);
+  }
+}
+function enemiesNear(x, y, range) {
+  const r = Math.ceil(range / SPATIAL_CELL);
+  const cx = Math.floor(x / SPATIAL_CELL), cy = Math.floor(y / SPATIAL_CELL);
+  const out = [];
+  for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
+    const arr = game.enemyGrid.get((cx+dx) + '_' + (cy+dy));
+    if (arr) for (const e of arr) out.push(e);
+  }
+  return out;
+}
+
+function getViewportSize() {
+  const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+  const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  return { w: Math.floor(vw), h: Math.floor(vh) };
+}
+
+function resize() {
+  const size = getViewportSize();
+  canvas.width = size.w;
+  canvas.height = size.h;
+  canvas.style.width = size.w + 'px';
+  canvas.style.height = size.h + 'px';
+  try {
+    if (game && game.player) {
+      game.player.x = clamp(game.player.x, game.player.radius, canvas.width - game.player.radius);
+      game.player.y = clamp(game.player.y, game.player.radius, canvas.height - game.player.radius);
+    }
+  } catch (e) { /* game 还没初始化，忽略 */ }
+  buildBackgroundCache();
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 150));
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resize);
+  window.visualViewport.addEventListener('scroll', resize);
+}
+resize();
+
+// ===================== 优化 #1：HUD DOM 缓存 =====================
+(function cacheHUD() {
+  const ids = ['score','materials','wave','enemies','hp-text','hp-fill','lvl','xp-text','xp-fill','stamina-text','stamina-fill','weapon-name','weapon-upgrades','ammo-display','charge-bar','charge-fill','reload-hint','weapon-stats-block','weapon-slots-hud','skills-row','armor-text','armor-fill','armor-block'];
+  for (const id of ids) { $[id] = document.getElementById(id); }
+})();
+
+function renderCharSelect() {
+  const list = document.getElementById('char-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (const key in CHARACTERS) {
+    const c = CHARACTERS[key];
+    const div = document.createElement('div');
+    div.className = 'char-card' + (selectedCharacter === key ? ' selected' : '');
+    div.style.borderColor = c.color;
+    div.innerHTML = `<div class="char-icon" style="color:${c.color}">${c.icon}</div><div class="char-name">${c.name}</div><div class="char-desc">${c.desc}</div>`;
+    div.onclick = () => { selectedCharacter = key; renderCharSelect(); };
+    list.appendChild(div);
+  }
+}
+renderCharSelect();
+
+function renderMetaUnlock() {
+  const display = document.getElementById('meta-gene-display');
+  const grid = document.getElementById('meta-grid');
+  if (!display || !grid) return;
+  display.textContent = Meta.data.genePoints;
+  grid.innerHTML = '';
+  for (const key in META_UNLOCKS) {
+    const u = META_UNLOCKS[key];
+    const owned = Meta.data.unlocked[key];
+    const canAfford = Meta.data.genePoints >= u.cost;
+    const div = document.createElement('div');
+    div.className = 'meta-card' + (owned ? ' owned' : (canAfford ? '' : ' locked'));
+    div.innerHTML = `<div class="meta-name">${u.name}</div><div class="meta-cost">${owned ? '已解锁' : u.cost + ' 基因点'}</div><div class="meta-desc">${u.desc}</div>`;
+    if (!owned && canAfford) {
+      div.onclick = () => { Meta.unlock(key); renderMetaUnlock(); };
+    }
+    grid.appendChild(div);
+  }
+}
+renderMetaUnlock();
+
+const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+if (isTouch) { document.getElementById('mobile-ui').classList.add('active'); document.body.style.cursor = 'default'; }
+
+// ===================== 武器（18 把） =====================
+const WEAPONS = {
+  glock:    { name: 'GLOCK-18', damage: 22, fireRate: 10, bulletSpeed: 18, magSize: 17, spread: 0.06, auto: false, color: '#ffd870', size: 2.5, pellets: 1, life: 50, shake: 1, recoil: 0.8, reloadTime: 35, tier: 1, rarity: 'common', priceBase: 50, series: 'pistol' },
+  deagle:   { name: 'DESERT EAGLE', damage: 78, fireRate: 26, bulletSpeed: 20, magSize: 7, spread: 0.02, auto: false, color: '#ffaa44', size: 3.5, pellets: 1, life: 60, shake: 3.5, recoil: 2.5, reloadTime: 55, tier: 1, rarity: 'rare', priceBase: 90, series: 'pistol' },
+  mp9:      { name: 'MP9', damage: 14, fireRate: 4, bulletSpeed: 20, magSize: 30, spread: 0.12, auto: true, color: '#ffd070', size: 2.2, pellets: 1, life: 45, shake: 0.8, recoil: 0.4, reloadTime: 45, tier: 1, rarity: 'common', priceBase: 65, series: 'smg' },
+  nova:     { name: 'NOVA', damage: 12, fireRate: 32, bulletSpeed: 14, magSize: 8, spread: 0.38, auto: false, color: '#ff7755', size: 3, pellets: 9, life: 26, shake: 4.5, recoil: 3.5, reloadTime: 75, tier: 1, rarity: 'rare', priceBase: 85, series: 'shotgun', evolution: { name: '龙息霰弹', relic: 'dragonbreath', burn: { duration: 180, dps: 12 }, pellets: 4 } },
+  m4a4:     { name: 'M4A4', damage: 28, fireRate: 6, bulletSpeed: 24, magSize: 30, spread: 0.04, auto: true, color: '#e4b041', size: 2.6, pellets: 1, life: 55, shake: 1.1, recoil: 0.7, reloadTime: 60, tier: 2, rarity: 'common', priceBase: 130, series: 'rifle' },
+  ak47:     { name: 'AK-47', damage: 36, fireRate: 8, bulletSpeed: 25, magSize: 30, spread: 0.06, auto: true, color: '#ffaa55', size: 2.8, pellets: 1, life: 60, shake: 1.4, recoil: 1, reloadTime: 65, tier: 2, rarity: 'rare', priceBase: 160, series: 'rifle' },
+  ricochet: { name: 'RICOCHET', damage: 35, fireRate: 8, bulletSpeed: 22, magSize: 12, spread: 0.05, auto: true, color: '#ff44aa', size: 2.5, pellets: 1, life: 60, shake: 1.2, recoil: 0.8, reloadTime: 55, tier: 2, rarity: 'rare', priceBase: 145, bounceBase: 3, bounceDamageMult: 0.2, series: 'energy' },
+  slugshot: { name: 'SLUG SHOTGUN', damage: 120, fireRate: 50, bulletSpeed: 28, magSize: 4, spread: 0.01, auto: false, color: '#aaff88', size: 4, pellets: 1, life: 70, shake: 4, recoil: 3, reloadTime: 75, tier: 2, rarity: 'rare', priceBase: 170, series: 'shotgun', evolution: { name: '龙息霰弹', relic: 'dragonbreath', burn: { duration: 180, dps: 12 }, pellets: 4 } },
+  awp:      { name: 'AWP', damage: 200, fireRate: 48, bulletSpeed: 32, magSize: 5, spread: 0.004, auto: false, color: '#ffeebb', size: 2.2, pellets: 1, life: 80, shake: 5.5, recoil: 4.5, reloadTime: 85, tier: 3, rarity: 'epic', priceBase: 320, pierce: 99, series: 'sniper', evolution: { name: '反器材步枪', relic: 'antimateriel', damage: 1.5, pierce: 99, explosive: { radius: 60, damage: 60 } } },
+  m249:     { name: 'M249', damage: 18, fireRate: 3, bulletSpeed: 22, magSize: 100, spread: 0.16, auto: true, color: '#aabb66', size: 2.6, pellets: 1, life: 50, shake: 1, recoil: 0.5, reloadTime: 120, tier: 3, rarity: 'rare', priceBase: 280, series: 'rifle', evolution: { name: '加特林', relic: 'gatling', fireRate: 0.4 } },
+  rpg:      { name: 'RPG-7', damage: 180, fireRate: 72, bulletSpeed: 12, magSize: 1, spread: 0.01, auto: false, color: '#ff6633', size: 5, pellets: 1, life: 120, shake: 8, recoil: 6, reloadTime: 90, tier: 3, rarity: 'epic', priceBase: 420, explosive: { radius: 90, damage: 80 }, series: 'explosive', evolution: { name: '核子火箭', relic: 'nuclear', explosive: { radius: 160, damage: 200 } } },
+  m32:      { name: 'M32', damage: 60, fireRate: 48, bulletSpeed: 16, magSize: 6, spread: 0.03, auto: false, color: '#88aa44', size: 4, pellets: 1, life: 80, shake: 5, recoil: 3, reloadTime: 80, tier: 3, rarity: 'rare', priceBase: 380, explosive: { radius: 70, damage: 45 }, series: 'explosive' },
+  flamer:   { name: 'FLAMETHROWER', damage: 8, fireRate: 2, bulletSpeed: 10, magSize: 200, spread: 0.25, auto: true, color: '#ff7a18', size: 3, pellets: 1, life: 18, shake: 0.6, recoil: 0.2, reloadTime: 100, tier: 3, rarity: 'rare', priceBase: 350, burn: { duration: 180, dps: 5 }, flame: true, series: 'flame', evolution: { name: '等离子喷射', relic: 'plasma_core', damage: 3, burn: { duration: 240, dps: 15 } } },
+  laser:    { name: 'LASER RIFLE', damage: 45, fireRate: 9, bulletSpeed: 999, magSize: 20, spread: 0.01, auto: true, color: '#b347d9', size: 2, pellets: 1, life: 20, shake: 1.5, recoil: 0.5, reloadTime: 55, tier: 3, rarity: 'epic', priceBase: 400, pierce: 5, instant: true, series: 'energy' },
+  tesla:    { name: 'TESLA GUN', damage: 30, fireRate: 14, bulletSpeed: 20, magSize: 15, spread: 0.03, auto: false, color: '#4ad4ff', size: 3, pellets: 1, life: 45, shake: 1.8, recoil: 0.8, reloadTime: 60, tier: 3, rarity: 'epic', priceBase: 380, chainCount: 3, series: 'energy' },
+  minigun:  { name: 'MINIGUN', damage: 10, fireRate: 2, bulletSpeed: 20, magSize: 300, spread: 0.10, auto: true, color: '#ccaa44', size: 2, pellets: 1, life: 40, shake: 1, recoil: 0.3, reloadTime: 150, tier: 4, rarity: 'legendary', priceBase: 500, spinup: 30, series: 'special' },
+  dualdeagle:{ name: 'DUAL DEAGLES', damage: 60, fireRate: 30, bulletSpeed: 20, magSize: 14, spread: 0.08, auto: false, color: '#ffcc66', size: 3.5, pellets: 2, life: 55, shake: 3.5, recoil: 2.5, reloadTime: 70, tier: 4, rarity: 'epic', priceBase: 450, series: 'pistol' },
+  plasma:   { name: 'PLASMA CANNON', damage: 50, fireRate: 10, bulletSpeed: 18, magSize: 10, spread: 0.02, auto: false, color: '#00ffcc', size: 4, pellets: 1, life: 70, shake: 2, recoil: 1, reloadTime: 70, tier: 4, rarity: 'legendary', priceBase: 480, chargeable: true, chargeTime: 60, chargeDamageMult: 5, series: 'energy' }
+};
+const WEAPON_KEYS = Object.keys(WEAPONS);
+const WEAPON_UPGRADE_TREE = {
+  1: { damage: 1.15, fireRate: 0.92, magSize: 1.25, spread: 0.92, bulletSpeed: 1.1 },
+  2: { damage: 1.20, fireRate: 0.88, magSize: 1.30, spread: 0.88, bulletSpeed: 1.15 },
+  3: { damage: 1.25, fireRate: 0.85, magSize: 1.40, spread: 0.85, bulletSpeed: 1.20 },
+  4: { damage: 1.30, fireRate: 0.80, magSize: 1.50, spread: 0.80, bulletSpeed: 1.25 },
+  5: { damage: 1.50, fireRate: 0.75, magSize: 1.80, spread: 0.70, bulletSpeed: 1.35 }
+};
+
+// ===================== 敌人 =====================
+const ENEMY_TYPES = {
+  grunt:    { name: '突击兵', hp: 120, speed: 1.5, radius: 14, color: '#7a4a2a', accent: '#a06a3a', skin: '#c89060', damage: 12, score: 10, xp: 11, behavior: 'chase', shape: 'human', weapon: 'pistol' },
+  runner:   { name: '冲锋兵', hp: 70, speed: 2.6, radius: 11, color: '#8a3a2a', accent: '#bb5a3a', skin: '#d8a070', damage: 8, score: 12, xp: 9, behavior: 'chase', shape: 'human', weapon: 'knife' },
+  heavy:    { name: '重装兵', hp: 650, speed: 0.7, radius: 22, color: '#3a3a4a', accent: '#5a5a7a', skin: '#a08070', damage: 28, score: 50, xp: 45, behavior: 'chase', shape: 'human_heavy', weapon: 'lmg' },
+  bomber:   { name: '自爆兵', hp: 100, speed: 2.0, radius: 13, color: '#8a2a18', accent: '#ff6a3a', skin: '#c87050', damage: 45, score: 20, xp: 18, behavior: 'bomber', shape: 'human_bomb', weapon: 'none', explodeRadius: 75 },
+  shielder: { name: '盾牌兵', hp: 400, speed: 0.9, radius: 14, color: '#2a3a5a', accent: '#4a6a9a', skin: '#a08070', damage: 14, score: 30, xp: 25, behavior: 'chase', shape: 'human_shield', weapon: 'smg', shield: 0.6 },
+  medic:    { name: '医疗兵', hp: 180, speed: 1.1, radius: 13, color: '#2a5a3a', accent: '#4aaa5a', skin: '#a08070', damage: 6, score: 25, xp: 25, behavior: 'medic', shape: 'human_medic', weapon: 'pistol', healRange: 130, healAmount: 2, healRate: 25 },
+  shooter:  { name: '手枪兵', hp: 140, speed: 1.0, radius: 13, color: '#5a4a1a', accent: '#aa9040', skin: '#c89060', damage: 8, score: 18, xp: 16, behavior: 'shooter', shape: 'human', weapon: 'pistol', fireRate: 75, bulletSpeed: 11, bulletDamage: 10, range: 320 },
+  rifleman: { name: '步枪手', hp: 210, speed: 1.1, radius: 14, color: '#4a4a2a', accent: '#8a8a4a', skin: '#b08868', damage: 6, score: 28, xp: 25, behavior: 'shooter', shape: 'human', weapon: 'rifle', fireRate: 110, bulletSpeed: 16, bulletDamage: 16, range: 420, burstCount: 3, burstDelay: 6 },
+  shotgunner:{name: '霰弹兵', hp: 240, speed: 1.2, radius: 14, color: '#5a3a2a', accent: '#bb6a3a', skin: '#b08068', damage: 8, score: 30, xp: 27, behavior: 'shooter', shape: 'human', weapon: 'shotgun', fireRate: 90, bulletSpeed: 10, bulletDamage: 8, range: 220, pellets: 6, spread: 0.35 },
+  smg_gunner:{name: '冲锋枪手',hp: 140, speed: 1.4, radius: 13, color: '#3a4a3a', accent: '#5a8a5a', skin: '#b08068', damage: 5, score: 25, xp: 23, behavior: 'shooter', shape: 'human', weapon: 'smg', fireRate: 8, bulletSpeed: 14, bulletDamage: 7, range: 280, auto: true },
+  sniper:   { name: '狙击手', hp: 110, speed: 0.7, radius: 12, color: '#2a4a4a', accent: '#4acca8', skin: '#a08068', damage: 6, score: 35, xp: 29, behavior: 'shooter', shape: 'human', weapon: 'sniper', fireRate: 130, bulletSpeed: 22, bulletDamage: 38, range: 540, sniper: true },
+  flamer:   { name: '喷火兵', hp: 360, speed: 1.0, radius: 15, color: '#5a2a1a', accent: '#ff7a18', skin: '#a07050', damage: 4, score: 40, xp: 32, behavior: 'flamer', shape: 'human_heavy', weapon: 'flamer', flameRange: 170, flameDamage: 0.6 },
+  behemoth: { name: '巨神兵', hp: 18000, speed: 0.6, radius: 45, color: '#2a2a3a', accent: '#ff5252', skin: '#555', damage: 40, score: 1000, xp: 540, behavior: 'boss_turret', shape: 'human_heavy', weapon: 'lmg', bossDrop: { id: 'behemoth_core', name: '巨像核心', desc: '护甲吸收 100% 伤害', apply: p => { p.armorAbsorb = 1; } } },
+  overlord: { name: '召唤者', hp: 13500, speed: 0.7, radius: 38, color: '#3a2a4a', accent: '#b347d9', skin: '#666', damage: 20, score: 800, xp: 450, behavior: 'boss_summoner', shape: 'human_heavy', weapon: 'none', bossDrop: { id: 'overlord_eye', name: '召唤之眼', desc: '每 5 秒召唤 1 个小怪协助', apply: p => { p.summonAlly = true; } } },
+  stalker:  { name: '影刃', hp: 10500, speed: 2.0, radius: 30, color: '#2a2a2a', accent: '#00ffaa', skin: '#444', damage: 35, score: 900, xp: 500, behavior: 'boss_stalker', shape: 'human_heavy', weapon: 'knife', bossDrop: { id: 'stalker_cloak', name: '影刃披风', desc: '冲刺后 1 秒隐身', apply: p => { p.dashInvis = true; } } },
+  artillery:{ name: '攻城机甲', hp: 22500, speed: 0.6, radius: 40, color: '#4a3a2a', accent: '#ff8800', skin: '#666', damage: 30, score: 1200, xp: 630, behavior: 'boss_artillery', shape: 'human_heavy', weapon: 'lmg', bossDrop: { id: 'arty_barrel', name: '攻城炮管', desc: '爆炸范围 +50%', apply: p => { p.explosionMult = (p.explosionMult||1) * 1.5; } } },
+  berserker:{ name: '绞肉机', hp: 13500, speed: 2.5, radius: 35, color: '#5a2a2a', accent: '#ff5252', skin: '#555', damage: 25, score: 1000, xp: 540, behavior: 'boss_berserker', shape: 'human_heavy', weapon: 'lmg', bossDrop: { id: 'berk_blade', name: '绞肉之刃', desc: '近战伤害 +100%', apply: p => { p.knifeDamageMult = (p.knifeDamageMult||1) * 2; } } }
+};
+const BOSS_KEYS = ['behemoth', 'overlord', 'stalker', 'artillery', 'berserker'];
+// ===================== 升级（含护甲） =====================
+const UPGRADES = [
+  { id: 'maxhp', name: '生命强化', desc: '+25 最大生命值\n并完全治疗', icon: 'HP', rarity: 'common', apply: p => { p.maxHp += 25; p.hp = p.maxHp; } },
+  { id: 'speed', name: '战术靴', desc: '+15% 移动速度', icon: 'SPD', rarity: 'common', apply: p => { p.speedMult *= 1.15; } },
+  { id: 'damage', name: '空尖弹', desc: '+25% 武器伤害', icon: 'DMG', rarity: 'common', apply: p => { p.damageMult *= 1.25; } },
+  { id: 'firerate', name: '扳机改造', desc: '+20% 射速', icon: 'RPM', rarity: 'common', apply: p => { p.fireRateMult *= 0.8; } },
+  { id: 'mag', name: '扩容弹匣', desc: '+30% 弹匣容量', icon: 'MAG', rarity: 'common', apply: p => { p.magMult *= 1.3; if (!p.usingKnife) p.ammo = p.effectiveMag; } },
+  { id: 'regen', name: '战地医疗', desc: '每秒回复 2 点生命', icon: 'REG', rarity: 'rare', apply: p => { p.regen += 2; } },
+  { id: 'pickup', name: '磁性力场', desc: '+70% 拾取范围', icon: 'MAG', rarity: 'common', apply: p => { p.pickupRangeMult *= 1.7; } },
+  { id: 'xp', name: '战斗本能', desc: '+25% 经验获取', icon: 'XP', rarity: 'common', apply: p => { p.xpMult *= 1.25; } },
+  { id: 'crit', name: '精准射击', desc: '+20% 暴击率', icon: 'CRT', rarity: 'rare', apply: p => { p.critChance += 0.2; } },
+  { id: 'lifesteal', name: '吸血', desc: '击杀回复 6 HP', icon: 'VMP', rarity: 'rare', apply: p => { p.lifesteal += 6; } },
+  { id: 'scavenger', name: '拾荒者', desc: '+50% 掉落概率', icon: 'SCV', rarity: 'common', apply: p => { p.dropLuck *= 1.5; } },
+  { id: 'thorns', name: '反伤装甲', desc: '受到伤害时反弹 60%', icon: 'THN', rarity: 'epic', apply: p => { p.thorns += 0.6; } },
+  { id: 'rage', name: '狂战', desc: '低血量时 +40% 伤害与速度', icon: 'BZR', rarity: 'epic', apply: p => { p.rage = true; } },
+  { id: 'overdrive', name: '过载', desc: '+50% 射速 但 +20% 散布', icon: 'OVR', rarity: 'epic', apply: p => { p.fireRateMult *= 0.5; p.spreadMult *= 1.2; } },
+  { id: 'skillslot', name: '技能扩容', desc: '+1 技能槽位', icon: 'SLOT', rarity: 'rare', apply: p => { p.skillSlots++; } },
+  { id: 'stamina_max', name: '体能强化', desc: '+30 最大体力值', icon: 'STM', rarity: 'common', apply: p => { p.maxStamina += 30; p.stamina = p.maxStamina; } },
+  { id: 'stamina_regen', name: '持久力', desc: '+50% 体力恢复速度', icon: 'SRG', rarity: 'common', apply: p => { p.staminaRegenMult *= 1.5; } },
+  { id: 'dash_cost', name: '冲刺优化', desc: '冲刺消耗 -10 体力', icon: 'DSC', rarity: 'rare', apply: p => { p.dashCostReduction += 10; } },
+  { id: 'mat_bonus', name: '拾荒专家', desc: '+30% 材料获取', icon: 'MAT', rarity: 'rare', apply: p => { p.matMult *= 1.3; } },
+  { id: 'armor_max', name: '装甲强化', desc: '+25 最大护甲\n并回满护甲', icon: 'ARM', rarity: 'common', apply: p => { p.maxArmor += 25; p.armor = p.maxArmor; } },
+  { id: 'armor_regen', name: '装甲再生', desc: '每波额外回复 10% 护甲', icon: 'ARG', rarity: 'rare', apply: p => { p.armorRegenBonus += 0.1; } },
+  { id: 'armor_dmg', name: '反应装甲', desc: '护甲存在时 +15% 伤害', icon: 'ARD', rarity: 'epic', apply: p => { p.armorDamageBonus += 0.15; } },
+  { id: 'heavy_armor', name: '重装', desc: '+50 最大护甲\n-8% 移速', icon: 'HVY', rarity: 'rare', apply: p => { p.maxArmor += 50; p.armor = Math.min(p.armor + 50, p.maxArmor); p.speedMult *= 0.92; } },
+  { id: 'c_berserk', name: '狂战诅咒', desc: '<span class="pos">伤害 +60%</span><br><span class="neg">最大生命 -30%</span>', icon: 'BRS', rarity: 'legendary', curse: true, apply: p => { p.damageMult *= 1.6; p.maxHp = Math.floor(p.maxHp * 0.7); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 'c_glass', name: '玻璃炮', desc: '<span class="pos">射速 +80%</span><br><span class="neg">最大生命 -40%</span>', icon: 'GLS', rarity: 'legendary', curse: true, apply: p => { p.fireRateMult *= 0.2; p.maxHp = Math.floor(p.maxHp * 0.6); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 'c_vampire', name: '血族契约', desc: '<span class="pos">击杀回 20 HP</span><br><span class="neg">最大生命 -25%</span>', icon: 'VMP', rarity: 'legendary', curse: true, apply: p => { p.lifesteal += 20; p.maxHp = Math.floor(p.maxHp * 0.75); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 'c_overload', name: '过载协议', desc: '<span class="pos">伤害 +100%</span><br><span class="neg">散布 +100%</span>', icon: 'OVR', rarity: 'legendary', curse: true, apply: p => { p.damageMult *= 2; p.spreadMult *= 2; } },
+  { id: 'c_ruthless', name: '无情', desc: '<span class="pos">暴击率 +50%</span><br><span class="neg">暴击伤害 -30%</span>', icon: 'RTH', rarity: 'legendary', curse: true, apply: p => { p.critChance += 0.5; p.critMult *= 0.7; } }
+];
+
+// ===================== 商店道具（32 个） =====================
+const SHOP_ITEMS = [
+  { id: 's_hp',     name: '防弹衣',   desc: '<span class="pos">+20 最大生命</span>',      price: 40, rarity: 'common', apply: p => { p.maxHp += 20; p.hp = Math.min(p.hp + 20, p.maxHp); } },
+  { id: 's_dmg',    name: '空尖弹',   desc: '<span class="pos">+10% 伤害</span>',         price: 55, rarity: 'common', apply: p => { p.damageMult *= 1.10; } },
+  { id: 's_speed',  name: '战术靴',   desc: '<span class="pos">+8% 移速</span>',          price: 45, rarity: 'common', apply: p => { p.speedMult *= 1.08; } },
+  { id: 's_regen',  name: '医疗包',   desc: '<span class="pos">每秒回 1 HP</span>',       price: 70, rarity: 'rare',   apply: p => { p.regen += 1; } },
+  { id: 's_crit',   name: '瞄准镜',   desc: '<span class="pos">+15% 暴击率</span>',       price: 80, rarity: 'rare',   apply: p => { p.critChance += 0.15; } },
+  { id: 's_lifest', name: '吸血鬼',   desc: '<span class="pos">击杀回 5 HP</span>',       price: 95, rarity: 'epic',   apply: p => { p.lifesteal += 5; } },
+  { id: 's_stam',   name: '体能饮料', desc: '<span class="pos">+20 最大体力</span>',      price: 35, rarity: 'common', apply: p => { p.maxStamina += 20; p.stamina = p.maxStamina; } },
+  { id: 's_regen2', name: '持久力',   desc: '<span class="pos">+30% 体力恢复</span>',     price: 50, rarity: 'common', apply: p => { p.staminaRegenMult *= 1.3; } },
+  { id: 's_fire',   name: '扳机改造', desc: '<span class="pos">+8% 射速</span>',          price: 60, rarity: 'rare',   apply: p => { p.fireRateMult *= 0.92; } },
+  { id: 's_mag',    name: '扩容弹匣', desc: '<span class="pos">+15% 弹匣容量</span>',     price: 55, rarity: 'common', apply: p => { p.magMult *= 1.15; if (!p.usingKnife) p.ammo = p.effectiveMag; } },
+  { id: 's_thorns', name: '反伤甲',   desc: '<span class="pos">+30% 反伤</span>',         price: 100, rarity: 'epic',  apply: p => { p.thorns += 0.3; } },
+  { id: 's_xp',     name: '战斗本能', desc: '<span class="pos">+15% 经验</span>',         price: 65, rarity: 'rare',   apply: p => { p.xpMult *= 1.15; } },
+  { id: 's_pickup', name: '磁力场',   desc: '<span class="pos">+40% 拾取范围</span>',     price: 50, rarity: 'common', apply: p => { p.pickupRangeMult *= 1.4; } },
+  { id: 's_mat',    name: '拾荒专家', desc: '<span class="pos">+20% 材料获取</span>',     price: 75, rarity: 'rare',   apply: p => { p.matMult *= 1.2; } },
+  { id: 's_armor1', name: '防弹插板', desc: '<span class="pos">+15 最大护甲</span>',      price: 55, rarity: 'common', apply: p => { p.maxArmor += 15; p.armor += 15; } },
+  { id: 's_armor2', name: '陶瓷护甲', desc: '<span class="pos">+30 最大护甲</span>',      price: 110, rarity: 'rare',  apply: p => { p.maxArmor += 30; p.armor += 30; } },
+  { id: 's_armorfix', name: '护甲修复', desc: '<span class="pos">回满护甲</span>',         price: 30, rarity: 'common', apply: p => { p.armor = p.maxArmor; } },
+  { id: 's_gloves', name: '战术手套', desc: '<span class="pos">+10% 射速</span>',         price: 65, rarity: 'common', apply: p => { p.fireRateMult *= 0.9; } },
+  { id: 's_backpack', name: '扩容背包', desc: '<span class="pos">+20% 拾取范围</span>',   price: 45, rarity: 'common', apply: p => { p.pickupRangeMult *= 1.2; } },
+  { id: 's_adrenaline', name: '肾上腺素', desc: '<span class="pos">+25 最大体力</span>',   price: 50, rarity: 'common', apply: p => { p.maxStamina += 25; p.stamina = p.maxStamina; } },
+  { id: 's_luckycoin', name: '幸运币', desc: '<span class="pos">+15% 材料获取</span>',    price: 70, rarity: 'rare',  apply: p => { p.matMult *= 1.15; } },
+  { id: 's_magboots', name: '磁力靴', desc: '<span class="pos">+8% 移速</span>',          price: 60, rarity: 'common', apply: p => { p.speedMult *= 1.08; } },
+  { id: 's_medkit', name: '医疗针',   desc: '<span class="pos">每秒回 1.5 HP</span>',     price: 90, rarity: 'rare',  apply: p => { p.regen += 1.5; } },
+  { id: 's_eagleeye', name: '鹰眼',   desc: '<span class="pos">+12% 暴击率</span>',       price: 85, rarity: 'rare',  apply: p => { p.critChance += 0.12; } },
+  { id: 's_heavyarmor', name: '重型护甲', desc: '<span class="pos">+40 最大护甲</span><br><span class="neg">-10% 移速</span>', price: 80, rarity: 'rare', apply: p => { p.maxArmor += 40; p.armor += 40; p.speedMult *= 0.9; } },
+  { id: 's_glasscannon', name: '玻璃大炮', desc: '<span class="pos">+40% 伤害</span><br><span class="neg">-25% 最大生命</span>', price: 100, rarity: 'epic', apply: p => { p.damageMult *= 1.4; p.maxHp = Math.floor(p.maxHp * 0.75); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 's_ragepotion', name: '狂暴药剂', desc: '<span class="pos">+25% 射速</span><br><span class="neg">-15% 最大生命</span>', price: 90, rarity: 'rare', apply: p => { p.fireRateMult *= 0.75; p.maxHp = Math.floor(p.maxHp * 0.85); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 's_scope', name: '狙击镜', desc: '<span class="pos">+30% 射程</span><br><span class="neg">-15% 射速</span>', price: 75, rarity: 'rare', apply: p => { p.bulletSpeedMult *= 1.3; p.fireRateMult *= 1.15; } },
+  { id: 's_gambler', name: '赌徒之骰', desc: '<span class="pos">+30% 暴击率</span><br><span class="neg">-10% 暴击伤害</span>', price: 95, rarity: 'epic', apply: p => { p.critChance += 0.3; p.critMult *= 0.9; } },
+  { id: 's_overclock', name: '过载核心', desc: '<span class="pos">+30% 移速</span><br><span class="neg">-15 最大护甲</span>', price: 85, rarity: 'rare', apply: p => { p.speedMult *= 1.3; p.maxArmor = Math.max(0, p.maxArmor - 15); p.armor = Math.min(p.armor, p.maxArmor); } },
+  { id: 's_vampfang', name: '吸血獠牙', desc: '<span class="pos">+8 击杀回血</span><br><span class="neg">-20% 最大生命</span>', price: 110, rarity: 'epic', apply: p => { p.lifesteal += 8; p.maxHp = Math.floor(p.maxHp * 0.8); p.hp = Math.min(p.hp, p.maxHp); } },
+  { id: 's_madscientist', name: '疯狂科学家', desc: '<span class="pos">+50% 经验</span><br><span class="neg">-10% 移速</span>', price: 70, rarity: 'rare', apply: p => { p.xpMult *= 1.5; p.speedMult *= 0.9; } },
+  { id: 'r_anti', name: '反器材核心', desc: '<span class="pos">AWP 进化材料</span>', price: 250, rarity: 'epic', relic: 'antimateriel', apply: p => { p.relics = p.relics || {}; p.relics.antimateriel = true; p.tryEvolve(); } },
+  { id: 'r_dragon', name: '龙息喉', desc: '<span class="pos">霰弹枪进化材料</span>', price: 220, rarity: 'epic', relic: 'dragonbreath', apply: p => { p.relics = p.relics || {}; p.relics.dragonbreath = true; p.tryEvolve(); } },
+  { id: 'r_nuke', name: '核弹头', desc: '<span class="pos">RPG 进化材料</span>', price: 300, rarity: 'epic', relic: 'nuclear', apply: p => { p.relics = p.relics || {}; p.relics.nuclear = true; p.tryEvolve(); } },
+  { id: 'r_plasma', name: '等离子核心', desc: '<span class="pos">火焰喷射器进化材料</span>', price: 240, rarity: 'epic', relic: 'plasma_core', apply: p => { p.relics = p.relics || {}; p.relics.plasma_core = true; p.tryEvolve(); } },
+  { id: 'r_gatling', name: '加特林套件', desc: '<span class="pos">M249 进化材料</span>', price: 260, rarity: 'epic', relic: 'gatling', apply: p => { p.relics = p.relics || {}; p.relics.gatling = true; p.tryEvolve(); } }
+];
+
+// ===================== 技能（19 个） =====================
+const SKILLS = [
+  { id: 'pierce',   name: '过穿透',     desc: '子弹穿透 +5 个敌人', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'bounce',   name: '反弹',       desc: '子弹反弹 3 次', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'shock',    name: '冲击波',     desc: '击杀产生爆炸', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'multishot',name: '多发弹',     desc: '每次开火 +2 颗子弹', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'poison',   name: '毒弹',       desc: '命中中毒', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'freeze',   name: '冰冻弹',     desc: '命中减速 50%', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'mag_ext',  name: '弹匣扩容',   desc: '弹匣容量 +50%', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'fast_reload', name: '快速装弹', desc: '装弹速度 +50%', rarity: 'rare',     color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'sprint',   name: '疾跑',       desc: '移动速度 +30%', rarity: 'rare',      color: '#4a90e2', duration: 900, cooldown: 600, triggerCD: 0, price: 120 },
+  { id: 'split',    name: '分裂弹',     desc: '子弹击中后分裂出 2 颗', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 180, price: 180 },
+  { id: 'infrange', name: '无限射程',   desc: '子弹永不消失', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'homing',   name: '追踪弹',     desc: '子弹追踪敌人', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'boomerang',name: '回旋弹',     desc: '子弹飞出后折返', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'chain',    name: '连锁闪电',   desc: '命中连锁电击', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 120, price: 180 },
+  { id: 'critmaster',name: '暴击大师',  desc: '+30% 暴击率 x2.5', rarity: 'epic',      color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'double_dmg', name: '双倍伤害', desc: '子弹伤害 ×2，射速 -20%', rarity: 'epic', color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'headshot_master', name: '爆头大师', desc: '暴击伤害 ×3', rarity: 'epic',   color: '#b347d9', duration: 720, cooldown: 900, triggerCD: 0, price: 180 },
+  { id: 'infammo',  name: '无限弹匣',   desc: '无限弹药', rarity: 'legendary', color: '#ffb800', duration: 1200, cooldown: 1500, triggerCD: 0, price: 280 },
+  { id: 'time_warp', name: '时间扭曲', desc: '敌人移速 -40%', rarity: 'legendary', color: '#ffb800', duration: 1200, cooldown: 1500, triggerCD: 0, price: 280 }
+];
+const SKILL_MAP = Object.fromEntries(SKILLS.map(s => [s.id, s]));
+
+// ===================== Player =====================
+class Player {
+  constructor(x, y) {
+    this.x = x; this.y = y; this.radius = 13;
+    this.baseSpeed = 3.0; this.angle = 0;
+    this.hp = 120; this.maxHp = 120;
+    this.armor = 0; this.maxArmor = 0;
+    this.armorRegenBonus = 0;
+    this.armorDamageBonus = 0;
+    this.level = 1; this.xp = 0; this.xpToNext = 50; this.kills = 0;
+    this.weaponSlots = [];
+    this.maxWeaponSlots = 6;
+    this.currentWeaponIndex = 0;
+    this.lastPrimaryIndex = 0;
+    this.usingKnife = false;
+    this.ammoPerWeapon = {};
+    this.weaponKey = null;
+    this.weaponTier = 1;
+    this.ammo = 0;
+    this.fireTimer = 0; this.reloadTimer = 0;
+    this.invuln = 0; this.muzzleFlash = 0; this.recoilOffset = 0; this.canFire = true;
+    this.speedMult = 1; this.damageMult = 1; this.fireRateMult = 1;
+    this.magMult = 1; this.reloadMult = 1; this.bulletSpeedMult = 1;
+    this.spreadMult = 1; this.pickupRangeMult = 1; this.xpMult = 1;
+    this.dropLuck = 1; this.critChance = 0; this.critMult = 1.75;
+    this.regen = 0; this.lifesteal = 0; this.thorns = 0; this.rage = false;
+    this.regenAcc = 0;
+    this.materials = 0;
+    this.matMult = 1;
+    this.skills = new Set();
+    this.skillSlots = 5;
+    this.skillStates = {};
+    this.skillTriggerCDs = {};
+    this.extraShots = 0; this.pierceBonus = 0;
+    this.takenUpgrades = {};
+    this.moveDir = { x: 0, y: 0 };
+    this.maxStamina = 100; this.stamina = 100;
+    this.staminaRegenMult = 1; this.dashCostReduction = 0;
+    this.isDashing = false; this.dashTimer = 0; this.dashDir = { x: 0, y: 0 };
+    this.dashTrail = [];
+    this.knifeSlash = 0; this.knifeAnim = 0;
+    this.spinupTimer = 0; this.isSpinning = false;
+    this.chargeTimer = 0; this.isCharging = false;
+    this.skillBuffs = {};
+    this.addWeapon('glock');
+    this.character = selectedCharacter;
+    this.equipWeapon(0);
+    if (CHARACTERS[selectedCharacter]) CHARACTERS[selectedCharacter].apply(this);
+    for (const key in Meta.data.unlocked) { if (Meta.data.unlocked[key] && META_UNLOCKS[key]) META_UNLOCKS[key].apply(this); }
+    this.recalcSynergy();
+  }
+  get weapon() { return WEAPONS[this.weaponKey]; }
+  get weaponMods() { return WEAPON_UPGRADE_TREE[this.weaponTier]; }
+  get speed() {
+    let mult = this.speedMult * (this.rage && this.hp < this.maxHp * 0.35 ? 1.4 : 1);
+    if (this.isDashing) mult *= 2.8;
+    if (this.isSpinning && this.weapon && this.weapon.spinup) mult *= 0.5;
+    if (this.isCharging) mult *= 0.7;
+    if (this.isSkillActive('sprint')) mult *= 1.3;
+    return this.baseSpeed * mult;
+  }
+  get effectiveDamageMult() {
+    let m = this.damageMult * this.weaponMods.damage * (this.rage && this.hp < this.maxHp * 0.35 ? 1.4 : 1);
+    if (this.armor > 0) m *= (1 + this.armorDamageBonus);
+    if (this.isSkillActive('double_dmg')) m *= 2;
+    if (this._synDamage) m *= this._synDamage;
+    return m;
+  }
+  get effectiveFireRate() {
+    let fr = this.weapon.fireRate * this.fireRateMult * this.weaponMods.fireRate;
+    if (this.isSkillActive('double_dmg')) fr *= 1.2;
+    if (this._synFireRate) fr *= this._synFireRate;
+    return Math.max(1, Math.floor(fr));
+  }
+  get effectiveMag() {
+    let m = this.weapon.magSize * this.magMult * this.weaponMods.magSize;
+    if (this.isSkillActive('mag_ext')) m *= 1.5;
+    if (this._synMag) m *= this._synMag;
+    return Math.floor(m);
+  }
+  get effectiveReload() {
+    let r = this.weapon.reloadTime * this.reloadMult;
+    if (this.isSkillActive('fast_reload')) r *= 0.5;
+    return Math.floor(r);
+  }
+  get effectiveSpread() { return this.weapon.spread * this.spreadMult * this.weaponMods.spread; }
+  get effectiveBulletSpeed() { return this.weapon.bulletSpeed * this.bulletSpeedMult * this.weaponMods.bulletSpeed; }
+  get knifeDamage() { return Math.floor((100 + (this.level - 1) * 25)); }
+
+  addWeapon(key) {
+    const existing = this.weaponSlots.find(w => w.key === key && w.tier < 5);
+    if (existing) { existing.tier++; this.recalcSynergy(); this.tryEvolve(); if (game.state === 'playing') { updateWeaponSlotsHUD(); updateWeaponStatsHUD(); } return 'merged'; }
+    if (this.weaponSlots.length >= this.maxWeaponSlots) return 'full';
+    this.weaponSlots.push({ key, tier: 1 });
+    this.ammoPerWeapon[key + '_1'] = WEAPONS[key].magSize;
+    this.recalcSynergy();
+    if (game.state === 'playing') { updateWeaponSlotsHUD(); }
+    return 'added';
+  }
+  equipWeapon(index) {
+    if (index < 0 || index >= this.weaponSlots.length) return;
+    this.usingKnife = false;
+    this.currentWeaponIndex = index;
+    this.lastPrimaryIndex = index;
+    const w = this.weaponSlots[index];
+    this.weaponKey = w.key;
+    this.weaponTier = w.tier;
+    const ammoKey = w.key + '_' + w.tier;
+    this.ammo = this.ammoPerWeapon[ammoKey] !== undefined ? this.ammoPerWeapon[ammoKey] : this.effectiveMag;
+    this.reloadTimer = 0; this.fireTimer = 0;
+    this.spinupTimer = 0; this.isSpinning = false;
+    this.chargeTimer = 0; this.isCharging = false;
+    if (game.state === 'playing') { updateWeaponSlotsHUD(); updateWeaponStatsHUD(); }
+  }
+  equipKnife() {
+    if (this.usingKnife) return;
+    this.saveAmmo();
+    this.usingKnife = true;
+    this.weaponKey = null;
+    this.reloadTimer = 0; this.fireTimer = 0;
+    this.spinupTimer = 0; this.isSpinning = false;
+    this.chargeTimer = 0; this.isCharging = false;
+    if (game.state === 'playing') { updateWeaponSlotsHUD(); updateWeaponStatsHUD(); }
+  }
+  unequipKnife() {
+    if (!this.usingKnife) return;
+    if (this.weaponSlots.length === 0) return;
+    this.usingKnife = false;
+    this.equipWeapon(clamp(this.lastPrimaryIndex, 0, this.weaponSlots.length - 1));
+  }
+  toggleKnife() { if (this.usingKnife) this.unequipKnife(); else this.equipKnife(); }
+  cycleWeapon(dir) {
+    if (this.weaponSlots.length === 0) return;
+    if (this.usingKnife) { this.unequipKnife(); return; }
+    this.saveAmmo();
+    let next = this.currentWeaponIndex + dir;
+    if (next < 0) next = this.weaponSlots.length - 1;
+    if (next >= this.weaponSlots.length) next = 0;
+    this.equipWeapon(next);
+  }
+  selectWeapon(index) {
+    if (index < 0 || index >= this.weaponSlots.length) return;
+    this.saveAmmo();
+    this.equipWeapon(index);
+  }
+  saveAmmo() {
+    if (this.weaponKey && !this.usingKnife) {
+      this.ammoPerWeapon[this.weaponKey + '_' + this.weaponTier] = this.ammo;
+    }
+  }
+  removeWeapon(index) {
+    if (index < 0 || index >= this.weaponSlots.length) return 0;
+    const w = this.weaponSlots[index];
+    const refund = Math.floor(this.getWeaponPrice(w.key, w.tier) * 0.25);
+    this.weaponSlots.splice(index, 1);
+    delete this.ammoPerWeapon[w.key + '_' + w.tier];
+    if (this.weaponSlots.length === 0) { this.weaponKey = null; this.usingKnife = true; }
+    else if (!this.usingKnife) { this.currentWeaponIndex = Math.min(this.currentWeaponIndex, this.weaponSlots.length - 1); this.equipWeapon(this.currentWeaponIndex); }
+    this.recalcSynergy();
+    if (game.state === 'playing') { updateWeaponSlotsHUD(); updateWeaponStatsHUD(); }
+    return refund;
+  }
+  getWeaponPrice(key, tier) {
+    const base = WEAPONS[key].priceBase || 50;
+    return Math.floor((base + tier * 25) * (1 + tier * 0.15));
+  }
+
+  getSynergyBonus() {
+    const counts = {};
+    for (const w of this.weaponSlots) {
+      const s = WEAPONS[w.key].series;
+      if (s) counts[s] = (counts[s]||0) + 1;
+    }
+    const bonus = { fireRate: 1, damage: 1, explosion: 1, mag: 1, crit: 0 };
+    for (const s in counts) {
+      const n = counts[s];
+      if (n >= 3) {
+        if (s === 'smg') bonus.fireRate *= 0.7;
+        if (s === 'explosive') bonus.explosion *= 1.5;
+        if (s === 'shotgun') bonus.damage *= 1.25;
+        if (s === 'rifle') bonus.mag *= 1.4;
+        if (s === 'pistol') bonus.crit += 0.15;
+        if (s === 'sniper') bonus.damage *= 1.3;
+        if (s === 'flame') bonus.damage *= 1.2;
+        if (s === 'energy') bonus.fireRate *= 0.85;
+        if (s === 'special') bonus.damage *= 1.15;
+      }
+    }
+    return bonus;
+  }
+  recalcSynergy() {
+    const b = this.getSynergyBonus();
+    this._synFireRate = b.fireRate;
+    this._synDamage = b.damage;
+    this._synExplosion = b.explosion;
+    this._synMag = b.mag;
+    this._synCrit = b.crit;
+  }
+  tryEvolve() {
+    this.relics = this.relics || {};
+    for (let i = 0; i < this.weaponSlots.length; i++) {
+      const ws = this.weaponSlots[i];
+      const w = WEAPONS[ws.key];
+      if (ws.tier >= 5 && w.evolution && this.relics[w.evolution.relic] && !ws.evolved) {
+        ws.evolved = true;
+        ws.evolutionData = w.evolution;
+        showFloater(this.x, this.y - 30, w.evolution.name + ' 觉醒!', '#ffb800');
+      }
+    }
+  }
+
+  isSkillActive(id) { const st = this.skillStates[id]; return !!(st && st.active); }
+  get hasInfiniteAmmo() { return this.isSkillActive('infammo'); }
+  get hasInfiniteRange() { return this.isSkillActive('infrange'); }
+  get hasSplit() { return this.isSkillActive('split') && (this.skillTriggerCDs['split'] || 0) <= 0; }
+  get hasHoming() { return this.isSkillActive('homing'); }
+  get hasBoomerang() { return this.isSkillActive('boomerang'); }
+  get hasBounce() { return this.isSkillActive('bounce'); }
+  get hasShock() { return this.isSkillActive('shock'); }
+  get hasChain() { return this.isSkillActive('chain') && (this.skillTriggerCDs['chain'] || 0) <= 0; }
+  get hasMulti() { return this.isSkillActive('multishot'); }
+  get hasPoison() { return this.isSkillActive('poison'); }
+  get hasFreeze() { return this.isSkillActive('freeze'); }
+
+  tryDash() {
+    if (this.isDashing) return;
+    const cost = Math.max(10, 30 - this.dashCostReduction);
+    if (this.stamina < cost) return;
+    this.stamina -= cost;
+    let dx = this.moveDir.x, dy = this.moveDir.y;
+    if (dx === 0 && dy === 0) { dx = Math.cos(this.angle); dy = Math.sin(this.angle); }
+    this.dashDir = { x: dx, y: dy };
+    this.isDashing = true; this.dashTimer = 18; this.invuln = 18;
+    this.dashTrail = [];
+    for (const e of game.enemies) {
+      if (e.dead || e.spawnAnim > 0) continue;
+      const ex = e.x - this.x, ey = e.y - this.y;
+      const d = Math.hypot(ex, ey);
+      if (d < this.radius + e.radius + 35) {
+        const dot = (ex * dx + ey * dy) / (d || 1);
+        if (dot > 0.3 || d < 30) {
+          e.takeDamage(this.knifeDamage * 0.5);
+          e.x += (ex / (d||1)) * 15; e.y += (ey / (d||1)) * 15;
+          // ★ 冲刺撞人特效
+          for (let i = 0; i < 12; i++) { const a = rand(0, TAU); const sp = rand(3, 7); game.particles.push(new Particle(e.x, e.y, Math.cos(a)*sp, Math.sin(a)*sp, 20, '#6ab0ff', rand(2, 4))); }
+        }
+      }
+    }
+    game.shake = Math.min(game.shake + 3, 8);
+    for (let i = 0; i < 12; i++) { const a = rand(0, TAU); const sp = rand(1, 4); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 12, '#6ab0ff', rand(2, 3))); }
+  }
+
+  update() {
+    if (this.isDashing) {
+      this.dashTimer--;
+      this.dashTrail.push({ x: this.x, y: this.y });
+      if (this.dashTrail.length > 8) this.dashTrail.shift();
+      this.x += this.dashDir.x * 14;
+      this.y += this.dashDir.y * 14;
+      this.x = clamp(this.x, this.radius, canvas.width - this.radius);
+      this.y = clamp(this.y, this.radius, canvas.height - this.radius);
+      if (this.dashTimer <= 0) { this.isDashing = false; }
+      for (const e of game.enemies) {
+        if (e.dead || e.spawnAnim > 0) continue;
+        if (dist(this, e) < this.radius + e.radius + 10) {
+          e.takeDamage(this.knifeDamage * 0.3);
+          // ★ 冲刺持续撞人特效
+          if (game.time % 3 === 0) {
+            for (let i = 0; i < 4; i++) { const a = rand(0, TAU); const sp = rand(2, 5); game.particles.push(new Particle(e.x, e.y, Math.cos(a)*sp, Math.sin(a)*sp, 14, '#6ab0ff', rand(1.5, 3))); }
+          }
+        }
+      }
+      this.updateSkillTimers();
+      return;
+    }
+    let dx = 0, dy = 0;
+    if (game.keys['w'] || game.keys['arrowup']) dy -= 1;
+    if (game.keys['s'] || game.keys['arrowdown']) dy += 1;
+    if (game.keys['a'] || game.keys['arrowleft']) dx -= 1;
+    if (game.keys['d'] || game.keys['arrowright']) dx += 1;
+    if (game.touchState.move.active) { const len = Math.hypot(game.touchState.move.dx, game.touchState.move.dy); if (len > 8) { dx = game.touchState.move.dx / len; dy = game.touchState.move.dy / len; } }
+    if (dx !== 0 || dy !== 0) {
+      const len = Math.hypot(dx, dy); dx /= len; dy /= len;
+      this.x += dx * this.speed; this.y += dy * this.speed;
+      this.moveDir = { x: dx, y: dy };
+      if (game.time % 6 === 0) game.particles.push(new Particle(this.x - dx*10+rand(-2,2), this.y-dy*10+rand(-2,2), rand(-0.3,0.3), rand(-0.3,0.3), 16, '#4a4a45', 1.4));
+    }
+    this.x = clamp(this.x, this.radius, canvas.width - this.radius);
+    this.y = clamp(this.y, this.radius, canvas.height - this.radius);
+    if (game.touchState.aim.active) { const len = Math.hypot(game.touchState.aim.dx, game.touchState.aim.dy); if (len > 8) this.angle = Math.atan2(game.touchState.aim.dy, game.touchState.aim.dx); }
+    else this.angle = Math.atan2(game.mouse.y - this.y, game.mouse.x - this.x);
+
+    if (this.reloadTimer > 0 && !this.hasInfiniteAmmo && !this.usingKnife) { this.reloadTimer--; if (this.reloadTimer === 0) this.ammo = this.effectiveMag; }
+    if (this.regen > 0 && this.hp < this.maxHp) { this.regenAcc += this.regen / 60; if (this.regenAcc >= 1) { this.hp = Math.min(this.maxHp, this.hp + Math.floor(this.regenAcc)); this.regenAcc -= Math.floor(this.regenAcc); } }
+    this.stamina = Math.min(this.maxStamina, this.stamina + 0.4 * this.staminaRegenMult);
+    if (this.fireTimer > 0) this.fireTimer--;
+    if (this.muzzleFlash > 0) this.muzzleFlash--;
+    if (this.recoilOffset > 0) this.recoilOffset *= 0.7;
+    if (this.invuln > 0) this.invuln--;
+    if (this.knifeSlash > 0) this.knifeSlash--;
+    if (this.knifeAnim > 0) this.knifeAnim--;
+    this.updateSkillTimers();
+
+    const firing = game.mouse.down || game.touchState.aim.active;
+
+    if (this.usingKnife) {
+      if (firing && this.fireTimer <= 0) { if (this.canFire) { this.fireKnife(); this.canFire = false; } }
+      if (!firing) this.canFire = true;
+      return;
+    }
+    if (this.weapon.spinup) {
+      if (firing && this.fireTimer <= 0) {
+        if (!this.isSpinning) { this.isSpinning = true; this.spinupTimer = this.weapon.spinup; }
+        if (this.spinupTimer > 0) { this.spinupTimer--; return; }
+      } else if (!firing) { this.isSpinning = false; this.spinupTimer = 0; }
+    }
+    if (this.weapon.chargeable) {
+      if (firing && this.fireTimer <= 0 && this.reloadTimer <= 0) {
+        if (this.ammo > 0 || this.hasInfiniteAmmo) { this.isCharging = true; this.chargeTimer = Math.min(this.chargeTimer + 1, this.weapon.chargeTime); }
+      } else if (this.isCharging && !firing) {
+        const level = this.chargeTimer / this.weapon.chargeTime;
+        this.firePrimary(level);
+        this.isCharging = false; this.chargeTimer = 0;
+      } else if (!firing) { this.isCharging = false; this.chargeTimer = 0; }
+      return;
+    }
+    if (firing && this.fireTimer <= 0 && this.reloadTimer <= 0 && this.weaponKey) {
+      if (this.hasInfiniteAmmo || this.ammo > 0) { if (this.weapon.auto || this.canFire) { this.firePrimary(1); this.canFire = false; } }
+      else this.startReload();
+    }
+    if (!firing) this.canFire = true;
+  }
+
+  updateSkillTimers() {
+    for (const id of this.skills) {
+      const st = this.skillStates[id]; if (!st) continue;
+      if (st.active) {
+        st.activeTimer--;
+        if (st.activeTimer <= 0) {
+          st.active = false; st.activeTimer = 0;
+          const skill = SKILL_MAP[id];
+          st.cooldownTimer = skill ? skill.cooldown : 600;
+          this.onSkillDeactivate(id);
+        }
+      } else if (st.cooldownTimer > 0) {
+        st.cooldownTimer--;
+        if (st.cooldownTimer <= 0) {
+          st.cooldownTimer = 0; st.active = true;
+          const skill = SKILL_MAP[id];
+          st.activeTimer = skill ? skill.duration : 900;
+          this.onSkillActivate(id);
+        }
+      }
+    }
+    for (const id in this.skillTriggerCDs) if (this.skillTriggerCDs[id] > 0) this.skillTriggerCDs[id]--;
+  }
+  onSkillActivate(id) {
+    if (id === 'multishot') this.extraShots = 2;
+    if (id === 'pierce') this.pierceBonus = 5;
+    if (id === 'critmaster') { this.critChance += 0.3; this.critMult = 2.5; }
+    if (id === 'headshot_master') { this.skillBuffs.headshot = this.critMult; this.critMult *= 3; }
+    if (id === 'time_warp') { game.slowFactor = 0.6; }
+  }
+  onSkillDeactivate(id) {
+    if (id === 'multishot') this.extraShots = 0;
+    if (id === 'pierce') this.pierceBonus = 0;
+    if (id === 'critmaster') { this.critChance = Math.max(0, this.critChance - 0.3); this.critMult = 1.75; }
+    if (id === 'headshot_master') { if (this.skillBuffs.headshot !== undefined) { this.critMult = this.skillBuffs.headshot; delete this.skillBuffs.headshot; } }
+    if (id === 'time_warp') { game.slowFactor = 1; }
+  }
+
+  fireKnife() {
+    const cost = 15;
+    if (this.stamina < cost) return;
+    this.stamina -= cost;
+    this.fireTimer = 25; this.knifeSlash = 12; this.knifeAnim = 15;
+    const range = this.radius + 42; const halfAngle = Math.PI / 2.5;
+    const dmg = this.knifeDamage;
+    // ★ 攻击瞬间刀光粒子
+    for (let i = 0; i < 14; i++) {
+      const t = i / 14;
+      const a = this.angle + (-halfAngle + t * halfAngle * 2);
+      const r = this.radius + rand(22, 46);
+      const px = this.x + Math.cos(a) * r;
+      const py = this.y + Math.sin(a) * r;
+      game.particles.push(new Particle(px, py, Math.cos(a) * rand(1, 3), Math.sin(a) * rand(1, 3), 14, '#ffffff', rand(2, 4)));
+      if (i % 2 === 0) {
+        game.particles.push(new Particle(px, py, Math.cos(a) * rand(1, 2), Math.sin(a) * rand(1, 2), 22, '#6ab0ff', rand(1.5, 2.5)));
+      }
+    }
+    for (const e of game.enemies) {
+      if (e.dead || e.spawnAnim > 0) continue;
+      const dx = e.x - this.x, dy = e.y - this.y, d = Math.hypot(dx, dy);
+      if (d < range + e.radius) {
+        const angleToE = Math.atan2(dy, dx);
+        let diff = angleToE - this.angle;
+        while (diff > Math.PI) diff -= TAU; while (diff < -Math.PI) diff += TAU;
+        if (Math.abs(diff) < halfAngle) {
+          e.takeDamage(dmg);
+          const knockback = 12;
+          e.x += Math.cos(angleToE) * knockback; e.y += Math.sin(angleToE) * knockback;
+          // ★ 命中特效：红色溅射 + 切割痕
+          for (let i = 0; i < 15; i++) { const a = angleToE + rand(-0.6, 0.6); const sp = rand(3, 7); game.particles.push(new Particle(e.x, e.y, Math.cos(a)*sp, Math.sin(a)*sp, 25, '#ff5252', rand(2, 4))); }
+          game.particles.push(new Particle(e.x, e.y, 0, 0, 15, '#ffffff', 3, 'slash'));
+          game.shake = Math.min(game.shake + 3, 8);
+        }
+      }
+    }
+    game.shake = Math.min(game.shake + 2, 6);
+  }
+
+  firePrimary(chargeLevel = 1) {
+    const w = this.weapon;
+    const ws = this.weaponSlots[this.currentWeaponIndex];
+    const evo = (ws && ws.evolved && ws.evolutionData) ? ws.evolutionData : null;
+    this.fireTimer = this.effectiveFireRate * (evo && evo.fireRate ? evo.fireRate : 1);
+    if (!this.hasInfiniteAmmo) this.ammo--;
+    this.muzzleFlash = 6; this.recoilOffset = w.recoil;
+    const totalPellets = w.pellets + (this.hasMulti ? 2 : 0) + this.extraShots + (evo && evo.pellets ? evo.pellets : 0);
+    const dmgMult = w.chargeable ? (1 + (chargeLevel * (w.chargeDamageMult - 1))) : 1;
+    const evoDmgMult = evo && evo.damage ? evo.damage : 1;
+    const evoExplosive = evo && evo.explosive ? evo.explosive : (w.explosive || null);
+    const evoBurn = evo && evo.burn ? evo.burn : (w.burn || null);
+    const evoPierce = evo && evo.pierce ? evo.pierce : (w.pierce || 0);
+    for (let i = 0; i < totalPellets; i++) {
+      const spread = (Math.random() - 0.5) * this.effectiveSpread * 2;
+      const angle = this.angle + spread;
+      const isCrit = Math.random() < (this.critChance + (this.isSkillActive('critmaster') ? 0.3 : 0) + (this._synCrit || 0));
+      const dmg = w.damage * this.effectiveDamageMult * dmgMult * evoDmgMult * (isCrit ? (this.isSkillActive('critmaster') ? 2.5 : this.critMult) : 1);
+      const bx = this.x + Math.cos(this.angle) * (this.radius + 18);
+      const by = this.y + Math.sin(this.angle) * (this.radius + 18);
+      const opts = {
+        damage: dmg, color: w.color, glow: w.color,
+        bulletSpeed: w.instant ? 999 : this.effectiveBulletSpeed,
+        size: w.size * (w.chargeable ? (1 + chargeLevel * 0.5) : 1),
+        life: w.instant ? 3 : (this.hasInfiniteRange ? 99999 : Math.floor(w.life * this.weaponMods.bulletSpeed)),
+        pierce: this.pierceBonus + evoPierce + (this.isSkillActive('pierce') ? 5 : 0),
+        bounce: this.hasBounce ? 3 : (w.bounceBase || 0),
+        homing: this.hasHoming, boomerang: this.hasBoomerang,
+        split: this.hasSplit, shock: this.hasShock, chain: this.hasChain,
+        poison: this.hasPoison, freeze: this.hasFreeze,
+        explosive: evoExplosive, burn: evoBurn,
+        chainCount: w.chainCount || 0, bounceDamageMult: w.bounceDamageMult || 0,
+        instant: w.instant || false, flame: w.flame || false
+      };
+      const bullet = new Bullet(bx, by, angle, opts, 'player');
+      bullet.crit = isCrit;
+      game.bullets.push(bullet);
+    }
+    if (this.isSkillActive('split')) this.skillTriggerCDs['split'] = 180;
+    if (this.isSkillActive('chain')) this.skillTriggerCDs['chain'] = 120;
+    const pColor = w.flame ? '#ffaa44' : '#ffcc66';
+    for (let i = 0; i < 5; i++) { const a = this.angle + rand(-0.3, 0.3); const sp = rand(2, 5); game.particles.push(new Particle(this.x+Math.cos(this.angle)*(this.radius+18), this.y+Math.sin(this.angle)*(this.radius+18), Math.cos(a)*sp, Math.sin(a)*sp, 9, pColor, rand(1.8, 3.2))); }
+    const ea = this.angle + Math.PI/2 + rand(-0.15, 0.15);
+    game.particles.push(new Particle(this.x+Math.cos(this.angle)*6, this.y+Math.sin(this.angle)*6, Math.cos(ea)*2.2+rand(-0.4,0.4), Math.sin(ea)*2.2-1.4, 35, '#ccaa55', 1.8, 'shell'));
+    game.shake = Math.min(game.shake + w.shake, 12);
+    this.x -= Math.cos(this.angle) * w.recoil * 0.22; this.y -= Math.sin(this.angle) * w.recoil * 0.22;
+  }
+
+  startReload() {
+    if (this.usingKnife) return;
+    if (this.hasInfiniteAmmo) return;
+    if (this.reloadTimer > 0) return;
+    if (this.ammo >= this.effectiveMag) return;
+    const cost = 40;
+    if (this.stamina < cost) return;
+    this.stamina -= cost;
+    this.reloadTimer = this.effectiveReload;
+  }
+
+  takeDamage(amount, source) {
+    if (this.invuln > 0 || this.isDashing) return;
+    if (this.armor > 0) {
+      const absorbed = Math.min(this.armor, amount);
+      this.armor -= absorbed;
+      amount -= absorbed;
+      for (let i = 0; i < 6; i++) {
+        const a = rand(0, TAU); const sp = rand(1, 3);
+        game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 18, '#d8e0e8', rand(1.5, 2.5)));
+      }
+    }
+    if (amount <= 0) {
+      this.invuln = 15;
+      game.shake = Math.min(game.shake + 1, 5);
+      return;
+    }
+    this.hp -= amount;
+    this.invuln = 30;
+    game.shake = Math.min(game.shake + 4, 12);
+    if (this.thorns > 0 && source && !source.dead) source.takeDamage(amount * this.thorns, true);
+    const flash = document.getElementById('damage-flash'); flash.classList.remove('show'); void flash.offsetWidth; flash.classList.add('show'); setTimeout(() => flash.classList.remove('show'), 350);
+    for (let i = 0; i < 12; i++) { const a = rand(0, TAU); const sp = rand(1, 4); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 25, '#aa3030', rand(1.8, 3))); }
+    if (this.hp <= 0) { this.hp = 0; gameOver(); }
+  }
+
+  heal(amount) { this.hp = Math.min(this.maxHp, this.hp + amount); for (let i = 0; i < 10; i++) { const a = rand(0, TAU); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*1, Math.sin(a)*1-1, 28, '#4ad45a', rand(1.8, 2.8))); } }
+  addXP(amount) { this.xp += Math.floor(amount * this.xpMult); while (this.xp >= this.xpToNext) { this.xp -= this.xpToNext; this.level++; this.xpToNext = Math.floor(50 * Math.pow(1.30, this.level - 1)); triggerLevelUp(); } }
+  addMaterials(amount) { this.materials += Math.floor(amount * this.matMult); }
+
+  tryAddSkill(skillId) {
+    const skill = SKILL_MAP[skillId];
+    if (!skill) return 'error';
+    if (this.skills.has(skillId)) {
+      const st = this.skillStates[skillId];
+      if (st) { st.active = true; st.activeTimer = skill.duration; st.cooldownTimer = 0; this.onSkillActivate(skillId); }
+      return 'owned';
+    }
+    if (this.skills.size < this.skillSlots) {
+      this.skills.add(skillId);
+      this.skillStates[skillId] = { active: true, activeTimer: skill.duration, cooldownTimer: 0 };
+      this.skillTriggerCDs[skillId] = 0;
+      this.onSkillActivate(skillId);
+      if (game.state === 'playing') updateSkillsHUD();
+      return 'added';
+    }
+    return 'full';
+  }
+  replaceSkill(oldId, newId) {
+    const oldSkill = SKILL_MAP[oldId];
+    if (oldSkill) this.onSkillDeactivate(oldId);
+    this.skills.delete(oldId);
+    delete this.skillStates[oldId]; delete this.skillTriggerCDs[oldId];
+    this.skills.add(newId);
+    const newSkill = SKILL_MAP[newId];
+    this.skillStates[newId] = { active: true, activeTimer: newSkill.duration, cooldownTimer: 0 };
+    this.skillTriggerCDs[newId] = 0;
+    this.onSkillActivate(newId);
+    if (game.state === 'playing') updateSkillsHUD();
+  }
+
+  draw() {
+    if (this.isDashing) {
+      for (let i = 0; i < this.dashTrail.length; i++) {
+        const t = this.dashTrail[i]; const a = i / this.dashTrail.length;
+        ctx.globalAlpha = a * 0.4; ctx.fillStyle = '#6ab0ff';
+        ctx.beginPath(); ctx.arc(t.x, t.y, this.radius * 0.9, 0, TAU); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (this.armor > 0 && this.maxArmor > 0) {
+      const ratio = this.armor / this.maxArmor;
+      ctx.strokeStyle = `rgba(200, 216, 232, ${0.3 + ratio * 0.4})`;
+      ctx.lineWidth = 2 + ratio * 2;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 8 + ratio * 3, 0, TAU); ctx.stroke();
+    }
+    ctx.save(); ctx.translate(this.x, this.y);
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.beginPath(); ctx.ellipse(0, 7, this.radius*1.0, this.radius*0.35, 0, 0, TAU); ctx.fill();
+    ctx.rotate(this.angle); ctx.translate(-this.recoilOffset * 0.3, 0);
+    const flicker = (this.invuln > 0 && Math.floor(game.time / 2) % 2 === 0);
+    const vestColor = flicker ? '#6ab0ff' : '#3a5a7a';
+    const hasActiveSkill = Array.from(this.skills).some(id => this.isSkillActive(id));
+    const accent = flicker ? '#aaeeff' : (hasActiveSkill ? '#b347d9' : '#6a8aaa');
+    if (this.usingKnife) {
+      const swingProgress = this.knifeAnim > 0 ? (15 - this.knifeAnim) / 15 : 0;
+      const swingAngle = this.knifeAnim > 0 ? Math.sin(swingProgress * Math.PI) * 1.2 : 0;
+      ctx.save(); ctx.rotate(swingAngle);
+      // ★ 小刀待机发光
+      const glowIntensity = 0.3 + 0.2 * Math.sin(game.time * 0.15);
+      ctx.shadowColor = '#ffb800';
+      ctx.shadowBlur = 8 * glowIntensity;
+      ctx.fillStyle = '#cccccc'; ctx.fillRect(this.radius - 2, -2, 20, 4);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#444444'; ctx.fillRect(this.radius - 2, -3, 6, 6);
+      ctx.restore();
+      if (this.knifeSlash > 0) {
+        const f = this.knifeSlash / 12;
+        const startAngle = -Math.PI / 2.5; const endAngle = Math.PI / 2.5;
+        const curAngle = startAngle + (endAngle - startAngle) * swingProgress;
+        // ★ 三层刀光：外蓝 + 中白 + 内亮白
+        ctx.strokeStyle = `rgba(106, 176, 255, ${f * 0.4})`; ctx.lineWidth = 14;
+        ctx.beginPath(); ctx.arc(0, 0, this.radius + 35, startAngle, curAngle); ctx.stroke();
+        ctx.strokeStyle = `rgba(200, 220, 255, ${f * 0.7})`; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(0, 0, this.radius + 35, startAngle, curAngle); ctx.stroke();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${f * 0.95})`; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(0, 0, this.radius + 35, startAngle, curAngle); ctx.stroke();
+        // ★ 刀尖亮点
+        const tipX = Math.cos(curAngle) * (this.radius + 35);
+        const tipY = Math.sin(curAngle) * (this.radius + 35);
+        ctx.fillStyle = `rgba(255, 255, 255, ${f})`;
+        ctx.beginPath(); ctx.arc(tipX, tipY, 4, 0, TAU); ctx.fill();
+      }
+    } else if (this.weaponKey) {
+      ctx.fillStyle = '#1a1d23'; ctx.fillRect(this.radius - 2, -3, 22, 6);
+      ctx.fillStyle = '#0a0c10'; ctx.fillRect(this.radius + 18, -2.5, 5, 5);
+      if (this.muzzleFlash > 0) { const f = this.muzzleFlash / 6; ctx.fillStyle = `rgba(255,220,100,${f*0.9})`; ctx.beginPath(); ctx.arc(this.radius+24, 0, 8*f+3, 0, TAU); ctx.fill(); }
+    }
+    ctx.fillStyle = vestColor; ctx.beginPath(); ctx.ellipse(0, 0, this.radius*0.85, this.radius*0.95, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#2a3a4a'; ctx.fillRect(-this.radius*0.7, -2, this.radius*1.4, 4);
+    ctx.fillStyle = '#c89060'; ctx.beginPath(); ctx.arc(0, 0, this.radius*0.55, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#2a3a4a'; ctx.beginPath(); ctx.arc(0, 0, this.radius*0.55, Math.PI, TAU); ctx.fill();
+    ctx.fillStyle = accent; ctx.fillRect(-this.radius*0.55, -this.radius*0.55, this.radius*1.1, 1.5);
+    ctx.restore();
+    if (this.invuln > 0 && !this.isDashing) {
+      ctx.strokeStyle = `rgba(106,176,255,${0.4 + 0.3 * Math.sin(game.time * 0.4)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 6, 0, TAU); ctx.stroke();
+    }
+    // ★ 换弹进度环（角色头顶）
+    if (this.reloadTimer > 0) {
+      const progress = 1 - this.reloadTimer / this.effectiveReload;
+      const cx = this.x;
+      const cy = this.y - this.radius - 22;
+      const r = 10;
+      // 底色
+      ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, TAU);
+      ctx.stroke();
+      // 进度
+      ctx.strokeStyle = '#ffb800';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + TAU * progress);
+      ctx.stroke();
+      // 中间 R
+      ctx.fillStyle = '#ffb800';
+      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('R', cx, cy + 1);
+    }
+  }
+}
+
+// ===================== 敌人 =====================
+class Enemy {
+  constructor(x, y, type, waveBonus) {
+    this.x = x; this.y = y; this.type = type;
+    const t = ENEMY_TYPES[type]; Object.assign(this, t);
+    const buff = BOSS_KEYS.includes(type) ? 1 : (1 + waveBonus * 0.04);
+    this.hp = t.hp * buff; this.maxHp = this.hp;
+    this.damage = t.damage * (1 + waveBonus * 0.02);
+    this.angle = 0; this.dead = false; this.hitFlash = 0; this.spawnAnim = 18;
+    this.attackCD = 0; this.fireTimer = Math.floor(Math.random()*60)+30;
+    this.sideStep = Math.random() < 0.5 ? 1 : -1; this.healTimer = 0;
+    this.slow = 0; this.poisonStacks = 0; this.poisonTimer = 0;
+    this.burnStacks = 0; this.burnTimer = 0; this.burnDps = 0;
+    this.burstCount = t.burstCount || 0; this.burstShotsLeft = 0; this.burstDelay = 0;
+    this.flameParticles = 0; this.dashTimer = 0; this.dashCD = 120; this.enraged = false;
+    if (this.isBoss) game.boss = this;
+  }
+  get isBoss() { return BOSS_KEYS.includes(this.type); }
+  update() {
+    if (this.spawnAnim > 0) { this.spawnAnim--; return; }
+    const p = game.player; const dx = p.x - this.x; const dy = p.y - this.y; const d = Math.hypot(dx, dy);
+    this.angle = Math.atan2(dy, dx);
+    const slowMult = (this.slow > 0 ? 0.5 : 1) * (game.slowFactor || 1); if (this.slow > 0) this.slow--;
+    if (this.poisonStacks > 0) { this.poisonTimer--; if (this.poisonTimer <= 0) { this.takeDamage(this.poisonStacks * 2, true); this.poisonStacks = Math.max(0, this.poisonStacks - 1); this.poisonTimer = 30; } }
+    if (this.burnStacks > 0) {
+      this.burnTimer--;
+      if (this.burnTimer % 60 === 0) this.takeDamage(this.burnDps, true);
+      if (this.burnTimer <= 0) { this.burnStacks = 0; this.burnDps = 0; }
+      if (game.time % 4 === 0) game.particles.push(new Particle(this.x + rand(-8,8), this.y + rand(-8,8), rand(-0.5,0.5), -rand(1,2.5), 18, '#ff7a18', rand(2,3), 'flame'));
+    }
+    const sp = this.speed * slowMult;
+    switch (this.behavior) {
+      case 'chase': if (d > 0.1) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } if (d < this.radius+p.radius+2 && this.attackCD <= 0) { p.takeDamage(this.damage, this); this.attackCD = 25; } break;
+      case 'shooter': const desired = this.sniper ? 380 : (this.weapon === 'shotgun' ? 160 : 250); if (d < desired-30) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; } else if (d > desired+50) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } else { this.x += -dy/d*sp*0.5*this.sideStep; this.y += dx/d*sp*0.5*this.sideStep; } if (d < this.range) { if (this.burstShotsLeft > 0) { this.burstDelay--; if (this.burstDelay <= 0) { this.shoot(); this.burstShotsLeft--; this.burstDelay = 6; } if (this.burstShotsLeft === 0) this.fireTimer = this.fireRate; } else { this.fireTimer--; if (this.fireTimer <= 0) { if (this.burstCount > 0) { this.burstShotsLeft = this.burstCount; this.burstDelay = 0; } else { this.shoot(); this.fireTimer = this.fireRate; } } } } break;
+      case 'bomber': if (d > 0.1) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } if (d < this.explodeRadius * 0.7) this.explode(); break;
+      case 'medic': let target = null, minD = Infinity; for (const e of game.enemies) { if (e === this || e.dead || e.type === 'medic') continue; const ed = dist(this, e); if (ed < minD) { minD = ed; target = e; } } if (target) { const tdx = target.x-this.x, tdy = target.y-this.y, td = Math.hypot(tdx,tdy); if (td > 40) { this.x += (tdx/td)*sp; this.y += (tdy/td)*sp; } this.healTimer--; if (this.healTimer <= 0) { this.healTimer = this.healRate; for (const e of game.enemies) { if (e === this || e.dead) continue; if (dist(this, e) < this.healRange) { e.hp = Math.min(e.maxHp, e.hp + this.healAmount); } } } } else { if (d > 0.1) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } } if (d < this.radius+p.radius+2 && this.attackCD <= 0) { p.takeDamage(this.damage, this); this.attackCD = 25; } break;
+      case 'flamer': const fdesired = 130; if (d > fdesired+20) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } else if (d < fdesired-30) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; } else { this.x += -dy/d*sp*0.4*this.sideStep; this.y += dx/d*sp*0.4*this.sideStep; } if (d < this.flameRange) { this.flameParticles++; if (this.flameParticles >= 2) { this.flameParticles = 0; for (let i = 0; i < 3; i++) { const a = this.angle+rand(-0.25,0.25); const sp2 = rand(3,7); game.particles.push(new Particle(this.x+Math.cos(this.angle)*(this.radius+8), this.y+Math.sin(this.angle)*(this.radius+8), Math.cos(a)*sp2, Math.sin(a)*sp2, 25, i===0?'#ff4400':(i===1?'#ff8800':'#ffcc00'), rand(3,5), 'flame')); } const angDiff = Math.abs(((this.angle-Math.atan2(dy,dx)+Math.PI)%TAU)-Math.PI); if (angDiff < 0.4) p.takeDamage(this.flameDamage, this); } } break;
+      case 'boss_turret': const bDesired = 280; if (d < bDesired-30) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; } else if (d > bDesired+40) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } else { this.x += -dy/d*sp*0.3*this.sideStep; this.y += dx/d*sp*0.3*this.sideStep; } this.fireTimer--; if (this.fireTimer <= 0) { this.fireTimer = 150; for (let i = 0; i < 24; i++) { const a = (i/24)*TAU+game.time*0.01; game.bullets.push(new Bullet(this.x, this.y, a, {color:'#ff5252',glow:'#ff5252',damage:12,bulletSpeed:7,size:4,life:120}, 'enemy')); } } this.attackCD--; if (this.attackCD <= 0) { this.attackCD = 40; for (let i = -2; i <= 2; i++) { const a = this.angle+i*0.15; game.bullets.push(new Bullet(this.x, this.y, a, {color:'#ffaa44',glow:'#ffaa44',damage:10,bulletSpeed:12,size:3,life:80}, 'enemy')); } } break;
+      case 'boss_summoner': const sDesired = 350; if (d < sDesired-30) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; } else if (d > sDesired+40) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } this.fireTimer--; if (this.fireTimer <= 0) { this.fireTimer = 200; for (let i = 0; i < 3; i++) { const a = rand(0,TAU); const r = 60; const ex = clamp(this.x+Math.cos(a)*r, 20, canvas.width-20); const ey = clamp(this.y+Math.sin(a)*r, 20, canvas.height-20); const e = new Enemy(ex, ey, 'runner', game.wave); e.spawnAnim = 20; game.enemies.push(e); } } this.attackCD--; if (this.attackCD <= 0) { this.attackCD = 90; for (let i = 0; i < 16; i++) { const a = (i/16)*TAU; game.bullets.push(new Bullet(this.x, this.y, a, {color:'#b347d9',glow:'#b347d9',damage:8,bulletSpeed:6,size:3,life:90}, 'enemy')); } } break;
+      case 'boss_stalker': this.dashCD--; if (this.dashCD <= 0 && this.dashTimer === 0) { this.dashTimer = 40; this.dashCD = 180; } let stalkerSpeed = this.speed; if (this.dashTimer > 20) { stalkerSpeed *= 0.3; } else if (this.dashTimer > 0) { stalkerSpeed = 12; } this.dashTimer--; if (d > 0.1) { this.x += (dx/d)*stalkerSpeed; this.y += (dy/d)*stalkerSpeed; } if (d < this.radius+p.radius+2 && this.attackCD <= 0) { p.takeDamage(this.damage, this); this.attackCD = 30; } break;
+      case 'boss_artillery': if (d < 120) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; this.attackCD--; if (this.attackCD <= 0 && d < 120) { this.attackCD = 60; game.shockwaves.push({x:this.x,y:this.y,r:5,maxR:150,life:25,damaging:true,damage:40,hit:new Set()}); game.shake = Math.min(game.shake+8,15); } } else { const artDesired = 300; if (d < artDesired-30) { this.x -= (dx/d)*sp; this.y -= (dy/d)*sp; } else if (d > artDesired+40) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } this.fireTimer--; if (this.fireTimer <= 0) { this.fireTimer = 120; for (let i = 0; i < 4; i++) { const a = this.angle+(i-1.5)*0.4; const b = new Bullet(this.x, this.y, a, {color:'#ff8800',glow:'#ffaa00',damage:18,bulletSpeed:6,size:5,life:200,homing:true}, 'enemy'); game.bullets.push(b); } } } break;
+      case 'boss_berserker': if (!this.enraged && this.hp < this.maxHp*0.5) { this.enraged = true; this.speed = 4.5; this.damage = 50; this.color = '#c41e3a'; this.accent = '#ff5252'; this.radius = 40; game.shake = Math.min(game.shake+10,15); } if (d > 0.1) { this.x += (dx/d)*sp; this.y += (dy/d)*sp; } if (d < this.radius+p.radius+2 && this.attackCD <= 0) { p.takeDamage(this.damage, this); this.attackCD = 25; } break;
+    }
+    if (this.attackCD > 0) this.attackCD--; if (this.hitFlash > 0) this.hitFlash--;
+  }
+  shoot() { const ang = this.angle+rand(-0.05,0.05); const bx = this.x+Math.cos(this.angle)*(this.radius+12); const by = this.y+Math.sin(this.angle)*(this.radius+12); if (this.pellets) { for (let i = 0; i < this.pellets; i++) { const s = (Math.random()-0.5)*this.spread*2; game.bullets.push(new Bullet(bx, by, ang+s, {color:this.accent,glow:this.accent,damage:this.bulletDamage,bulletSpeed:this.bulletSpeed,size:3,life:35}, 'enemy')); } } else { game.bullets.push(new Bullet(bx, by, ang, {color:this.accent,glow:this.accent,damage:this.bulletDamage,bulletSpeed:this.bulletSpeed,size:this.sniper?4.5:3.2,life:this.sniper?120:80}, 'enemy')); } }
+  explode() { this.dead = true; const p = game.player; const d = dist(this, p); if (d < this.explodeRadius) p.takeDamage(this.damage*(1-d/this.explodeRadius), this); for (let i = 0; i < 40; i++) { const a = rand(0,TAU); const sp = rand(2,8); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 45, i%2?'#ff7a18':'#ffcc44', rand(2,5))); } game.shake = Math.min(game.shake+6,12); game.shockwaves.push({x:this.x,y:this.y,r:5,maxR:this.explodeRadius,life:18}); }
+  takeDamage(amount, fromDot) { if (this.dead) return; if (this.shield && !fromDot) { const p = game.player; const angToP = Math.atan2(p.y-this.y, p.x-this.x); const diff = Math.abs(((this.angle-angToP+Math.PI)%TAU)-Math.PI); if (diff < 0.9) amount *= (1-this.shield); } this.hp -= amount; this.hitFlash = 4; game.floaters.push({x:this.x+rand(-8,8),y:this.y-this.radius-4,text:Math.ceil(amount),life:32,maxLife:32,vy:-1.4,color:amount>200?'#ff5252':'#ffcc44',size:amount>200?15:12}); for (let i = 0; i < 4; i++) { const a = rand(0,TAU); const sp = rand(1,3); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 18, '#aa3030', rand(1.5,2.5))); } if (this.hp <= 0) this.die(); }
+  die() {
+    if (this.dead) return; this.dead = true;
+    if (game.boss === this) game.boss = null;
+    game.score += this.score; game.player.kills++;
+    if (game.player.lifesteal > 0) game.player.heal(game.player.lifesteal);
+    const matCount = this.isBoss ? 80 : Math.ceil(this.score * 0.65);
+    const matOrbs = Math.min(matCount, 12);
+    const perOrb = Math.ceil(matCount / matOrbs);
+    for (let i = 0; i < matOrbs; i++) {
+      const a = rand(0, TAU); const sp = rand(1, 4);
+      game.materials.push(new MaterialOrb(this.x+rand(-6,6), this.y+rand(-6,6), Math.cos(a)*sp, Math.sin(a)*sp, perOrb));
+    }
+    for (let i = 0; i < 22; i++) { const a = rand(0,TAU); const sp = rand(1.5,6); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 35, '#aa3030', rand(1.8,3.5))); }
+    if (game.player.hasShock) game.shockwaves.push({x:this.x,y:this.y,r:5,maxR:85,life:16,damaging:true,damage:35,hit:new Set()});
+    const xpOrbCount = this.isBoss ? 15 : Math.min(5, Math.ceil(this.xp/12));
+    const xpPerOrb = this.xp/xpOrbCount;
+    for (let i = 0; i < xpOrbCount; i++) { const a = rand(0,TAU); const sp = rand(1, this.isBoss?5:3); game.orbs.push(new ExpOrb(this.x+rand(-5,5), this.y+rand(-5,5), Math.cos(a)*sp, Math.sin(a)*sp, xpPerOrb)); }
+    game.shake = Math.min(game.shake+1.5,8); addKillFeed(this.name, this.score);
+    if (this.isBoss) {
+      game.drops.push(new Drop(this.x-20, this.y, 'health', null));
+      game.drops.push(new Drop(this.x+20, this.y, 'ammo', null));
+      if (this.bossDrop) {
+        game.drops.push(new Drop(this.x, this.y - 20, 'boss', this.bossDrop));
+      }
+      showFloater(this.x, this.y, 'BOSS 击破！', '#ffb800');
+    } else if (this.isElite) {
+      game.drops.push(new Drop(this.x, this.y, 'health', null));
+      game.drops.push(new Drop(this.x + 20, this.y, 'ammo', null));
+      game.drops.push(new Drop(this.x - 20, this.y, 'health', null));
+    } else {
+      const r = Math.random();
+      const luck = game.player.dropLuck;
+      if (r < 0.15*luck) game.drops.push(new Drop(this.x, this.y, 'ammo', null));
+      else if (r < 0.28*luck) game.drops.push(new Drop(this.x, this.y, 'health', null));
+    }
+  }
+  draw() {
+    if (this.spawnAnim > 0) { const t = 1 - this.spawnAnim/18; ctx.save(); ctx.translate(this.x, this.y); ctx.globalAlpha = t; ctx.strokeStyle = this.accent; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, this.radius*(2-t), 0, TAU); ctx.stroke(); ctx.restore(); return; }
+    ctx.save(); ctx.translate(this.x, this.y);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.ellipse(0, 6, this.radius*0.95, this.radius*0.32, 0, 0, TAU); ctx.fill();
+    if (this.slow > 0) { ctx.strokeStyle = 'rgba(74,212,240,0.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, this.radius+3, 0, TAU); ctx.stroke(); }
+    if (this.poisonStacks > 0) { ctx.strokeStyle = 'rgba(74,220,90,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, this.radius+5, 0, TAU); ctx.stroke(); }
+    if (this.burnStacks > 0) { ctx.strokeStyle = 'rgba(255,120,24,0.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, this.radius+7, 0, TAU); ctx.stroke(); }
+    ctx.rotate(this.angle);
+    const flashing = this.hitFlash > 0; const vestColor = flashing ? '#ffffff' : this.color; const skinColor = flashing ? '#ffffff' : this.skin;
+    let gunLen = 18; if (this.weapon === 'rifle' || this.weapon === 'smg' || this.weapon === 'lmg') gunLen = 26; if (this.weapon === 'sniper') gunLen = 30; if (this.weapon === 'shotgun') gunLen = 22; if (this.weapon === 'flamer') gunLen = 24;
+    if (this.weapon !== 'none') { ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.radius-2, -2.5, gunLen, 5); }
+    if (this.shape === 'human_bomb') { ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-this.radius*0.5, -this.radius*0.5, this.radius, this.radius); const pulse = 0.5+0.5*Math.sin(game.time*0.4); ctx.fillStyle = `rgba(255,200,60,${pulse})`; ctx.beginPath(); ctx.arc(0, 0, 3, 0, TAU); ctx.fill(); }
+    if (this.shape === 'human_heavy') { ctx.fillStyle = vestColor; ctx.fillRect(-this.radius*0.9, -this.radius*0.85, this.radius*1.8, this.radius*1.7); ctx.fillStyle = this.accent; ctx.beginPath(); ctx.arc(0, 0, this.radius*0.25, 0, TAU); ctx.fill(); } else { ctx.fillStyle = vestColor; ctx.beginPath(); ctx.ellipse(0, 0, this.radius*0.78, this.radius*0.88, 0, 0, TAU); ctx.fill(); }
+    if (this.shape === 'human_shield') { ctx.fillStyle = '#1a3a6a'; ctx.fillRect(this.radius-2, -this.radius-1, 5, this.radius*2+2); }
+    if (this.shape === 'human_medic') { ctx.fillStyle = '#ffffff'; ctx.fillRect(-3, -this.radius*0.4, 6, this.radius*0.8); ctx.fillRect(-this.radius*0.4, -3, this.radius*0.8, 6); }
+    ctx.fillStyle = skinColor; ctx.beginPath(); ctx.arc(0, 0, this.radius*0.5, 0, TAU); ctx.fill();
+    ctx.restore();
+    if (this.hp < this.maxHp && this.spawnAnim === 0 && !this.isBoss) { const bw = this.radius*2.2; const bx = this.x-bw/2; const by = this.y-this.radius-8; ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(bx-1, by-1, bw+2, 3); ctx.fillStyle = this.color; ctx.fillRect(bx, by, bw*(this.hp/this.maxHp), 1.5); }
+  }
+}
+
+// ===================== 子弹 =====================
+class Bullet {
+  constructor(x, y, angle, opts, owner) {
+    this.x = x; this.y = y;
+    this.vx = Math.cos(angle)*opts.bulletSpeed; this.vy = Math.sin(angle)*opts.bulletSpeed;
+    this.angle = angle; this.baseSpeed = opts.bulletSpeed;
+    this.damage = opts.damage; this.color = opts.color; this.glow = opts.glow||opts.color;
+    this.size = opts.size||3; this.life = opts.life||60;
+    this.owner = owner; this.pierce = opts.pierce||0; this.bounce = opts.bounce||0;
+    this.homing = opts.homing||false; this.boomerang = opts.boomerang||false; this.split = opts.split||false;
+    this.shock = opts.shock||false; this.chain = opts.chain||false;
+    this.poison = opts.poison||false; this.freeze = opts.freeze||false;
+    this.explosive = opts.explosive||null; this.burn = opts.burn||null;
+    this.chainCount = opts.chainCount||0; this.bounceDamageMult = opts.bounceDamageMult||0;
+    this.instant = opts.instant||false; this.flame = opts.flame||false;
+    this.hitEnemies = new Set(); this.dead = false; this.trail = []; this.crit = false;
+    this.maxDist = 500; this.distTraveled = 0; this.returning = false;
+    this.splitTriggered = false; this.chainTriggered = false; this.bounceCount = 0;
+  }
+  update() {
+    this.trail.push({x:this.x,y:this.y}); if (this.trail.length > 8) this.trail.shift();
+    if (this.homing) { let target = null; if (this.owner === 'player') { let nd = Infinity; for (const e of enemiesNear(this.x, this.y, 180)) { if (e.dead || e.spawnAnim > 0) continue; const d = dist(this, e); if (d < nd && d < 180) { nd = d; target = e; } } } else if (this.owner === 'enemy') target = game.player; if (target) { const targetAngle = Math.atan2(target.y-this.y, target.x-this.x); const cur = Math.atan2(this.vy, this.vx); let diff = targetAngle - cur; while (diff > Math.PI) diff -= TAU; while (diff < -Math.PI) diff += TAU; const newAngle = cur + clamp(diff, -0.15, 0.15); this.vx = Math.cos(newAngle)*this.baseSpeed; this.vy = Math.sin(newAngle)*this.baseSpeed; } }
+    if (this.boomerang && this.owner === 'player') { if (!this.returning) { this.distTraveled += this.baseSpeed; if (this.distTraveled > this.maxDist) this.returning = true; } else { const targetAngle = Math.atan2(game.player.y-this.y, game.player.x-this.x); const cur = Math.atan2(this.vy, this.vx); let diff = targetAngle - cur; while (diff > Math.PI) diff -= TAU; while (diff < -Math.PI) diff += TAU; const newAngle = cur + clamp(diff, -0.2, 0.2); this.vx = Math.cos(newAngle)*this.baseSpeed; this.vy = Math.sin(newAngle)*this.baseSpeed; if (dist(this, game.player) < 20) this.dead = true; } }
+    this.x += this.vx; this.y += this.vy; this.life--;
+    if (this.bounce > 0) {
+      let bounced = false;
+      if (this.x < 0 || this.x > canvas.width) { this.vx = -this.vx; this.bounce--; bounced = true; this.bounceCount++; }
+      if (this.y < 0 || this.y > canvas.height) { this.vy = -this.vy; this.bounce--; bounced = true; this.bounceCount++; }
+      if (bounced && this.bounceDamageMult) this.damage *= (1 + this.bounceDamageMult);
+    }
+    if (this.life <= 0 || this.x < -80 || this.x > canvas.width+80 || this.y < -80 || this.y > canvas.height+80) {
+      if (this.explosive && this.owner === 'player') this.detonate();
+      this.dead = true; return;
+    }
+    if (this.owner === 'player') {
+      for (const e of enemiesNear(this.x, this.y, this.size + 60)) {
+        if (e.dead || e.spawnAnim > 0) continue;
+        if (this.hitEnemies.has(e)) continue;
+        if (dist(this, e) < e.radius+this.size) {
+          this.onHitEnemy(e);
+          if (this.instant) { this.dead = true; break; }
+          if (this.pierce <= 0) { this.dead = true; if (this.explosive) this.detonate(); break; }
+          else this.pierce--;
+        }
+      }
+    } else if (this.owner === 'enemy') {
+      const p = game.player;
+      if (dist(this, p) < p.radius+this.size) { p.takeDamage(this.damage); this.dead = true; }
+    }
+  }
+  detonate() {
+    if (!this.explosive) return;
+    game.shockwaves.push({ x: this.x, y: this.y, r: 5, maxR: this.explosive.radius, life: 18, damaging: true, damage: this.explosive.damage, hit: new Set() });
+    game.shake = Math.min(game.shake + 6, 14);
+    for (let i = 0; i < 22; i++) { const a = rand(0, TAU); const sp = rand(2, 7); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 35, i%2?'#ff7a18':'#ffcc44', rand(2, 5))); }
+  }
+  onHitEnemy(e) {
+    e.takeDamage(this.damage); this.hitEnemies.add(e);
+    if (this.poison) { e.poisonStacks = Math.min(5, e.poisonStacks+1); e.poisonTimer = 30; }
+    if (this.freeze) e.slow = 90;
+    if (this.burn) { e.burnStacks = Math.min(5, e.burnStacks + 1); e.burnTimer = this.burn.duration; e.burnDps = this.burn.dps * e.burnStacks; }
+    if (this.split && !this.splitTriggered) { this.splitTriggered = true; for (let i = 0; i < 2; i++) { const a = this.angle + (i===0 ? Math.PI/3 : -Math.PI/3); const b = new Bullet(this.x, this.y, a, {damage:this.damage*0.5,color:this.color,glow:this.glow,bulletSpeed:this.baseSpeed,size:this.size*0.8,life:35}, 'player'); game.bullets.push(b); } }
+    if (this.chain && !this.chainTriggered) { this.chainTriggered = true; let nearest = null, nd = Infinity; for (const e2 of enemiesNear(this.x, this.y, 140)) { if (e2 === e || e2.dead || e2.spawnAnim > 0) continue; const d = dist(this, e2); if (d < nd && d < 140) { nd = d; nearest = e2; } } if (nearest) { nearest.takeDamage(this.damage*0.6); game.lightnings.push({x1:this.x,y1:this.y,x2:nearest.x,y2:nearest.y,life:7}); } }
+    if (this.chainCount > 0) {
+      let chainSource = e; let chainLeft = this.chainCount;
+      const chainHit = new Set([e]);
+      while (chainLeft > 0) {
+        let near = null, nd = Infinity;
+        for (const e2 of enemiesNear(chainSource.x, chainSource.y, 160)) {
+          if (chainHit.has(e2) || e2.dead || e2.spawnAnim > 0) continue;
+          const d = Math.hypot(e2.x - chainSource.x, e2.y - chainSource.y);
+          if (d < nd && d < 160) { nd = d; near = e2; }
+        }
+        if (!near) break;
+        near.takeDamage(this.damage * 0.6);
+        game.lightnings.push({ x1: chainSource.x, y1: chainSource.y, x2: near.x, y2: near.y, life: 7 });
+        chainHit.add(near); chainSource = near; chainLeft--;
+      }
+    }
+    for (let i = 0; i < 4; i++) { const a = rand(0,TAU); const sp = rand(1,2.5); game.particles.push(new Particle(this.x, this.y, Math.cos(a)*sp, Math.sin(a)*sp, 12, this.glow, rand(1,2.2))); }
+  }
+  draw() {
+    for (let i = 0; i < this.trail.length; i++) { const t = this.trail[i]; const a = i/this.trail.length; ctx.globalAlpha = a*0.4; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(t.x, t.y, Math.max(0.5, this.size*a*0.7), 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    if (this.flame) { ctx.globalAlpha = 0.7; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 1.5, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; return; }
+    if (this.explosive) { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, TAU); ctx.fill(); ctx.strokeStyle = '#ffaa44'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.x, this.y, this.size + 2, 0, TAU); ctx.stroke(); return; }
+    if (this.instant) { ctx.strokeStyle = this.color; ctx.lineWidth = this.size; ctx.beginPath(); ctx.moveTo(this.x - this.vx * 10, this.y - this.vy * 10); ctx.lineTo(this.x, this.y); ctx.stroke(); return; }
+    ctx.fillStyle = this.color;
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, TAU); ctx.fill();
+    if (this.crit) { ctx.strokeStyle = '#ff5252'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.x, this.y, this.size+2, 0, TAU); ctx.stroke(); }
+  }
+}
+
+// ===================== 粒子（★ 新增 slash 类型） =====================
+class Particle {
+  constructor(x,y,vx,vy,life,color,size,type) {
+    this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.life=life;this.maxLife=life;this.color=color;this.size=size;this.type=type||'normal';this.dead=false;this.rotation=rand(0,TAU);this.rotSpeed=rand(-0.2,0.2);
+  }
+  update() {
+    this.x+=this.vx;this.y+=this.vy;
+    if(this.type==='shell'){this.vy+=0.18;this.vx*=0.98;this.rotation+=this.rotSpeed;}
+    else if(this.type==='smoke'){this.vx*=0.95;this.vy*=0.95;this.vy-=0.05;}
+    else if(this.type==='flame'){this.vx*=0.9;this.vy*=0.9;this.vy-=0.1;}
+    else {this.vx*=0.92;this.vy*=0.92;}
+    this.life--; if(this.life<=0)this.dead=true;
+  }
+  draw() {
+    const a=this.life/this.maxLife;
+    if(this.type==='shell'){ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.rotation);ctx.globalAlpha=a;ctx.fillStyle=this.color;ctx.fillRect(-2.2,-0.8,4.4,1.6);ctx.restore();ctx.globalAlpha=1;}
+    else if(this.type==='smoke'){ctx.globalAlpha=a*0.35;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.size*(2-a),0,TAU);ctx.fill();ctx.globalAlpha=1;}
+    else if(this.type==='flame'){ctx.globalAlpha=a*0.8;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.size*(1.5-a*0.5),0,TAU);ctx.fill();ctx.globalAlpha=1;}
+    else if(this.type==='slash'){
+      // ★ 十字切割痕
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-this.size * 3, 0); ctx.lineTo(this.size * 3, 0);
+      ctx.moveTo(0, -this.size * 3); ctx.lineTo(0, this.size * 3);
+      ctx.stroke();
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+    else {ctx.globalAlpha=a;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,Math.max(0.5,this.size*a),0,TAU);ctx.fill();ctx.globalAlpha=1;}
+  }
+}
+
+// ===================== 经验球 =====================
+class ExpOrb { constructor(x,y,vx,vy,xp) { this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.xp=xp;this.life=600;this.dead=false;this.radius=5;this.bob=rand(0,TAU); } update() { this.bob+=0.1;this.life--; if(this.life<=0){this.dead=true;return;} const p=game.player; const d=dist(this,p); const magnet=90*p.pickupRangeMult; if(d<magnet){const ang=Math.atan2(p.y-this.y,p.x-this.x);const force=(1-d/magnet)*1.8;this.vx+=Math.cos(ang)*force;this.vy+=Math.sin(ang)*force;} this.vx*=0.85;this.vy*=0.85; this.x+=this.vx;this.y+=this.vy; if(d<p.radius+this.radius+4){p.addXP(this.xp);this.dead=true;} } draw() { const bob=Math.sin(this.bob)*2; const r=this.radius+bob*0.2; ctx.fillStyle='rgba(255,184,0,0.18)';ctx.beginPath();ctx.arc(this.x,this.y+bob,r*2,0,TAU);ctx.fill(); ctx.fillStyle='#ffb800';ctx.beginPath();ctx.arc(this.x,this.y+bob,r,0,TAU);ctx.fill(); } }
+
+// ===================== 材料球 =====================
+class MaterialOrb {
+  constructor(x,y,vx,vy,amount) { this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.amount=amount;this.life=900;this.dead=false;this.radius=5;this.bob=rand(0,TAU); }
+  update() {
+    this.bob+=0.1;this.life--;
+    if(this.life<=0){this.dead=true;return;}
+    const p=game.player; const d=dist(this,p); const magnet=110*p.pickupRangeMult;
+    if(d<magnet){const ang=Math.atan2(p.y-this.y,p.x-this.x);const force=(1-d/magnet)*2.2;this.vx+=Math.cos(ang)*force;this.vy+=Math.sin(ang)*force;}
+    this.vx*=0.85;this.vy*=0.85; this.x+=this.vx;this.y+=this.vy;
+    if(d<p.radius+this.radius+4){p.addMaterials(this.amount);this.dead=true;}
+  }
+  draw() { const bob=Math.sin(this.bob)*2; ctx.fillStyle='rgba(74,212,90,0.18)';ctx.beginPath();ctx.arc(this.x,this.y+bob,this.radius*2,0,TAU);ctx.fill(); ctx.fillStyle='#4ad45a';ctx.beginPath();ctx.arc(this.x,this.y+bob,this.radius,0,TAU);ctx.fill(); }
+}
+
+// ===================== 掉落物 =====================
+class Drop { constructor(x,y,kind,data) { this.x=x;this.y=y;this.kind=kind;this.data=data;this.life=600;this.bob=rand(0,TAU);this.dead=false;this.radius=14;this.spawnAnim=12; } get color() { if(this.kind==='ammo')return '#d4a017'; if(this.kind==='boss')return '#b347d9'; return '#4ad45a'; } update() { if(this.spawnAnim>0)this.spawnAnim--; this.bob+=0.06;this.life--; if(this.life<=0){this.dead=true;return;} const p=game.player; if(dist(this,p)<this.radius+p.radius+4)this.pickup(); } pickup() { this.dead=true; if(this.kind==='ammo'){if(!game.player.usingKnife){game.player.saveAmmo();game.player.ammo=game.player.effectiveMag;game.player.ammoPerWeapon[game.player.weaponKey+'_'+game.player.weaponTier]=game.player.ammo;game.player.reloadTimer=0;}showFloater(this.x,this.y,'弹药',this.color);} else if(this.kind==='health'){game.player.heal(35);showFloater(this.x,this.y,'+35 HP',this.color);} else if(this.kind==='boss'){this.data.apply(game.player);showFloater(this.x,this.y,'获得 '+this.data.name+'!','#ffb800');} } draw() { const bob=Math.sin(this.bob)*3; const scale=this.spawnAnim>0?(1-this.spawnAnim/12):1; ctx.save();ctx.translate(this.x,this.y+bob);ctx.scale(scale,scale); ctx.fillStyle='#1a1d23';ctx.fillRect(-this.radius,-this.radius,this.radius*2,this.radius*2); ctx.strokeStyle=this.color;ctx.lineWidth=2;ctx.strokeRect(-this.radius,-this.radius,this.radius*2,this.radius*2); ctx.fillStyle=this.color;ctx.font='bold 13px Noto Sans SC';ctx.textAlign='center';ctx.textBaseline='middle'; const label=this.kind==='ammo'?'A':(this.kind==='boss'?'★':'+'); ctx.fillText(label,0,1); ctx.restore(); } }
+
+// ===================== 飘字与击杀 =====================
+function showFloater(x,y,text,color) { game.floaters.push({x,y,text:String(text),life:45,maxLife:45,vy:-1.4,color,size:13}); }
+function updateFloaters() { for(let i=game.floaters.length-1;i>=0;i--){const f=game.floaters[i];f.y+=f.vy;f.vy*=0.96;f.life--;if(f.life<=0)game.floaters.splice(i,1);} }
+function drawFloaters() { for(const f of game.floaters){const a=f.life/f.maxLife;ctx.globalAlpha=a;ctx.fillStyle=f.color;ctx.font=`900 ${f.size||13}px Noto Sans SC`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.text,f.x,f.y);} ctx.globalAlpha=1; }
+function addKillFeed(name,score) { if (!game.killfeed) return; const item=document.createElement('div');item.className='kill-item';item.textContent=`击杀 ${name} +${score}`;game.killfeed.appendChild(item);setTimeout(()=>item.classList.add('fade'),2000);setTimeout(()=>item.remove(),2500);while(game.killfeed.children.length>4)game.killfeed.removeChild(game.killfeed.firstChild); }
+
+// ===================== 触屏 =====================
+canvas.addEventListener('touchstart', e => { e.preventDefault(); for (const touch of e.changedTouches) { const x=touch.clientX;const y=touch.clientY;const halfW=window.innerWidth/2; if(x<halfW&&!game.touchState.move.active){game.touchState.move.active=true;game.touchState.move.id=touch.identifier;game.touchState.move.dx=0;game.touchState.move.dy=0;document.getElementById('move-base').style.display='block';document.getElementById('move-stick').style.display='block';} else if(x>=halfW&&!game.touchState.aim.active){game.touchState.aim.active=true;game.touchState.aim.id=touch.identifier;game.touchState.aim.dx=0;game.touchState.aim.dy=0;game.mouse.down=true;document.getElementById('aim-base').style.display='block';document.getElementById('aim-stick').style.display='block';} } }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); for (const touch of e.changedTouches) { if(touch.identifier===game.touchState.move.id){const baseX=30+60;const baseY=window.innerHeight-30-60;game.touchState.move.dx=touch.clientX-baseX;game.touchState.move.dy=touch.clientY-baseY;const len=Math.hypot(game.touchState.move.dx,game.touchState.move.dy);const max=40;if(len>max){game.touchState.move.dx=game.touchState.move.dx/len*max;game.touchState.move.dy=game.touchState.move.dy/len*max;}document.getElementById('move-stick').style.left=(30+60+game.touchState.move.dx-25)+'px';document.getElementById('move-stick').style.bottom=(30+60-game.touchState.move.dy-25)+'px';} else if(touch.identifier===game.touchState.aim.id){const baseX=window.innerWidth-30-60;const baseY=window.innerHeight-30-60;game.touchState.aim.dx=touch.clientX-baseX;game.touchState.aim.dy=touch.clientY-baseY;const len=Math.hypot(game.touchState.aim.dx,game.touchState.aim.dy);const max=40;if(len>max){game.touchState.aim.dx=game.touchState.aim.dx/len*max;game.touchState.aim.dy=game.touchState.aim.dy/len*max;}document.getElementById('aim-stick').style.right=(30+60-game.touchState.aim.dx-25)+'px';document.getElementById('aim-stick').style.bottom=(30+60-game.touchState.aim.dy-25)+'px';} } }, { passive: false });
+function endTouch(e) { for (const touch of e.changedTouches) { if(touch.identifier===game.touchState.move.id){game.touchState.move.active=false;game.touchState.move.id=null;game.touchState.move.dx=0;game.touchState.move.dy=0;document.getElementById('move-base').style.display='none';document.getElementById('move-stick').style.display='none';} else if(touch.identifier===game.touchState.aim.id){game.touchState.aim.active=false;game.touchState.aim.id=null;game.mouse.down=false;document.getElementById('aim-base').style.display='none';document.getElementById('aim-stick').style.display='none';} } }
+canvas.addEventListener('touchend', e => { e.preventDefault(); endTouch(e); }, { passive: false });
+canvas.addEventListener('touchcancel', e => { e.preventDefault(); endTouch(e); }, { passive: false });
+document.getElementById('reload-mobile').addEventListener('click', e => { if(game.state==='playing')game.player.startReload(); });
+document.getElementById('switch-mobile').addEventListener('click', e => { if(game.state==='playing')game.player.cycleWeapon(1); });
+document.getElementById('knife-mobile').addEventListener('click', e => { if(game.state==='playing')game.player.toggleKnife(); });
+document.getElementById('dash-mobile').addEventListener('click', e => { if(game.state==='playing')game.player.tryDash(); });
+
+// ===================== Game 状态（★ var 提前声明过，这里赋值） =====================
+game = {
+  state: 'menu', player: null,
+  enemies: [], bullets: [], particles: [], drops: [], orbs: [], materials: [], shockwaves: [], lightnings: [],
+  score: 0, wave: 0, enemiesToSpawn: 0, spawnTimer: 0, waveTimer: 0, bossSpawned: false,
+  shake: 0, time: 0, keys: {}, mouse: { x: 0, y: 0, down: false }, prevState: 'menu', pendingSkill: null,
+  slowFactor: 1, boss: null, enemyGrid: null, routeChoice: null, eliteWave: false,
+  floaters: [], killfeed: document.getElementById('killfeed'),
+  touchState: { move: { active: false, id: null, dx: 0, dy: 0 }, aim: { active: false, id: null, dx: 0, dy: 0 } },
+  shop: { items: [null, null, null, null], locked: [false, false, false, false], rerollCost: 5, rerollCount: 0 }
+};
+
+function startGame() {
+  game.state='playing';game.player=new Player(canvas.width/2,canvas.height/2);
+  game.enemies=[];game.bullets=[];game.particles=[];game.drops=[];game.orbs=[];game.materials=[];game.shockwaves=[];game.lightnings=[];
+  game.score=0;game.wave=0;game.waveTimer=0;game.shake=0;game.mouse.down=false;game.bossSpawned=false;game.pendingSkill=null;game.slowFactor=1;game.routeChoice=null;game.eliteWave=false;game.boss=null;
+  // ★ 新增：重置商店状态
+  game.shop.items = [null, null, null, null];
+  game.shop.locked = [false, false, false, false];
+  game.shop.rerollCost = 5;
+  game.shop.rerollCount = 0;
+  game.floaters.length=0;
+  if (game.killfeed) game.killfeed.innerHTML='';
+  const chEl = document.getElementById('crate-hint'); if (chEl) chEl.innerHTML='';
+  document.getElementById('menu').classList.add('hidden');document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');document.getElementById('levelup').classList.add('hidden');
+  const sr = document.getElementById('skill-replace'); if (sr) sr.classList.add('hidden');
+  const sp = document.getElementById('shop'); if (sp) sp.classList.add('hidden');
+  document.getElementById('pause-btn').classList.add('active');
+  if(!isTouch)document.body.style.cursor='none';else document.body.style.cursor='default';
+  buildBackgroundCache();
+  updateSkillsHUD();updateWeaponSlotsHUD();updateWeaponStatsHUD();updateArmorHUD();startWave();
+  try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
+}
+
+function startWave() {
+  game.wave++;game.bossSpawned=false;
+  if(game.wave%10===0){game.enemiesToSpawn=1;game.spawnTimer=60;showFloater(canvas.width/2,canvas.height/3,`第 ${game.wave} 波 - BOSS战`,'#ff5252');}
+  else{game.enemiesToSpawn=4+Math.floor(game.wave*1.5+game.wave*game.wave*0.06);game.spawnTimer=25;}
+}
+
+function spawnEnemy() { const margin=50;const side=Math.floor(Math.random()*4);let x,y; if(side===0){x=Math.random()*canvas.width;y=-margin;} else if(side===1){x=canvas.width+margin;y=Math.random()*canvas.height;} else if(side===2){x=Math.random()*canvas.width;y=canvas.height+margin;} else{x=-margin;y=Math.random()*canvas.height;} let type; if(game.wave%10===0&&!game.bossSpawned){game.bossSpawned=true;type=BOSS_KEYS[Math.floor(Math.random()*BOSS_KEYS.length)];x=canvas.width/2;y=100;} else { const pool=['grunt']; if(game.wave>=2)pool.push('runner','shooter'); if(game.wave>=3)pool.push('rifleman'); if(game.wave>=4)pool.push('bomber','smg_gunner'); if(game.wave>=5)pool.push('shielder','shotgunner'); if(game.wave>=6)pool.push('sniper'); if(game.wave>=7)pool.push('heavy'); if(game.wave>=8)pool.push('medic','flamer'); if(game.wave>=12)pool.push('heavy','sniper','medic','flamer','shotgunner'); type=pool[Math.floor(Math.random()*pool.length)]; } const e=new Enemy(x,y,type,game.wave); const eliteChance = game.eliteWave ? 0.3 : 0.08; if (!BOSS_KEYS.includes(type) && game.wave >= 3 && Math.random() < eliteChance) { e.isElite = true; e.hp *= 3; e.maxHp = e.hp; e.damage *= 1.8; e.score *= 4; e.xp *= 3; e.color = '#d4a017'; e.accent = '#ffd700'; e.radius *= 1.15; e.name = '★' + e.name; } game.enemies.push(e); }
+
+function gameOver() {
+  game.state='gameover';
+  document.getElementById('final-score').textContent=game.score;
+  document.getElementById('final-wave').textContent=game.wave;
+  document.getElementById('final-lvl').textContent=game.player.level;
+  document.getElementById('final-kills').textContent=game.player.kills;
+  document.getElementById('gameover').classList.remove('hidden');
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('pause-btn').classList.remove('active');
+  document.body.style.cursor='default';
+  const earned = game.player.kills + game.wave * 5;
+  Meta.data.totalKills += game.player.kills;
+  Meta.data.bestWave = Math.max(Meta.data.bestWave, game.wave);
+  Meta.data.runs += 1;
+  Meta.addPoints(earned);
+  const ge = document.getElementById('gene-earned'); if (ge) ge.textContent = '+' + earned;
+  const gp = document.getElementById('gene-points-total'); if (gp) gp.textContent = Meta.data.genePoints;
+}
+
+function togglePause() {
+  if (game.state === 'playing') {
+    game.prevState = 'playing'; game.state = 'paused';
+    document.getElementById('pause-overlay').classList.remove('hidden');
+    document.body.style.cursor = 'default';
+  } else if (game.state === 'paused') {
+    game.state = 'playing';
+    document.getElementById('pause-overlay').classList.add('hidden');
+    if (!isTouch) document.body.style.cursor = 'none';
+  }
+}
+document.getElementById('pause-toggle').addEventListener('click',togglePause);
+document.getElementById('resume-btn').addEventListener('click', togglePause);
+
+// ===================== 商店 =====================
+function getAvailableWeapons() {
+  const wave = game.wave;
+  let maxTier = 1;
+  if (wave >= 4) maxTier = 2;
+  if (wave >= 7) maxTier = 3;
+  if (wave >= 10) maxTier = 4;
+  return WEAPON_KEYS.filter(k => WEAPONS[k].tier <= maxTier);
+}
+
+function getWeaponChance() {
+  const wave = game.wave;
+  if (wave <= 2) return 0.6;
+  if (wave <= 5) return 0.45;
+  return 0.35;
+}
+
+function getSkillChance() {
+  const wave = game.wave;
+  if (wave <= 3) return 0;
+  if (wave <= 6) return 0.15;
+  if (wave <= 9) return 0.25;
+  return 0.35;
+}
+
+function showRouteChoice() {
+  game.state = 'route';
+  game.mouse.down = false;
+  let overlay = document.getElementById('route-overlay');
+  if (!overlay) {
+    const div = document.createElement('div');
+    div.id = 'route-overlay';
+    div.className = 'overlay';
+    div.innerHTML = '<div class="menu-content"><h1 class="game-title" style="font-size:32px">选择路线</h1><p class="game-sub">下一波的类型</p><div id="route-list" class="char-list"></div></div>';
+    document.body.appendChild(div);
+  }
+  overlay = document.getElementById('route-overlay');
+  overlay.classList.remove('hidden');
+  const list = document.getElementById('route-list');
+  list.innerHTML = '';
+  const routes = [
+    { key: 'combat', name: '常规战斗', icon: '⚔', desc: '正常波次', color: '#888' },
+    { key: 'elite', name: '精英突袭', icon: '★', desc: '精英敌人 x2，材料 +50%', color: '#ffd700' },
+    { key: 'shop', name: '军火商店', icon: '$', desc: '直接进入商店', color: '#4ad45a' },
+    { key: 'rest', name: '休整营地', icon: '♥', desc: '回复 50% 生命 + 随机小强化', color: '#ff6688' }
+  ];
+  routes.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    card.style.borderColor = r.color;
+    card.innerHTML = `<div class="char-icon" style="color:${r.color}">${r.icon}</div><div class="char-name">${r.name}</div><div class="char-desc">${r.desc}</div>`;
+    card.onclick = () => selectRoute(r.key);
+    list.appendChild(card);
+  });
+  document.body.style.cursor = 'default';
+}
+
+function selectRoute(key) {
+  const overlay = document.getElementById('route-overlay');
+  if (overlay) overlay.classList.add('hidden');
+  game.routeChoice = key;
+  if (key === 'shop') { openShop(); return; }
+  if (key === 'rest') {
+    game.player.hp = Math.min(game.player.maxHp, game.player.hp + Math.floor(game.player.maxHp * 0.5));
+    const smallBuffs = UPGRADES.filter(u => u.rarity === 'common');
+    const b = smallBuffs[Math.floor(Math.random()*smallBuffs.length)];
+    b.apply(game.player);
+    showFloater(game.player.x, game.player.y - 30, '休整：' + b.name, '#ff6688');
+  }
+  if (key === 'elite') { game.eliteWave = true; }
+  else { game.eliteWave = false; }
+  game.state = 'playing';
+  startWave();
+}
+
+function openShop() {
+  game.state = 'shop';
+  game.mouse.down = false;
+  const bonus = 25 + game.wave * 10;
+  game.player.addMaterials(bonus);
+  showFloater(game.player.x, game.player.y - 40, `+${bonus} 材料`, '#4ad45a');
+  if (game.player.maxArmor > 0) {
+    const regenPct = 0.2 + game.player.armorRegenBonus;
+    const regen = Math.floor(game.player.maxArmor * regenPct);
+    game.player.armor = Math.min(game.player.maxArmor, game.player.armor + regen);
+    if (regen > 0) showFloater(game.player.x, game.player.y - 20, `+${regen} 护甲`, '#a8b8c8');
+  }
+  game.shop.rerollCost = 5 + game.wave;
+  game.shop.rerollCount = 0;
+  // ★ 不再重置 locked 和 items
+  // ★ 只填充需要刷新的格子（未锁定 或 已购买/为空的）
+  rollShopItems(false);  // false 表示不是首次，按「锁定跳过」逻辑刷新
+  renderShop();
+  document.getElementById('shop').classList.remove('hidden');
+  document.body.style.cursor = 'default';
+}
+
+function rollShopItems(isFirstRoll) {
+  const wave = game.wave;
+  let weaponCount = 0;
+  if (isFirstRoll) {
+    if (wave <= 2) weaponCount = 2;
+    else if (wave <= 5) weaponCount = 1;
+  }
+  const weaponChance = getWeaponChance();
+  const skillChance = getSkillChance();
+  for (let i = 0; i < 4; i++) {
+    // ★ 锁定的格子：如果里面有物品就跳过（保留）
+    if (game.shop.locked[i] && game.shop.items[i]) continue;
+    // ★ 未锁定的格子：重新生成（不管原来是否有物品）
+    if (isFirstRoll && i < weaponCount) {
+      game.shop.items[i] = generateWeaponItem();
+    } else {
+      const r = Math.random();
+      if (r < weaponChance) game.shop.items[i] = generateWeaponItem();
+      else if (r < weaponChance + skillChance) game.shop.items[i] = generateSkillItem();
+      else game.shop.items[i] = generateItemItem();
+    }
+  }
+}
+function generateWeaponItem() {
+  const available = getAvailableWeapons();
+  const owned = game.player.weaponSlots.map(w => w.key);
+  let key;
+  if (owned.length > 0 && Math.random() < 0.4) {
+    const mergeCandidates = owned.filter(k => game.player.weaponSlots.some(w => w.key === k && w.tier < 5));
+    key = mergeCandidates.length > 0 && Math.random() < 0.7
+      ? mergeCandidates[Math.floor(Math.random() * mergeCandidates.length)]
+      : owned[Math.floor(Math.random() * owned.length)];
+  } else {
+    key = available[Math.floor(Math.random() * available.length)];
+  }
+  const w = WEAPONS[key];
+  const price = Math.floor(w.priceBase * (1 + game.wave * 0.05));
+  return { type: 'weapon', key, name: w.name, desc: `伤害 ${w.damage} · 弹匣 ${w.magSize} · T${w.tier}`, price, rarity: w.rarity, icon: 'W' };
+}
+
+function generateItemItem() {
+  const item = SHOP_ITEMS[Math.floor(Math.random() * SHOP_ITEMS.length)];
+  const waveMult = 1 + game.wave * 0.05;
+  const price = Math.floor(item.price * waveMult);
+  return { type: 'item', id: item.id, name: item.name, desc: item.desc, price, rarity: item.rarity, icon: '★', apply: item.apply };
+}
+
+function generateSkillItem() {
+  const skill = SKILLS[Math.floor(Math.random() * SKILLS.length)];
+  const owned = game.player.skills.has(skill.id);
+  const price = owned ? Math.floor(skill.price * 0.5) : skill.price;
+  return {
+    type: 'skill',
+    id: skill.id,
+    name: skill.name,
+    desc: skill.desc,
+    price,
+    rarity: skill.rarity,
+    icon: '◈',
+    skillId: skill.id,
+    owned
+  };
+}
+
+function renderShop() {
+  document.getElementById('shop-wave').textContent = game.wave;
+  document.getElementById('shop-materials').textContent = game.player.materials;
+  document.getElementById('reroll-cost').textContent = game.shop.rerollCost;
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+  game.shop.items.forEach((item, i) => {
+    if (!item) {
+      const empty = document.createElement('div');
+      empty.className = 'shop-item disabled';
+      empty.style.opacity = '0.15';
+      grid.appendChild(empty);
+      return;
+    }
+    const canAfford = game.player.materials >= item.price;
+    const card = document.createElement('div');
+    const typeClass = item.type === 'weapon' ? 'weapon' : (item.type === 'skill' ? 'skill' : item.rarity);
+    card.className = `shop-item ${typeClass} ${canAfford ? '' : 'disabled'} ${game.shop.locked[i] ? 'locked' : ''}`;
+    card.innerHTML = `
+      <button class="shop-lock">${game.shop.locked[i] ? '🔒' : '🔓'}</button>
+      <div class="shop-item-icon"><span>${item.icon}</span></div>
+      <div class="shop-item-name">${item.name}</div>
+      <div class="shop-item-desc">${item.desc}</div>
+      <div class="shop-item-price ${canAfford ? '' : 'expensive'}">$${item.price}</div>
+    `;
+    // ★ 统一事件处理：先判断是否点击锁定按钮，再决定是锁定还是购买
+    card.onclick = (e) => {
+      if (e.target.closest('.shop-lock')) {
+        // 点击锁定按钮 → 切换锁定状态
+        game.shop.locked[i] = !game.shop.locked[i];
+        renderShop();
+        return;
+      }
+      // 点击卡片其他区域 → 购买
+      buyShopItem(i);
+    };
+    grid.appendChild(card);
+  });
+  const inv = document.getElementById('shop-inventory');
+  inv.innerHTML = '';
+  const knifeSlot = document.createElement('div');
+  knifeSlot.className = 'inv-slot knife' + (game.player.usingKnife ? ' filled' : '');
+  knifeSlot.innerHTML = `<div class="inv-name">战术小刀</div><div class="inv-tier">伤害 ${game.player.knifeDamage}</div><div class="inv-key">Q</div>`;
+  inv.appendChild(knifeSlot);
+  for (let i = 0; i < game.player.maxWeaponSlots; i++) {
+    const w = game.player.weaponSlots[i];
+    const slot = document.createElement('div');
+    slot.className = 'inv-slot' + (w ? ' filled' : '');
+    if (w) {
+      slot.innerHTML = `
+        <div class="inv-name">${WEAPONS[w.key].name}</div>
+        <div class="inv-tier">T${w.tier}</div>
+        <div class="inv-key">${i + 1}</div>
+        <button class="inv-sell" title="卖回 $${Math.floor(game.player.getWeaponPrice(w.key, w.tier) * 0.25)}">×</button>
+      `;
+      slot.querySelector('.inv-sell').onclick = (e) => {
+        e.stopPropagation();
+        const refund = game.player.removeWeapon(i);
+        game.player.addMaterials(refund);
+        showFloater(game.player.x, game.player.y, `+${refund} 材料`, '#4ad45a');
+        renderShop(); updateWeaponSlotsHUD();
+      };
+    } else { slot.textContent = '空'; }
+    inv.appendChild(slot);
+  }
+}
+function buyShopItem(index) {
+  const item = game.shop.items[index];
+  if (!item) return;
+  if (game.player.materials < item.price) return;
+  if (item.type === 'weapon') {
+    const result = game.player.addWeapon(item.key);
+    if (result === 'full') { showFloater(game.player.x, game.player.y, '武器栏已满', '#ff5252'); return; }
+    game.player.materials -= item.price;
+    if (result === 'merged') showFloater(game.player.x, game.player.y, `${item.name} 升级！`, '#ffb800');
+    else showFloater(game.player.x, game.player.y, `获得 ${item.name}`, '#d4a017');
+    if (game.player.weaponSlots.length === 1) game.player.equipWeapon(0);
+  } else if (item.type === 'skill') {
+    const result = game.player.tryAddSkill(item.skillId);
+    if (result === 'full') {
+      showFloater(game.player.x, game.player.y, '技能槽已满', '#ff5252');
+      game.pendingSkill = item.skillId;
+      triggerSkillReplace(item.skillId, item.price);
+      return;
+    }
+    game.player.materials -= item.price;
+    if (result === 'added') showFloater(game.player.x, game.player.y, `获得 ${item.name}`, '#b347d9');
+    else if (result === 'owned') showFloater(game.player.x, game.player.y, `${item.name} 已强化`, '#b347d9');
+    updateSkillsHUD();
+  } else {
+    game.player.materials -= item.price;
+    item.apply(game.player);
+    showFloater(game.player.x, game.player.y, item.name, '#4ad45a');
+    updateArmorHUD();
+  }
+  game.shop.items[index] = null;
+  game.shop.locked[index] = false;
+  renderShop(); updateWeaponSlotsHUD(); updateWeaponStatsHUD();
+}
+
+function rerollShop() {
+  if (game.player.materials < game.shop.rerollCost) return;
+  const allEmpty = game.shop.items.every(it => !it);
+  if (!allEmpty) {
+    game.player.materials -= game.shop.rerollCost;
+    game.shop.rerollCount++;
+    game.shop.rerollCost += 2;
+  }
+  const weaponChance = getWeaponChance();
+  const skillChance = getSkillChance();
+  for (let i = 0; i < 4; i++) {
+    if (game.shop.locked[i] && game.shop.items[i]) continue;
+    const r = Math.random();
+    if (r < weaponChance) game.shop.items[i] = generateWeaponItem();
+    else if (r < weaponChance + skillChance) game.shop.items[i] = generateSkillItem();
+    else game.shop.items[i] = generateItemItem();
+  }
+  renderShop();
+}
+
+function closeShop() {
+  document.getElementById('shop').classList.add('hidden');
+  document.body.style.cursor = isTouch ? 'default' : 'none';
+  game.state = 'playing';
+  startWave();
+}
+
+document.getElementById('shop-reroll').addEventListener('click', rerollShop);
+document.getElementById('shop-next').addEventListener('click', closeShop);
+
+// ===================== 升级面板 =====================
+function triggerLevelUp() {
+  game.prevState=game.state;game.state='leveling';game.mouse.down=false;
+  const flash=document.getElementById('pickup-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');setTimeout(()=>flash.classList.remove('show'),500);
+  const taken=game.player.takenUpgrades;
+  const pool=UPGRADES.map(u=>({u,w:(taken[u.id]||0)>=3?0.1:(taken[u.id]||0)>=1?0.5:1})).filter(x=>x.w>0);
+  const chosen=[];const tempPool=[...pool];
+  for(let i=0;i<3&&tempPool.length>0;i++){const total=tempPool.reduce((s,x)=>s+x.w,0);let r=Math.random()*total;let idx=0; for(let j=0;j<tempPool.length;j++){r-=tempPool[j].w;if(r<=0){idx=j;break;}} chosen.push(tempPool[idx].u);tempPool.splice(idx,1); }
+  if (game.player.level >= 5 && Math.random() < 0.3) {
+    const curses = UPGRADES.filter(u => u.curse);
+    if (curses.length > 0) {
+      const c = curses[Math.floor(Math.random()*curses.length)];
+      chosen[Math.floor(Math.random()*chosen.length)] = c;
+    }
+  }
+  const container=document.getElementById('upgrade-cards');container.innerHTML='';
+  document.getElementById('lv-tag').textContent='升级';document.getElementById('lv-title').textContent='等级 '+game.player.level;document.getElementById('lv-sub').textContent='选择一项强化部署';
+  chosen.forEach(u=>{const card=document.createElement('div');card.className='upgrade-card '+u.rarity;const count=taken[u.id]||0; card.innerHTML=`<div class="uc-rarity">${u.rarity==='common'?'普通':u.rarity==='rare'?'稀有':u.rarity==='epic'?'史诗':'传说'}</div><div class="uc-icon"><span>${u.icon}</span></div><div class="uc-name">${u.name}</div><div class="uc-desc">${u.desc.replace(/\n/g,'<br>')}</div><div class="uc-stack">${count>0?'已拥有 x'+count:'新'}</div>`; card.onclick=()=>selectUpgrade(u); container.appendChild(card);});
+  document.getElementById('levelup').classList.remove('hidden');document.body.style.cursor='default';
+}
+function selectUpgrade(u) { u.apply(game.player);game.player.takenUpgrades[u.id]=(game.player.takenUpgrades[u.id]||0)+1; document.getElementById('levelup').classList.add('hidden');if(!isTouch)document.body.style.cursor='none';game.state='playing'; updateArmorHUD(); updateWeaponStatsHUD(); }
+
+// ===================== 技能替换 =====================
+let pendingSkillPrice = 0;
+function triggerSkillReplace(newSkillId, price) {
+  game.prevState=game.state;game.state='skill_replace';game.mouse.down=false;game.pendingSkill=newSkillId;
+  pendingSkillPrice = price || 0;
+  const container=document.getElementById('replace-cards');
+  if (!container) { game.pendingSkill=null; game.state='playing'; return; }
+  container.innerHTML='';
+  const owned=Array.from(game.player.skills);
+  owned.forEach(id=>{
+    const s=SKILL_MAP[id]; if(!s)return;
+    const st = game.player.skillStates[id];
+    const statusText = st && st.active ? `激活中 ${Math.ceil(st.activeTimer/60)}s` : `冷却中 ${Math.ceil(st.cooldownTimer/60)}s`;
+    const card=document.createElement('div');card.className='upgrade-card '+s.rarity;
+    card.innerHTML=`<div class="uc-rarity">${s.rarity==='common'?'普通':s.rarity==='rare'?'稀有':s.rarity==='epic'?'史诗':'传说'}</div><div class="uc-icon"><span>?</span></div><div class="uc-name">${s.name}</div><div class="uc-desc">${s.desc}</div><div class="uc-stack">${statusText}</div>`;
+    card.onclick=()=>doReplaceSkill(id); container.appendChild(card);
+  });
+  document.getElementById('skill-replace').classList.remove('hidden');
+  document.body.style.cursor='default';
+}
+function doReplaceSkill(oldId) {
+  if (pendingSkillPrice > 0 && game.player.materials < pendingSkillPrice) {
+    showFloater(game.player.x, game.player.y, '材料不足', '#ff5252');
+    return;
+  }
+  if (pendingSkillPrice > 0) game.player.materials -= pendingSkillPrice;
+  game.player.replaceSkill(oldId, game.pendingSkill);
+  const skill=SKILL_MAP[game.pendingSkill];
+  document.getElementById('skill-replace').classList.add('hidden');
+  game.pendingSkill=null; pendingSkillPrice=0;
+  updateSkillsHUD();
+  renderShop();
+  if(!isTouch)document.body.style.cursor='none';
+  game.state = (game.prevState === 'shop') ? 'shop' : 'playing';
+  if (game.state === 'shop') {
+    document.getElementById('shop').classList.remove('hidden');
+    document.body.style.cursor='default';
+  }
+}
+
+function updateSkillsHUD() {
+  const row=document.getElementById('skills-row');row.innerHTML='';
+  if(!game.player)return;
+  for(const id of game.player.skills){
+    const s=SKILL_MAP[id];if(!s)continue;
+    const st = game.player.skillStates[id]; if (!st) continue;
+    const chip=document.createElement('div');
+    chip.className='skill-chip '+s.rarity;
+    if (!st.active && st.cooldownTimer > 0) chip.classList.add('cooling');
+    const nameSpan=document.createElement('span'); nameSpan.textContent=s.name; chip.appendChild(nameSpan);
+    const timerSpan=document.createElement('span'); timerSpan.className='cd-timer';
+    if (st.active) { timerSpan.textContent = Math.ceil(st.activeTimer/60)+'s'; timerSpan.style.color='#4ad45a'; }
+    else { timerSpan.textContent = Math.ceil(st.cooldownTimer/60)+'s'; timerSpan.style.color='#ff5252'; }
+    chip.appendChild(timerSpan);
+    const bar=document.createElement('div'); bar.className='cd-bar';
+    if (st.active) { bar.style.width=(st.activeTimer/s.duration*100)+'%'; bar.style.background='#4ad45a'; }
+    else { bar.style.width=(1-st.cooldownTimer/s.cooldown)*100+'%'; bar.style.background='#ff5252'; }
+    chip.appendChild(bar);
+    row.appendChild(chip);
+  }
+}
+
+function updateWeaponSlotsHUD() {
+  const hud = document.getElementById('weapon-slots-hud');
+  if (!hud || !game.player) return;
+  hud.innerHTML = '';
+  const knifeSlot = document.createElement('div');
+  knifeSlot.className = 'wslot knife' + (game.player.usingKnife ? ' active' : '');
+  knifeSlot.innerHTML = `刀<span class="key-hint">Q</span>`;
+  hud.appendChild(knifeSlot);
+  for (let i = 0; i < game.player.maxWeaponSlots; i++) {
+    const w = game.player.weaponSlots[i];
+    const slot = document.createElement('div');
+    const isActive = !game.player.usingKnife && i === game.player.currentWeaponIndex;
+    slot.className = 'wslot' + (w ? '' : ' empty') + (isActive ? ' active' : '');
+    if (w) {
+      slot.innerHTML = `${WEAPONS[w.key].name.slice(0,2)}<span class="tier">T${w.tier}</span><span class="key-hint">${i + 1}</span>`;
+    } else {
+      slot.innerHTML = `—<span class="key-hint">${i + 1}</span>`;
+    }
+    hud.appendChild(slot);
+  }
+  if (game.player.usingKnife) {
+    document.getElementById('weapon-name').textContent = '战术小刀';
+    document.getElementById('weapon-upgrades').textContent = '伤害 ' + game.player.knifeDamage;
+  } else if (game.player.weaponKey) {
+    document.getElementById('weapon-name').textContent = game.player.weapon.name;
+    document.getElementById('weapon-upgrades').textContent = '等级 ' + game.player.weaponTier + ' / 5';
+  }
+}
+
+function updateWeaponStatsHUD() {
+  const block = document.getElementById('weapon-stats-block');
+  if (!block || !game.player) return;
+  const p = game.player;
+  if (p.usingKnife || !p.weaponKey) {
+    block.innerHTML = `<div class="weapon-stat-row"><span class="stat-name">近战伤害</span><span class="stat-val"><span class="stat-final">${p.knifeDamage}</span></span></div>`;
+    return;
+  }
+  const w = p.weapon;
+  const wm = WEAPON_UPGRADE_TREE[p.weaponTier];
+  const baseDmg = Math.round(w.damage * wm.damage);
+  const finalDmg = Math.round(w.damage * p.effectiveDamageMult);
+  const baseFire = Math.round(w.fireRate * wm.fireRate);
+  const finalFire = p.effectiveFireRate;
+  const baseReload = Math.round(w.reloadTime);
+  const finalReload = p.effectiveReload;
+  const baseMag = Math.round(w.magSize * wm.magSize);
+  const finalMag = p.effectiveMag;
+  const baseSpread = (w.spread * wm.spread).toFixed(3);
+  const finalSpread = p.effectiveSpread.toFixed(3);
+
+  function row(name, base, final, lowerBetter) {
+    const isBuff = lowerBetter ? (parseFloat(final) < parseFloat(base)) : (parseFloat(final) > parseFloat(base));
+    const isNerf = lowerBetter ? (parseFloat(final) > parseFloat(base)) : (parseFloat(final) < parseFloat(base));
+    const cls = isBuff ? 'stat-buffed' : (isNerf ? 'stat-nerfed' : 'stat-final');
+    const baseStr = String(base), finalStr = String(final);
+    const showArrow = baseStr !== finalStr;
+    return `<div class="weapon-stat-row"><span class="stat-name">${name}</span><span class="stat-val"><span class="stat-base">${baseStr}</span>${showArrow ? `<span class="stat-arrow">→</span><span class="${cls}">${finalStr}</span>` : ''}</span></div>`;
+  }
+
+  block.innerHTML =
+    row('伤害', baseDmg, finalDmg, false) +
+    row('射速', baseFire, finalFire, true) +
+    row('装弹', baseReload, finalReload, true) +
+    row('弹匣', baseMag, finalMag, false) +
+    row('散布', baseSpread, finalSpread, true);
+}
+
+function updateArmorHUD() {
+  const block = document.getElementById('armor-block');
+  if (!block || !game.player) return;
+  const p = game.player;
+  if (p.maxArmor <= 0) { block.style.display = 'none'; return; }
+  block.style.display = 'block';
+  document.getElementById('armor-text').textContent = Math.ceil(p.armor) + '/' + p.maxArmor;
+  document.getElementById('armor-fill').style.width = (p.armor / p.maxArmor * 100) + '%';
+}
+
+// ===================== 主循环 =====================
+function update() {
+  game.time++; if(game.state!=='playing')return;
+  game.player.update();
+  buildEnemyGrid();
+  for(let i=game.enemies.length-1;i>=0;i--){game.enemies[i].update();if(game.enemies[i].dead)game.enemies.splice(i,1);}
+  for(let i=game.bullets.length-1;i>=0;i--){game.bullets[i].update();if(game.bullets[i].dead)game.bullets.splice(i,1);}
+  for(let i=game.particles.length-1;i>=0;i--){game.particles[i].update();if(game.particles[i].dead)game.particles.splice(i,1);}
+  if(game.particles.length>1500)game.particles.splice(0,game.particles.length-1200);
+  for(let i=game.drops.length-1;i>=0;i--){game.drops[i].update();if(game.drops[i].dead)game.drops.splice(i,1);}
+  for(let i=game.orbs.length-1;i>=0;i--){game.orbs[i].update();if(game.orbs[i].dead)game.orbs.splice(i,1);}
+  for(let i=game.materials.length-1;i>=0;i--){game.materials[i].update();if(game.materials[i].dead)game.materials.splice(i,1);}
+  for(let i=game.shockwaves.length-1;i>=0;i--){const s=game.shockwaves[i];s.r+=(s.maxR-s.r)*0.2;s.life--;if(s.damaging){for(const e of game.enemies){if(e.dead||(s.hit&&s.hit.has(e)))continue;if(dist(s,e)<s.r+e.radius&&dist(s,e)>s.r-e.radius-10){e.takeDamage(s.damage);if(!s.hit)s.hit=new Set();s.hit.add(e);}}}if(s.life<=0)game.shockwaves.splice(i,1);}
+  for(let i=game.lightnings.length-1;i>=0;i--){game.lightnings[i].life--;if(game.lightnings[i].life<=0)game.lightnings.splice(i,1);}
+  updateFloaters();
+  if(game.enemiesToSpawn>0){game.spawnTimer--;if(game.spawnTimer<=0){const batch=Math.min(game.enemiesToSpawn,1+Math.floor(game.wave/5));for(let i=0;i<batch;i++)spawnEnemy();game.enemiesToSpawn-=batch;game.spawnTimer=Math.max(12,50-game.wave);}}
+  if(game.enemiesToSpawn===0&&game.enemies.length===0){if(game.waveTimer<=0)game.waveTimer=80;else{game.waveTimer--;if(game.waveTimer===0){showRouteChoice();return;}}}
+  game.shake*=0.85;if(game.shake<0.1)game.shake=0;
+  updateHUD();
+}
+
+function render() {
+  ctx.save();
+  if(game.shake>0.1)ctx.translate(rand(-game.shake,game.shake),rand(-game.shake,game.shake));
+  ctx.fillStyle='rgba(13,12,10,0.4)';ctx.fillRect(-50,-50,canvas.width+100,canvas.height+100);
+  ctx.drawImage(bgCanvas, 0, 0);
+  for(const s of game.shockwaves){const a=s.life/20;ctx.strokeStyle=`rgba(255,120,40,${a})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,TAU);ctx.stroke();}
+  for(const l of game.lightnings){const a=l.life/7;ctx.strokeStyle=`rgba(180,100,255,${a})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(l.x1,l.y1);ctx.lineTo(l.x2,l.y2);ctx.stroke();}
+  game.drops.forEach(d=>d.draw());game.orbs.forEach(o=>o.draw());game.materials.forEach(m=>m.draw());
+  if(game.state!=='menu'){game.particles.forEach(p=>p.draw());game.bullets.forEach(b=>b.draw());game.enemies.forEach(e=>e.draw());if(game.player)game.player.draw();drawFloaters();}
+  if(game.boss&&!game.boss.dead){const w=canvas.width*0.6;const x=(canvas.width-w)/2;const y=60; ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(x-2,y-2,w+4,24); ctx.fillStyle='#1a1a2a';ctx.fillRect(x,y,w,20); const hpRatio=game.boss.hp/game.boss.maxHp; const grad=ctx.createLinearGradient(x,y,x+w,y);grad.addColorStop(0,'#7a0a0a');grad.addColorStop(0.5,'#c41e3a');grad.addColorStop(1,'#ff5252'); ctx.fillStyle=grad;ctx.fillRect(x,y,w*hpRatio,20); ctx.strokeStyle='#ff5252';ctx.lineWidth=1;ctx.strokeRect(x,y,w,20); ctx.fillStyle='#fff';ctx.font='bold 14px Noto Sans SC';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(game.boss.name,canvas.width/2,y+10);}
+  ctx.restore();
+  // ★ 小刀 vs 枪 不同准星
+  if((game.state==='playing'||game.state==='leveling')&&!isTouch && game.player){
+    if (game.player.usingKnife) drawKnifeCrosshair();
+    else drawCrosshair();
+  }
+}
+
+function drawCrosshair() { const x=game.mouse.x,y=game.mouse.y; const firing=game.player&&game.player.fireTimer>game.player.effectiveFireRate-4; const baseColor=firing?'#ffb800':'#e4b041'; const gap=firing?10:6;const size=12; ctx.strokeStyle=baseColor;ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y-gap);ctx.lineTo(x,y-gap-size); ctx.moveTo(x,y+gap);ctx.lineTo(x,y+gap+size); ctx.moveTo(x-gap,y);ctx.lineTo(x-gap-size,y); ctx.moveTo(x+gap,y);ctx.lineTo(x+gap+size,y); ctx.stroke(); ctx.fillStyle=baseColor;ctx.beginPath();ctx.arc(x,y,1.3,0,TAU);ctx.fill(); }
+
+// ★ 小刀准星：扇形攻击范围预览 + 鼠标小准星
+function drawKnifeCrosshair() {
+  const p = game.player;
+  const range = p.radius + 42;
+  const halfAngle = Math.PI / 2.5;
+  // 扇形范围预览
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.angle);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, range, -halfAngle, halfAngle);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+  // 鼠标位置的小准星
+  const x = game.mouse.x, y = game.mouse.y;
+  ctx.strokeStyle = '#cccccc';
+  ctx.lineWidth = 2;
+  const gap = 4, size = 8;
+  ctx.beginPath();
+  ctx.moveTo(x, y - gap); ctx.lineTo(x, y - gap - size);
+  ctx.moveTo(x, y + gap); ctx.lineTo(x, y + gap + size);
+  ctx.moveTo(x - gap, y); ctx.lineTo(x - gap - size, y);
+  ctx.moveTo(x + gap, y); ctx.lineTo(x + gap + size, y);
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(x, y, 1.5, 0, TAU);
+  ctx.fill();
+}
+
+function updateHUD() {
+  if(!game.player)return; const p=game.player;
+  $.score.textContent=game.score;
+  $.materials.textContent=p.materials;
+  $.wave.textContent=game.wave;
+  const isBossWave = !!game.boss && !game.boss.dead;
+  $.enemies.textContent = isBossWave ? 'BOSS' : (game.enemies.length+game.enemiesToSpawn);
+  const hpTxt=Math.ceil(p.hp)+'/'+p.maxHp;
+  if ($['hp-text']._lastTxt !== hpTxt) { $['hp-text'].textContent = hpTxt; $['hp-text']._lastTxt = hpTxt; }
+  const hpRatio=(p.hp/p.maxHp*100)+'%';
+  if ($['hp-fill']._lastW !== hpRatio) { $['hp-fill'].style.width = hpRatio; $['hp-fill']._lastW = hpRatio; }
+  $.lvl.textContent=p.level;
+  const xpTxt=p.xp+' / '+p.xpToNext;
+  if ($['xp-text']._lastTxt !== xpTxt) { $['xp-text'].textContent = xpTxt; $['xp-text']._lastTxt = xpTxt; }
+  const xpRatio=(p.xp/p.xpToNext*100)+'%';
+  if ($['xp-fill']._lastW !== xpRatio) { $['xp-fill'].style.width = xpRatio; $['xp-fill']._lastW = xpRatio; }
+  const stTxt=Math.ceil(p.stamina)+'/'+p.maxStamina;
+  if ($['stamina-text']._lastTxt !== stTxt) { $['stamina-text'].textContent = stTxt; $['stamina-text']._lastTxt = stTxt; }
+  const stRatio=(p.stamina/p.maxStamina*100)+'%';
+  if ($['stamina-fill']._lastW !== stRatio) { $['stamina-fill'].style.width = stRatio; $['stamina-fill']._lastW = stRatio; }
+  updateArmorHUD();
+  if (p.usingKnife) {
+    const wn=$['weapon-name']; if(wn._lastName!=='knife'){wn.textContent='战术小刀';wn._lastName='knife';}
+    const wu=$['weapon-upgrades']; const wuTxt='伤害 '+p.knifeDamage; if(wu._lastTxt!==wuTxt){wu.textContent=wuTxt;wu._lastTxt=wuTxt;}
+    const ad=$['ammo-display']; if(ad._last!=='melee'){ad.innerHTML='<span class="ammo-melee">近战</span>';ad._last='melee';}
+    $['reload-hint'].classList.remove('show');
+  } else if (p.weaponKey) {
+    const wn=$['weapon-name']; if(wn._lastName!==p.weapon.name){wn.textContent=p.weapon.name;wn._lastName=p.weapon.name;}
+    const wu=$['weapon-upgrades']; const wuTxt='等级 '+p.weaponTier+' / 5'; if(wu._lastTxt!==wuTxt){wu.textContent=wuTxt;wu._lastTxt=wuTxt;}
+    const ammoDisplay = $['ammo-display'];
+    if (p.hasInfiniteAmmo) { if(ammoDisplay._last!=='inf'){ammoDisplay.innerHTML='<span class="ammo-infinite">∞</span>';ammoDisplay._last='inf';} }
+    else {
+      if(ammoDisplay._last!==p.ammo+'_'+p.effectiveMag){
+        ammoDisplay.innerHTML='<span id="ammo-mag">'+p.ammo+'</span><span class="ammo-sep">/</span><span id="ammo-mag-max">'+p.effectiveMag+'</span>';
+        ammoDisplay._last=p.ammo+'_'+p.effectiveMag;
+        const ammoEl = document.getElementById('ammo-mag');
+        if (ammoEl) ammoEl.classList.toggle('ammo-low', p.ammo <= p.effectiveMag * 0.25);
+      }
+    }
+    $['reload-hint'].classList.toggle('show', p.reloadTimer > 0);
+  }
+  const chargeBar = $['charge-bar'];
+  if (p.weapon && p.weapon.chargeable && p.isCharging) {
+    chargeBar.style.display = 'block';
+    $['charge-fill'].style.width = (p.chargeTimer / p.weapon.chargeTime * 100) + '%';
+  } else {
+    chargeBar.style.display = 'none';
+  }
+}
+
+let errorState = false;
+function loop() {
+  if (errorState) return;
+  try { update(); render(); }
+  catch (err) {
+    console.error('游戏循环异常：', err);
+    errorState = true;
+    document.body.style.cursor = 'default';
+    alert('游戏发生错误，请刷新页面。\n' + err.message + '\n\n' + String(err.stack||'').slice(0, 600));
+    return;
+  }
+  requestAnimationFrame(loop);
+}
+
+// ===================== 输入 =====================
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  game.keys[k] = true;
+  if (game.state === 'playing') {
+    if (k === 'r') game.player.startReload();
+    if (k === 'q') game.player.toggleKnife();
+    if (k === 'shift') game.player.tryDash();
+    if (k.length === 1 && k >= '1' && k <= '6') game.player.selectWeapon(parseInt(k) - 1);
+    if (k === '0') game.player.toggleKnife();
+  }
+  if (k === 'escape' && (game.state === 'playing' || game.state === 'paused')) togglePause();
+  if (k === ' ' && game.state === 'menu') startGame();
+});
+window.addEventListener('keyup', e => { game.keys[e.key.toLowerCase()] = false; });
+window.addEventListener('mousemove', e => { game.mouse.x = e.clientX; game.mouse.y = e.clientY; });
+window.addEventListener('mousedown', e => { if (e.button === 0 && game.state === 'playing' && !isTouch) game.mouse.down = true; });
+window.addEventListener('mouseup', e => { if (e.button === 0) game.mouse.down = false; });
+window.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('blur', () => { game.keys = {}; game.mouse.down = false; });
+
+window.addEventListener('wheel', e => {
+  if (game.state !== 'playing') return;
+  e.preventDefault();
+  const dir = e.deltaY > 0 ? 1 : -1;
+  game.player.cycleWeapon(dir);
+}, { passive: false });
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('restart-btn').addEventListener('click', () => { renderMetaUnlock(); startGame(); });
+
+loop();
+</script>
+</body>
+</html>
